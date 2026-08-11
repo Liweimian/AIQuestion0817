@@ -307,23 +307,25 @@ function bookLessonRow(index, title, meta, usage, topicId = "t9") {
   return `<button type="button" class="book-topic-row" data-topic="${topicId}" data-context="series" data-lesson-title="${safeTitle}" data-lesson-key="${safeTitle}"><i>${String(index).padStart(2, "0")}</i><span><b>${title}</b><small>${meta}</small></span><strong>${usage.toLocaleString()} 人使用</strong></button>`;
 }
 
-function bookLessonCell(title, topicId = "t9") {
+function bookLessonCell(title, topicId = "t9", questionCount = 12) {
   const safeTitle = String(title).replace(/"/g, "&quot;");
-  return `<button type="button" class="sync-lesson-cell" data-topic="${topicId}" data-lesson-title="${safeTitle}" data-lesson-key="${safeTitle}"><span>${title}</span></button>`;
+  return `<button type="button" class="sync-lesson-cell" data-topic="${topicId}" data-lesson-title="${safeTitle}" data-lesson-key="${safeTitle}"><span>${title}</span><strong>${questionCount} 题</strong></button>`;
 }
 
 function bookLessonGrid(lessons) {
-  return `<div class="sync-lesson-grid">${lessons.map(lesson => bookLessonCell(lesson.title, lesson.topic || "t9")).join("")}</div>`;
+  return `<div class="sync-lesson-grid">${lessons.map((lesson, index) => bookLessonCell(lesson.title, lesson.topic || "t9", lesson.questions || [12, 10, 14, 16, 15, 12, 20, 18][index] || 12)).join("")}</div>`;
 }
 
 const syncBookLessons = {
   duowei: [
     { title: "第 1 课时 生活中的立体图形（1）", topic: "t8" },
-    { title: "生活中的立体图形（2）", topic: "t8" },
-    { title: "从立体图形到平面图形（1）", topic: "t10" },
-    { title: "正方体的展开与折叠", topic: "t4" },
-    { title: "点、线、面、体", topic: "t1" },
-    { title: "几何直观与空间观念", topic: "t24" }
+    { title: "第 2 课时 生活中的立体图形（2）", topic: "t8" },
+    { title: "第 3 课时 从立体图形到平面图形（1）", topic: "t10" },
+    { title: "第 4 课时 从立体图形到平面图形（2）", topic: "t4" },
+    { title: "第 5 课时 从立体图形到平面图形（3）", topic: "t1" },
+    { title: "第 6 课时 从三个方向看物体的形状", topic: "t24" },
+    { title: "教材经典母题及变式", topic: "t10" },
+    { title: "单元复习", topic: "t13" }
   ],
   quanpin: [
     { title: "认识生活中的立体图形", topic: "t8" },
@@ -331,7 +333,9 @@ const syncBookLessons = {
     { title: "棱柱、圆柱、圆锥", topic: "t10" },
     { title: "展开与折叠", topic: "t4" },
     { title: "图形的认识与分类", topic: "t23" },
-    { title: "综合应用", topic: "t13" }
+    { title: "综合应用", topic: "t13" },
+    { title: "线段与角的度量", topic: "t10" },
+    { title: "几何作图基础", topic: "t24" }
   ]
 };
 
@@ -373,10 +377,10 @@ function homepagePracticeModule() {
               <button class="mod-link" type="button" data-open-filter="workbook">全部 <i class="ri-arrow-right-s-line"></i></button>
             </header>
             <div class="compile-list">
-              <button class="compile-row" data-topic="t4"><em>01</em><span><b>一般的正方体展开图</b><small>2023—2025 深圳重点校期中汇编</small></span><strong class="compile-qcount">24 题</strong><i class="ri-arrow-right-s-line"></i></button>
-              <button class="compile-row" data-topic="t23"><em>02</em><span><b>立体图形的识别与分类</b><small>各区期末汇编</small></span><strong class="compile-qcount">26 题</strong><i class="ri-arrow-right-s-line"></i></button>
-              <button class="compile-row" data-topic="t1"><em>03</em><span><b>点、线、面、体</b><small>各区期中易错分类</small></span><strong class="compile-qcount">28 题</strong><i class="ri-arrow-right-s-line"></i></button>
-              <button class="compile-row" data-topic="t10"><em>04</em><span><b>几何直观与空间观念</b><small>重点校期中汇编</small></span><strong class="compile-qcount">22 题</strong><i class="ri-arrow-right-s-line"></i></button>
+              <button class="compile-row" data-topic="t4"><em>01</em><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：正方体的展开与折叠（深圳版）</b><small>图形初步认识 · 高频考点整理</small></span><strong class="compile-qcount"><b>24</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
+              <button class="compile-row" data-topic="t23"><em>02</em><span><b>2023—2025 深圳各区初一（上）期末数学汇编：立体图形的识别与分类（深圳版）</b><small>各区期末真题 · 分类训练</small></span><strong class="compile-qcount"><b>26</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
+              <button class="compile-row" data-topic="t1"><em>03</em><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：点、线、面、体（深圳版）</b><small>易错题分类 · 重点校真题</small></span><strong class="compile-qcount"><b>28</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
+              <button class="compile-row" data-topic="t10"><em>04</em><span><b>2023—2025 深圳各区初一（上）期中数学汇编：几何直观与空间观念（深圳版）</b><small>核心题型 · 重点校期中汇编</small></span><strong class="compile-qcount"><b>22</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
             </div>
           </article>
         </div>
@@ -399,8 +403,7 @@ function paperBadge(tag) {
 }
 
 function paperRibbon(tags) {
-  if (!tags.includes("最新")) return "";
-  return `<span class="paper-card-ribbon" aria-label="最新"><span>NEW</span></span>`;
+  return "";
 }
 
 function homepagePaperModule() {
@@ -426,16 +429,18 @@ function homepagePaperModule() {
             ${paperRibbon(item.tags)}
             <div class="paper-card-head">
               <span class="paper-card-kind">${item.label}</span>
-              <span class="paper-card-badges">${item.tags.map(paperBadge).join("")}</span>
+              <span class="paper-card-category">${item.tags.find(tag => tag === "期中" || tag === "期末") || "阶段测试"}</span>
+              <span class="paper-card-badges" aria-label="资源标识">
+                ${item.tags.includes("最新") ? '<span class="paper-mark is-new" aria-label="最新">NEW</span>' : ''}
+                ${item.tags.some(tag => tag === "深圳热门" || tag === "用的人多") ? '<span class="paper-mark is-hot" aria-label="热门"><i class="ri-fire-fill"></i></span>' : ''}
+                ${item.tags.includes("高采用") ? '<span class="paper-mark is-adopt" aria-label="高采用"><i class="ri-thumb-up-fill"></i></span>' : ''}
+              </span>
             </div>
             <p class="paper-card-title">${item.title}</p>
-            <div class="paper-card-foot">
-              <div class="paper-card-metrics">
-                <span><small>浏览量</small><strong><i class="ri-eye-line"></i>${item.views}</strong></span>
-                <span><small>下载量</small><strong><i class="ri-download-line"></i>${item.downloads}</strong></span>
-                <span><small>使用量</small><strong><i class="ri-user-heart-line"></i>${item.usage}</strong></span>
-              </div>
-              <strong class="paper-card-qcount">${item.questions}</strong>
+            <div class="paper-card-foot paper-card-stats">
+              <span><strong>${item.questions}</strong></span>
+              <span><small><i class="ri-heart-3-line" aria-label="收藏量"></i></small><strong>${item.usage}</strong></span>
+              <span><small><i class="ri-download-2-line" aria-label="下载量"></i></small><strong>${item.downloads}</strong></span>
             </div>
           </button>
         `).join("")}
@@ -476,7 +481,14 @@ function homepageAlbumModule() {
   const albums = workbookAlbums.map((album, index) => {
     const count = topics.filter(topic => topic.source === album.source).length;
     const tones = ["sage", "cream", "lilac", "mist", "sage"];
-    return { ...album, count, tone: tones[index % tones.length] };
+    const details = [
+      ["课时练成套编排", "覆盖基础到综合", "导学案可直接布置"],
+      ["课前热身精练", "课中巩固分层", "课后作业配套"],
+      ["完整课时结构", "题型梯度清晰", "本地高质量资源"],
+      ["能力层级清晰", "重点题型突破", "适合日常教学进度"],
+      ["高频错因拆解", "同类变式训练", "二次过关巩固"]
+    ];
+    return { ...album, count, tone: tones[index % tones.length], details: details[index], downloads: (2108 + index * 367).toLocaleString() };
   });
   return `
     <section class="home-mod home-mod-albums" aria-label="专辑">
@@ -485,14 +497,17 @@ function homepageAlbumModule() {
         <button class="mod-link" type="button" data-open-filter="workbook">进入专辑库 <i class="ri-arrow-right-s-line"></i></button>
       </header>
       <div class="album-shelf">
-        ${albums.map(album => `
+        ${albums.map((album, index) => `
           <button class="album-cover tone-${album.tone}" type="button" data-album-jump="${album.source}">
-            <span class="album-cover-spine">${album.name.slice(0, 1)}</span>
-            <span class="album-cover-body">
-              <small>专辑</small>
+            <span class="album-cover-hero">
+              <small><i class="ri-book-2-line"></i>${index === 3 ? "本地教辅" : "热门教辅"}</small>
               <b>${album.name}</b>
               <em>${album.subtitle}</em>
-              <strong>${album.count} 份题单</strong>
+            </span>
+            <span class="album-cover-body">
+              <strong>${album.details[0]}</strong>
+              <span class="album-feature-list">${album.details.slice(1).map(item => `<i>• ${item}</i>`).join("")}</span>
+              <span class="album-cover-foot"><em>${album.count + 12} 份</em><em>${album.downloads} 下载</em><b>打开专辑 <i class="ri-arrow-right-line"></i></b></span>
             </span>
           </button>
         `).join("")}
