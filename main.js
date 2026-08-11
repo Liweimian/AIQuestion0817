@@ -438,8 +438,7 @@ function homepagePaperModule() {
             </div>
             <p class="paper-card-title">${item.title}</p>
             <div class="paper-card-foot paper-card-stats">
-              <span><small>题量</small><strong>${item.questions}</strong></span>
-              <span><small><i class="ri-eye-line" aria-label="浏览量"></i></small><strong>${item.views}</strong></span>
+              <span><strong>${item.questions}</strong></span>
               <span><small><i class="ri-heart-3-line" aria-label="收藏量"></i></small><strong>${item.usage}</strong></span>
               <span><small><i class="ri-download-2-line" aria-label="下载量"></i></small><strong>${item.downloads}</strong></span>
             </div>
@@ -482,7 +481,14 @@ function homepageAlbumModule() {
   const albums = workbookAlbums.map((album, index) => {
     const count = topics.filter(topic => topic.source === album.source).length;
     const tones = ["sage", "cream", "lilac", "mist", "sage"];
-    return { ...album, count, tone: tones[index % tones.length] };
+    const details = [
+      ["课时练成套编排", "覆盖基础到综合", "导学案可直接布置"],
+      ["课前热身精练", "课中巩固分层", "课后作业配套"],
+      ["完整课时结构", "题型梯度清晰", "本地高质量资源"],
+      ["能力层级清晰", "重点题型突破", "适合日常教学进度"],
+      ["高频错因拆解", "同类变式训练", "二次过关巩固"]
+    ];
+    return { ...album, count, tone: tones[index % tones.length], details: details[index], downloads: (2108 + index * 367).toLocaleString() };
   });
   return `
     <section class="home-mod home-mod-albums" aria-label="专辑">
@@ -491,14 +497,17 @@ function homepageAlbumModule() {
         <button class="mod-link" type="button" data-open-filter="workbook">进入专辑库 <i class="ri-arrow-right-s-line"></i></button>
       </header>
       <div class="album-shelf">
-        ${albums.map(album => `
+        ${albums.map((album, index) => `
           <button class="album-cover tone-${album.tone}" type="button" data-album-jump="${album.source}">
-            <span class="album-cover-spine">${album.name.slice(0, 1)}</span>
-            <span class="album-cover-body">
-              <small>专辑</small>
+            <span class="album-cover-hero">
+              <small><i class="ri-book-2-line"></i>${index === 3 ? "本地教辅" : "热门教辅"}</small>
               <b>${album.name}</b>
               <em>${album.subtitle}</em>
-              <strong>${album.count} 份题单</strong>
+            </span>
+            <span class="album-cover-body">
+              <strong>${album.details[0]}</strong>
+              <span class="album-feature-list">${album.details.slice(1).map(item => `<i>• ${item}</i>`).join("")}</span>
+              <span class="album-cover-foot"><em>${album.count + 12} 份</em><em>${album.downloads} 下载</em><b>打开专辑 <i class="ri-arrow-right-line"></i></b></span>
             </span>
           </button>
         `).join("")}
