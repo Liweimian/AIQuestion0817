@@ -51,6 +51,45 @@ const topics = [
   { id:"t50", title:"一元一次方程题型突破：解法到应用", focus:"分类掌握方程典型题型和变式", reason:"热门系列", questions:18, minutes:28, difficulty:"中等", source:"多维导学案", usage:936, tag:"workbook", tone:"lilac" },
   { id:"t51", title:"几何语言专题：读图、转换与规范表达", focus:"训练几何语言转换与推理书写", reason:"热门系列", questions:14, minutes:24, difficulty:"中等", source:"多维导学案", usage:868, tag:"workbook", tone:"mist" }
 ];
+const workbookAlbums = [
+  { id: "duowei", name: "多维导学案", subtitle: "课时练 + 单元检测", source: "多维导学案" },
+  { id: "quanpin", name: "全品学练考", subtitle: "同步精练体系", source: "全品学练考" },
+  { id: "yuanchuang", name: "原创新课堂", subtitle: "课堂同步训练", source: "原创新课堂" },
+  { id: "tiyou", name: "常用提优训练系列", subtitle: "能力进阶与培优", source: "常用提优训练系列" },
+  { id: "yicuo", name: "易错方法系列", subtitle: "错因拆解与变式", source: "易错方法系列" }
+];
+const albumFilterState = { view: "album", origin: "all", query: "" };
+const resourceOriginText = topic => `${topic.title} ${topic.reason} ${topic.focus} ${topic.source}`;
+const resourceOriginOptions = [
+  { id: "all", label: "全部" },
+  {
+    id: "jiaocai",
+    label: "教材",
+    match: topic => {
+      const text = resourceOriginText(topic);
+      if (/真题|汇编/.test(text)) return false;
+      return topic.tag === "chapter" || /第\d章|教材|同步|课堂小测|单元检测|课时/.test(text);
+    }
+  },
+  {
+    id: "jiaofu",
+    label: "教辅",
+    match: topic => {
+      const text = resourceOriginText(topic);
+      if (/真题|汇编/.test(text)) return false;
+      return topic.tag === "workbook" || /导学案|学练考|新课堂|提优|易错方法|教辅|系列/.test(text);
+    }
+  },
+  { id: "zhenti", label: "真题汇编", match: topic => /真题|汇编/.test(resourceOriginText(topic)) }
+];
+
+const curatedOriginOptions = resourceOriginOptions.filter(option => option.id !== "jiaocai");
+
+function matchesResourceOrigin(topic, origin) {
+  if (origin === "all") return true;
+  const option = resourceOriginOptions.find(item => item.id === origin);
+  return option?.match?.(topic) ?? true;
+}
 
 const byId = Object.fromEntries(topics.map(topic => [topic.id, topic]));
 const toneMap = { sage:"var(--sage)", cream:"var(--cream)", lilac:"var(--lilac)", mist:"var(--mist)" };
@@ -63,6 +102,90 @@ let aiModalOpen = false;
 let hasUserScrolled = false;
 let filterManuallyExpanded = false;
 const feedFilterState = { type:"all", difficulty:"all", source:"all", feature:"all", sort:"default" };
+const paperFilterState = {
+  examType: "final",
+  year: "all",
+  grade: "all",
+  source: "all",
+  sort: "latest",
+  query: ""
+};
+const paperExamTypes = {
+  final: { label: "期末", match: topic => /期末/.test(topic.title) },
+  midterm: { label: "期中", match: topic => /期中/.test(topic.title) },
+  monthly: { label: "月考", match: topic => /月考/.test(topic.title) },
+  unit: { label: "单元测试", match: topic => /单元|周测/.test(topic.title) },
+  other: { label: "其他", match: topic => topic.tag === "paper" && !/期末|期中|月考|单元|周测|中考|小升初|模拟/.test(topic.title) },
+  "zhongkao-real": { label: "真题", match: topic => /中考|小升初|真题汇编/.test(topic.title) },
+  "zhongkao-mock": { label: "模拟", match: topic => /模拟/.test(topic.title) }
+};
+const paperYearOptions = ["all", "2026", "2025", "2024", "2023", "earlier"];
+const paperGradeOptions = [
+  { id: "all", label: "全部" },
+  { id: "g9-2", label: "九年级下", match: /九年级下|初三下/ },
+  { id: "g9-1", label: "九年级上", match: /九年级上|初三上/ },
+  { id: "g8-2", label: "八年级下", match: /八年级下|初二下/ },
+  { id: "g8-1", label: "八年级上", match: /八年级上|初二上/ },
+  { id: "g7-2", label: "七年级下", match: /七年级下|初一下/ },
+  { id: "g7-1", label: "七年级上", match: /七年级上|初一上/ }
+];
+const paperSourceOptions = [
+  { id: "all", label: "全部" },
+  { id: "public", label: "飞象公共库", match: topic => !topic.author && !/私有/.test(topic.source) },
+  { id: "district", label: "龙岗区私有库", match: topic => /龙岗/.test(`${topic.source} ${topic.author?.school || ""}`) },
+  { id: "school", label: "本校私有库", match: topic => Boolean(topic.author) }
+];
+const specialFilterState = { category: "all", difficulty: "all", origin: "all", query: "" };
+const specialKnowledgeModules = [
+  { id: "numbers", label: "数与式", match: topic => /有理数|整式|代数|数与式/.test(`${topic.title} ${topic.focus}`) },
+  { id: "equations", label: "方程（组）与不等式（组）", match: topic => /方程|不等式/.test(`${topic.title} ${topic.focus}`) },
+  { id: "functions", label: "函数", match: topic => /函数/.test(`${topic.title} ${topic.focus}`) },
+  { id: "geo-basic", label: "几何初步", match: topic => /几何初步|图形初步|直线|射线|线段|图形语言/.test(`${topic.title} ${topic.focus}`) },
+  { id: "triangle", label: "三角形", match: topic => /三角形|全等/.test(`${topic.title} ${topic.focus}`) },
+  { id: "quadrilateral", label: "四边形", match: topic => /四边形/.test(`${topic.title} ${topic.focus}`) },
+  { id: "circle", label: "圆", match: topic => /圆/.test(`${topic.title} ${topic.focus}`) },
+  { id: "shape-change", label: "图形的变化", match: topic => /图形的变化|轴对称|变换/.test(`${topic.title} ${topic.focus}`) },
+  { id: "statistics", label: "统计", match: topic => /统计/.test(`${topic.title} ${topic.focus}`) },
+  { id: "probability", label: "概率", match: topic => /概率/.test(`${topic.title} ${topic.focus}`) }
+];
+const specialStandaloneCategories = [
+  { id: "geo-model", label: "几何模型", match: topic => /几何模型|模型/.test(`${topic.title} ${topic.focus}`) },
+  { id: "calc-practice", label: "计算专练", match: topic => /运算|计算/.test(`${topic.title} ${topic.focus}`) },
+  { id: "hard-breakthrough", label: "难点突破", match: topic => /难点|压轴|培优|进阶|突破|较难/.test(`${topic.title} ${topic.focus} ${topic.difficulty}`) }
+];
+const specialDifficultyOptions = [
+  { id: "all", label: "全部" },
+  { id: "简单", label: "基础" },
+  { id: "中等", label: "中等" },
+  { id: "较难", label: "较难" }
+];
+const chapterFilterState = {
+  section: "1-1",
+  difficulty: "all",
+  origin: "all",
+  source: "all",
+  query: "",
+  openChapters: ["ch1"]
+};
+const chapterText = topic => `${topic.title} ${topic.focus} ${topic.reason}`;
+const chapterNavTree = [
+  {
+    id: "ch1",
+    label: "第一章 有理数",
+    sections: [
+      { id: "1-1", label: "1.1 正数和负数", match: topic => /正负数|正数|负数|数轴/.test(chapterText(topic)) },
+      { id: "1-2", label: "1.2 有理数及其大小比较", match: topic => /大小比较|绝对值|相反数|有理数及其/.test(chapterText(topic)) },
+      { id: "1-summary", label: "小结", match: topic => /第1章|第一章|有理数/.test(chapterText(topic)) }
+    ]
+  },
+  { id: "ch2", label: "第二章 有理数的运算", match: topic => /第2章|第二章|混合运算|有理数.*运算|运算/.test(chapterText(topic)) },
+  { id: "prac1", label: "综合与实践 进位制的认识与探究", match: topic => /进位|进制/.test(chapterText(topic)) },
+  { id: "ch3", label: "第三章 代数式", match: topic => /第3章|第三章|代数式/.test(chapterText(topic)) },
+  { id: "ch4", label: "第四章 整式的加减", match: topic => /第4章|第四章|整式/.test(chapterText(topic)) },
+  { id: "ch5", label: "第五章 一元一次方程", match: topic => /第5章|第五章|方程/.test(chapterText(topic)) },
+  { id: "ch6", label: "第六章 几何图形初步", match: topic => /第6章|第六章|几何|图形|线段|角|立体/.test(chapterText(topic)) },
+  { id: "prac2", label: "综合与实践 设计学校田径运动会", match: topic => /田径|运动会|实践/.test(chapterText(topic)) }
+];
 
 const contentFeed = document.querySelector("#contentFeed");
 const emptyState = document.querySelector("#emptyState");
@@ -279,12 +402,463 @@ function homepageFeed() {
   return `${homepageSeriesSection()}${infiniteFeedMarkup()}`;
 }
 
+function paperTopics() {
+  return topics.filter(topic => topic.tag === "paper");
+}
+
+function paperMatchesYear(topic, year) {
+  if (year === "all") return true;
+  if (year === "earlier") return !/(202[3-6]|2030)/.test(topic.title);
+  return topic.title.includes(year);
+}
+
+function paperMatchesGrade(topic, grade) {
+  if (grade === "all") return true;
+  const option = paperGradeOptions.find(item => item.id === grade);
+  return option?.match?.test(topic.title) ?? true;
+}
+
+function paperMatchesSource(topic, source) {
+  if (source === "all") return true;
+  const option = paperSourceOptions.find(item => item.id === source);
+  return option?.match?.(topic) ?? true;
+}
+
+function paperMatchesExamType(topic, examType) {
+  const matcher = paperExamTypes[examType]?.match;
+  return matcher ? matcher(topic) : true;
+}
+
+function filteredPaperTopics() {
+  const keyword = paperFilterState.query.trim().toLowerCase();
+  let list = paperTopics().filter(topic =>
+    paperMatchesExamType(topic, paperFilterState.examType)
+    && paperMatchesYear(topic, paperFilterState.year)
+    && paperMatchesGrade(topic, paperFilterState.grade)
+    && paperMatchesSource(topic, paperFilterState.source)
+    && (!keyword || `${topic.title} ${topic.source} ${topic.focus}`.toLowerCase().includes(keyword))
+  );
+  if (paperFilterState.sort === "recommend") {
+    list = [...list].sort((a, b) => b.usage - a.usage);
+  } else {
+    list = [...list].sort((a, b) => {
+      const latestDelta = (b.highlight === "最新" ? 1 : 0) - (a.highlight === "最新" ? 1 : 0);
+      return latestDelta || b.id.localeCompare(a.id);
+    });
+  }
+  return list;
+}
+
+function paperFilterTagGroup(name, options, activeValue, dataAttr) {
+  return `
+    <div class="paper-filter-row">
+      <span class="paper-filter-label">${name}</span>
+      <div class="paper-filter-tags">
+        ${options.map(option => {
+          const value = typeof option === "string" ? option : option.id;
+          const label = typeof option === "string"
+            ? (value === "all" ? "全部" : value === "earlier" ? "更早之前" : value)
+            : option.label;
+          return `<button type="button" class="${activeValue === value ? "active" : ""}" ${dataAttr}="${value}">${label}</button>`;
+        }).join("")}
+      </div>
+    </div>`;
+}
+
+function paperCategoryView() {
+  const list = filteredPaperTopics();
+  const isZhongkao = ["zhongkao-real", "zhongkao-mock"].includes(paperFilterState.examType);
+  return `
+    <section class="category-detail paper-category-view">
+      <div class="resource-browser paper-browser">
+        <nav class="paper-sidebar" aria-label="试卷分类">
+          <div class="paper-sidebar-group ${isZhongkao ? "" : "open"}">
+            <button class="paper-sidebar-group-toggle" type="button" aria-expanded="${!isZhongkao}">
+              <i class="ri-${isZhongkao ? "arrow-right" : "arrow-down-s"}-line"></i><span>同步试卷</span>
+            </button>
+            <div class="paper-sidebar-items" ${isZhongkao ? "hidden" : ""}>
+              ${["final", "midterm", "monthly", "unit", "other"].map(type => `
+                <button type="button" class="${paperFilterState.examType === type ? "active" : ""}" data-paper-type="${type}">${paperExamTypes[type].label}</button>
+              `).join("")}
+            </div>
+          </div>
+          <div class="paper-sidebar-group ${isZhongkao ? "open" : ""}">
+            <button class="paper-sidebar-group-toggle" type="button" aria-expanded="${isZhongkao}">
+              <i class="ri-${isZhongkao ? "arrow-down-s" : "arrow-right"}-line"></i><span>小升初</span>
+            </button>
+            <div class="paper-sidebar-items" ${isZhongkao ? "" : "hidden"}>
+              ${["zhongkao-real", "zhongkao-mock"].map(type => `
+                <button type="button" class="${paperFilterState.examType === type ? "active" : ""}" data-paper-type="${type}">${paperExamTypes[type].label}</button>
+              `).join("")}
+            </div>
+          </div>
+        </nav>
+        <div class="paper-browser-main">
+          <div class="paper-filter-panel">
+            ${paperFilterTagGroup("学年", paperYearOptions, paperFilterState.year, "data-paper-year")}
+            <div class="paper-filter-row">
+              <span class="paper-filter-label">地区</span>
+              <button class="paper-filter-select" type="button"><span>深圳市龙岗区</span><i class="ri-arrow-down-s-line"></i></button>
+            </div>
+            ${paperFilterTagGroup("年级", paperGradeOptions, paperFilterState.grade, "data-paper-grade")}
+            ${paperFilterTagGroup("来源", paperSourceOptions, paperFilterState.source, "data-paper-source")}
+            <label class="paper-filter-search">
+              <span class="paper-filter-label">搜索</span>
+              <div class="paper-search-field">
+                <i class="ri-search-line"></i>
+                <input data-paper-search type="search" value="${paperFilterState.query.replace(/"/g, "&quot;")}" placeholder="请输入试卷名称或其他关键词进行搜索" />
+              </div>
+            </label>
+          </div>
+          <div class="paper-list-toolbar">
+            <div class="paper-list-tabs" role="tablist" aria-label="试卷排序">
+              <button type="button" class="${paperFilterState.sort === "latest" ? "active" : ""}" data-paper-sort="latest" role="tab">最新</button>
+              <button type="button" class="${paperFilterState.sort === "recommend" ? "active" : ""}" data-paper-sort="recommend" role="tab">推荐</button>
+            </div>
+            <span class="paper-list-count" data-paper-result-count>试卷 共 ${list.length.toLocaleString()} 份</span>
+          </div>
+          <div class="resource-card-grid paper-result-grid">${list.map(topic => topicCard(topic, { context: "paper" })).join("")}</div>
+          <div class="paper-empty" ${list.length ? "hidden" : ""}>没有找到匹配的试卷，试试调整筛选条件。</div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function applyPaperFilters(options = {}) {
+  if (options.examType) paperFilterState.examType = options.examType;
+  if (options.year) paperFilterState.year = options.year;
+  if (options.grade) paperFilterState.grade = options.grade;
+  if (options.source) paperFilterState.source = options.source;
+  if (options.sort) paperFilterState.sort = options.sort;
+  if (typeof options.query === "string") paperFilterState.query = options.query;
+
+  const panel = document.querySelector(".paper-category-view");
+  if (!panel) return;
+
+  const list = filteredPaperTopics();
+  panel.querySelectorAll("[data-paper-type]").forEach(button => {
+    button.classList.toggle("active", button.dataset.paperType === paperFilterState.examType);
+  });
+  panel.querySelectorAll("[data-paper-year]").forEach(button => {
+    button.classList.toggle("active", button.dataset.paperYear === paperFilterState.year);
+  });
+  panel.querySelectorAll("[data-paper-grade]").forEach(button => {
+    button.classList.toggle("active", button.dataset.paperGrade === paperFilterState.grade);
+  });
+  panel.querySelectorAll("[data-paper-source]").forEach(button => {
+    button.classList.toggle("active", button.dataset.paperSource === paperFilterState.source);
+  });
+  panel.querySelectorAll("[data-paper-sort]").forEach(button => {
+    button.classList.toggle("active", button.dataset.paperSort === paperFilterState.sort);
+  });
+
+  const grid = panel.querySelector(".paper-result-grid");
+  if (grid) {
+    grid.innerHTML = list.map(topic => topicCard(topic, { context: "paper" })).join("");
+    bindContentEvents(grid);
+  }
+  const count = panel.querySelector("[data-paper-result-count]");
+  if (count) count.textContent = `试卷 共 ${list.length.toLocaleString()} 份`;
+  const empty = panel.querySelector(".paper-empty");
+  if (empty) empty.hidden = list.length > 0;
+
+  const isZhongkao = ["zhongkao-real", "zhongkao-mock"].includes(paperFilterState.examType);
+  panel.querySelectorAll(".paper-sidebar-group").forEach((group, index) => {
+    const open = index === 0 ? !isZhongkao : isZhongkao;
+    group.classList.toggle("open", open);
+    const toggle = group.querySelector(".paper-sidebar-group-toggle");
+    const items = group.querySelector(".paper-sidebar-items");
+    const icon = toggle?.querySelector("i");
+    if (toggle) toggle.setAttribute("aria-expanded", String(open));
+    if (items) items.hidden = !open;
+    if (icon) icon.className = open ? "ri-arrow-down-s-line" : "ri-arrow-right-s-line";
+  });
+}
+
+function specialTopics() {
+  return topics.filter(topic => topic.tag === "special");
+}
+
+function specialCategoryMatcher(category) {
+  if (category === "all") return () => true;
+  const item = [...specialKnowledgeModules, ...specialStandaloneCategories].find(entry => entry.id === category);
+  return item?.match ?? (() => true);
+}
+
+function specialCategoryLabel(category) {
+  if (category === "all") return "全部资源";
+  return [...specialKnowledgeModules, ...specialStandaloneCategories].find(entry => entry.id === category)?.label || "全部资源";
+}
+
+function filteredSpecialTopics() {
+  const keyword = specialFilterState.query.trim().toLowerCase();
+  const matcher = specialCategoryMatcher(specialFilterState.category);
+  return specialTopics()
+    .filter(topic => matcher(topic))
+    .filter(topic => specialFilterState.difficulty === "all" || topic.difficulty === specialFilterState.difficulty)
+    .filter(topic => matchesResourceOrigin(topic, specialFilterState.origin))
+    .filter(topic => !keyword || `${topic.title} ${topic.source} ${topic.focus}`.toLowerCase().includes(keyword))
+    .sort((a, b) => b.usage - a.usage);
+}
+
+function specialCategoryView() {
+  const list = filteredSpecialTopics();
+  const activeCategory = specialFilterState.category;
+  return `
+    <section class="category-detail special-category-view">
+      <div class="resource-browser special-browser">
+        <nav class="special-sidebar" aria-label="专项分类">
+          <button type="button" class="special-root ${activeCategory === "all" ? "active" : ""}" data-special-category="all">全部资源</button>
+          <div class="special-sidebar-group open">
+            <button class="special-sidebar-group-toggle" type="button" aria-expanded="true">
+              <i class="ri-arrow-down-s-line"></i><span>知识模块</span>
+            </button>
+            <div class="special-sidebar-items">
+              ${specialKnowledgeModules.map(item => `
+                <button type="button" class="${activeCategory === item.id ? "active" : ""}" data-special-category="${item.id}">${item.label}</button>
+              `).join("")}
+            </div>
+          </div>
+          ${specialStandaloneCategories.map(item => `
+            <button type="button" class="special-standalone ${activeCategory === item.id ? "active" : ""}" data-special-category="${item.id}">${item.label}</button>
+          `).join("")}
+        </nav>
+        <div class="special-browser-main">
+          <div class="special-filter-panel">
+            ${paperFilterTagGroup("来自", curatedOriginOptions, specialFilterState.origin, "data-special-origin")}
+            <div class="special-filter-row">
+              <span class="special-filter-label">难度</span>
+              <div class="special-filter-tags">
+                ${specialDifficultyOptions.map(option => `
+                  <button type="button" class="${specialFilterState.difficulty === option.id ? "active" : ""}" data-special-difficulty="${option.id}">${option.label}</button>
+                `).join("")}
+              </div>
+            </div>
+            <label class="paper-filter-search special-filter-search">
+              <span class="paper-filter-label">搜索</span>
+              <div class="paper-search-field">
+                <i class="ri-search-line"></i>
+                <input data-special-search type="search" value="${specialFilterState.query.replace(/"/g, "&quot;")}" placeholder="请输入题单名称或其他关键词进行搜索" />
+              </div>
+            </label>
+          </div>
+          <div class="special-list-toolbar">
+            <b>${specialCategoryLabel(activeCategory)}</b>
+            <span class="special-list-count" data-special-result-count>专项 共 ${list.length.toLocaleString()} 份</span>
+          </div>
+          <div class="resource-card-grid special-result-grid">${list.map(topic => topicCard(topic, { context: "special" })).join("")}</div>
+          <div class="special-empty" ${list.length ? "hidden" : ""}>没有找到匹配的专项题单，试试调整筛选条件。</div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function applySpecialFilters(options = {}) {
+  if (options.category) specialFilterState.category = options.category;
+  if (options.difficulty) specialFilterState.difficulty = options.difficulty;
+  if (options.origin) specialFilterState.origin = options.origin;
+  if (typeof options.query === "string") specialFilterState.query = options.query;
+  if (!curatedOriginOptions.some(option => option.id === specialFilterState.origin)) {
+    specialFilterState.origin = "all";
+  }
+
+  const panel = document.querySelector(".special-category-view");
+  if (!panel) return;
+
+  const list = filteredSpecialTopics();
+  panel.querySelectorAll("[data-special-category]").forEach(button => {
+    button.classList.toggle("active", button.dataset.specialCategory === specialFilterState.category);
+  });
+  panel.querySelectorAll("[data-special-difficulty]").forEach(button => {
+    button.classList.toggle("active", button.dataset.specialDifficulty === specialFilterState.difficulty);
+  });
+  panel.querySelectorAll("[data-special-origin]").forEach(button => {
+    button.classList.toggle("active", button.dataset.specialOrigin === specialFilterState.origin);
+  });
+
+  const heading = panel.querySelector(".special-list-toolbar b");
+  if (heading) heading.textContent = specialCategoryLabel(specialFilterState.category);
+
+  const grid = panel.querySelector(".special-result-grid");
+  if (grid) {
+    grid.innerHTML = list.map(topic => topicCard(topic, { context: "special" })).join("");
+    bindContentEvents(grid);
+  }
+  const count = panel.querySelector("[data-special-result-count]");
+  if (count) count.textContent = `专项 共 ${list.length.toLocaleString()} 份`;
+  const empty = panel.querySelector(".special-empty");
+  if (empty) empty.hidden = list.length > 0;
+}
+
+function chapterSyncTopics() {
+  return topics.filter(topic => ["chapter", "school", "workbook"].includes(topic.tag));
+}
+
+function chapterSectionEntry(sectionId) {
+  if (sectionId === "all") return { id: "all", label: "全部资源", match: () => true };
+  for (const item of chapterNavTree) {
+    if (item.id === sectionId) return item;
+    const section = item.sections?.find(entry => entry.id === sectionId);
+    if (section) return section;
+  }
+  return { id: sectionId, label: "全部资源", match: () => true };
+}
+
+function chapterSectionLabel(sectionId) {
+  return chapterSectionEntry(sectionId).label;
+}
+
+function chapterParentId(sectionId) {
+  if (sectionId === "all") return null;
+  const parent = chapterNavTree.find(item => item.sections?.some(section => section.id === sectionId));
+  return parent?.id || null;
+}
+
+function chapterMatchesSection(topic, sectionId) {
+  if (sectionId === "all") return true;
+  const entry = chapterSectionEntry(sectionId);
+  if (entry.match?.(topic)) return true;
+  const parent = chapterNavTree.find(item => item.id === sectionId);
+  return parent?.match?.(topic) ?? false;
+}
+
+function filteredChapterTopics() {
+  const keyword = chapterFilterState.query.trim().toLowerCase();
+  return chapterSyncTopics()
+    .filter(topic => chapterMatchesSection(topic, chapterFilterState.section))
+    .filter(topic => chapterFilterState.difficulty === "all" || topic.difficulty === chapterFilterState.difficulty)
+    .filter(topic => matchesResourceOrigin(topic, chapterFilterState.origin))
+    .filter(topic => paperMatchesSource(topic, chapterFilterState.source))
+    .filter(topic => !keyword || chapterText(topic).toLowerCase().includes(keyword))
+    .sort((a, b) => b.usage - a.usage);
+}
+
+function renderChapterSidebar() {
+  const activeSection = chapterFilterState.section;
+  const openChapters = new Set(chapterFilterState.openChapters);
+  const rootActive = activeSection === "all";
+  let html = `
+    <button class="chapter-textbook-select" type="button"><span>人教版/七年级上册 (2024)</span><i class="ri-arrow-down-s-line"></i></button>
+    <button type="button" class="chapter-root ${rootActive ? "active" : ""}" data-chapter-section="all">全部资源</button>`;
+
+  chapterNavTree.forEach(item => {
+    if (item.sections) {
+      const open = openChapters.has(item.id) || item.sections.some(section => section.id === activeSection);
+      html += `
+        <div class="chapter-sidebar-group ${open ? "open" : ""}">
+          <button class="chapter-sidebar-group-toggle" type="button" aria-expanded="${open}" data-chapter-toggle="${item.id}">
+            <i class="ri-${open ? "arrow-down-s" : "arrow-right-s"}-line"></i><span>${item.label}</span>
+          </button>
+          <div class="chapter-sidebar-items" ${open ? "" : "hidden"}>
+            ${item.sections.map(section => `
+              <button type="button" class="${activeSection === section.id ? "active" : ""}" data-chapter-section="${section.id}">${section.label}</button>
+            `).join("")}
+          </div>
+        </div>`;
+      return;
+    }
+    html += `<button type="button" class="chapter-leaf ${activeSection === item.id ? "active" : ""}" data-chapter-section="${item.id}">${item.label}</button>`;
+  });
+  return html;
+}
+
+function chapterCategoryView() {
+  const list = filteredChapterTopics();
+  return `
+    <section class="category-detail chapter-category-view">
+      <div class="resource-browser chapter-browser">
+        <nav class="chapter-sidebar" aria-label="教材章节">
+          ${renderChapterSidebar()}
+        </nav>
+        <div class="chapter-browser-main">
+          <div class="paper-filter-panel chapter-filter-panel">
+            ${paperFilterTagGroup("来自", resourceOriginOptions, chapterFilterState.origin, "data-chapter-origin")}
+            ${paperFilterTagGroup("难度", specialDifficultyOptions, chapterFilterState.difficulty, "data-chapter-difficulty")}
+            ${paperFilterTagGroup("来源", paperSourceOptions, chapterFilterState.source, "data-chapter-source")}
+            <div class="paper-filter-row">
+              <span class="paper-filter-label">地区</span>
+              <button class="paper-filter-select chapter-filter-select" type="button"><span>深圳市龙岗区</span><i class="ri-arrow-down-s-line"></i></button>
+            </div>
+            <label class="paper-filter-search">
+              <span class="paper-filter-label">搜索</span>
+              <div class="paper-search-field">
+                <i class="ri-search-line"></i>
+                <input data-chapter-search type="search" value="${chapterFilterState.query.replace(/"/g, "&quot;")}" placeholder="请输入题单名称或其他关键词进行搜索" />
+              </div>
+            </label>
+          </div>
+          <div class="chapter-list-toolbar">
+            <b>${chapterSectionLabel(chapterFilterState.section)}</b>
+            <span class="chapter-list-count" data-chapter-result-count>同步练习 共 ${list.length.toLocaleString()} 份</span>
+          </div>
+          <div class="resource-card-grid chapter-result-grid">${list.map(topic => topicCard(topic, { context: "chapter" })).join("")}</div>
+          <div class="chapter-empty" ${list.length ? "hidden" : ""}>没有找到匹配的题单，试试调整筛选条件。</div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function applyChapterFilters(options = {}) {
+  if (options.section) {
+    chapterFilterState.section = options.section;
+    const parentId = chapterParentId(options.section);
+    if (parentId && !chapterFilterState.openChapters.includes(parentId)) {
+      chapterFilterState.openChapters = [...chapterFilterState.openChapters, parentId];
+    }
+  }
+  if (options.difficulty) chapterFilterState.difficulty = options.difficulty;
+  if (options.origin) chapterFilterState.origin = options.origin;
+  if (options.source) chapterFilterState.source = options.source;
+  if (typeof options.query === "string") chapterFilterState.query = options.query;
+  if (options.toggleChapter) {
+    const open = new Set(chapterFilterState.openChapters);
+    if (open.has(options.toggleChapter)) open.delete(options.toggleChapter);
+    else open.add(options.toggleChapter);
+    chapterFilterState.openChapters = [...open];
+  }
+
+  const panel = document.querySelector(".chapter-category-view");
+  if (!panel) return;
+
+  const sidebar = panel.querySelector(".chapter-sidebar");
+  if (sidebar) sidebar.innerHTML = renderChapterSidebar();
+
+  const list = filteredChapterTopics();
+  panel.querySelectorAll("[data-chapter-difficulty]").forEach(button => {
+    button.classList.toggle("active", button.dataset.chapterDifficulty === chapterFilterState.difficulty);
+  });
+  panel.querySelectorAll("[data-chapter-origin]").forEach(button => {
+    button.classList.toggle("active", button.dataset.chapterOrigin === chapterFilterState.origin);
+  });
+  panel.querySelectorAll("[data-chapter-source]").forEach(button => {
+    button.classList.toggle("active", button.dataset.chapterSource === chapterFilterState.source);
+  });
+
+  const heading = panel.querySelector(".chapter-list-toolbar b");
+  if (heading) heading.textContent = chapterSectionLabel(chapterFilterState.section);
+
+  const grid = panel.querySelector(".chapter-result-grid");
+  if (grid) {
+    grid.innerHTML = list.map(topic => topicCard(topic, { context: "chapter" })).join("");
+    bindContentEvents(grid);
+  }
+  const count = panel.querySelector("[data-chapter-result-count]");
+  if (count) count.textContent = `同步练习 共 ${list.length.toLocaleString()} 份`;
+  const empty = panel.querySelector(".chapter-empty");
+  if (empty) empty.hidden = list.length > 0;
+
+  bindContentEvents(sidebar);
+}
+
 function categoryBrowserView(kind) {
   const config = {
     chapter: { label:"同步练习", navLabel:"教材章节", nav:["正数与负数","有理数及其运算","整式的加减","一元一次方程","图形初步认识"], topics:["t8","t9","t10","t11","t12","t13"], chips:["全部同步", "课时练习", "单元检测", "易错巩固"], selector:"人教版七上" },
     special: { label:"专项练习", navLabel:"知识领域", nav:["数与式","方程与不等式","函数","图形与几何","统计与概率"], topics:["t1","t3","t5","t23","t28","t31","t32"], chips:["全部专项", "易错巩固", "方法突破", "情境应用", "培优提高"], selector:"全部难度" },
     paper: { label:"试卷", navLabel:"考试类型", nav:["期末考试","期中考试","月考","单元测试","中考真题"], topics:["t2","t4","t6","t14","t25","t27","t33"], chips:["本地优先", "使用最多", "真题汇编"], selector:"深圳市 · 七年级数学" }
   }[kind];
+  if (kind === "paper") return paperCategoryView();
+  if (kind === "special") return specialCategoryView();
+  if (kind === "chapter") return chapterCategoryView();
   const list = config.topics.map(id => byId[id]).filter(Boolean);
   return `
     <section class="category-detail unified-category-view">
@@ -302,13 +876,138 @@ function categoryBrowserView(kind) {
 }
 
 function seriesCategoryView() {
-  const seriesTopics = topics.filter(topic => topic.tag === "workbook");
+  const albumView = albumFilterState.view === "album";
+  const albums = filteredWorkbookAlbums();
+  const list = filteredWorkbookTopics();
   return `
-    <section class="category-detail series-category-view">
-      <div class="series-panel-heading"><div><b>先看题单，再进入系列</b><span>点击题单下方的系列名称，可查看该系列的全部题单</span></div><label class="series-search"><i class="ri-search-line"></i><input data-series-search placeholder="搜索系列或题单名称" /></label></div>
-      <div class="series-quick-links"><button class="active" data-series-query="">全部系列</button><button data-series-query="全品学练考">全品学练考</button><button data-series-query="原创新课堂">原创新课堂</button><button data-series-query="多维导学案">多维导学案</button></div>
-      <div class="series-topic-grid">${seriesTopics.map(topicCard).join("")}</div><div class="series-empty" hidden>没有找到这个系列，换个名称试试。</div>
+    <section class="category-detail album-category-view">
+      <div class="paper-filter-panel album-filter-panel">
+        ${paperFilterTagGroup("来自", curatedOriginOptions, albumFilterState.origin, "data-album-origin")}
+        <label class="paper-filter-search album-filter-search">
+          <span class="paper-filter-label">搜索</span>
+          <div class="paper-search-field">
+            <i class="ri-search-line"></i>
+            <input data-album-search type="search" value="${albumFilterState.query.replace(/"/g, "&quot;")}" placeholder="请输入专辑或题单名称进行搜索" />
+          </div>
+        </label>
+      </div>
+      <div class="album-toolbar">
+        <div class="album-view-tabs" role="tablist" aria-label="专辑浏览方式">
+          <button type="button" class="${albumView ? "active" : ""}" data-album-view="album" role="tab" aria-selected="${albumView}">专辑</button>
+          <button type="button" class="${!albumView ? "active" : ""}" data-album-view="topic" role="tab" aria-selected="${!albumView}">单卷</button>
+        </div>
+      </div>
+      <div class="album-panel album-by-album" data-album-panel="album" ${albumView ? "" : "hidden"}>
+        <div class="series-library-grid album-grid">${albums.map(albumCard).join("")}</div>
+        <div class="album-empty" ${albums.length ? "hidden" : ""}>没有找到匹配的专辑，换个关键词试试。</div>
+      </div>
+      <div class="album-panel album-by-topic" data-album-panel="topic" ${albumView ? "hidden" : ""}>
+        <div class="album-topic-meta"><b>全部题单</b><span data-album-topic-count>共 ${list.length.toLocaleString()} 份</span></div>
+        <div class="series-topic-grid album-topic-grid">${list.map(topic => topicCard(topic, { context: "series" })).join("")}</div>
+        <div class="album-empty" ${list.length ? "hidden" : ""}>没有找到匹配的题单，换个关键词试试。</div>
+      </div>
     </section>`;
+}
+
+function workbookTopics() {
+  return topics.filter(topic => topic.tag === "workbook");
+}
+
+function workbookTopicMatchesFilters(topic) {
+  const keyword = albumFilterState.query.trim().toLowerCase();
+  return matchesResourceOrigin(topic, albumFilterState.origin)
+    && (!keyword || `${topic.title} ${topic.source} ${topic.focus}`.toLowerCase().includes(keyword));
+}
+
+function filteredWorkbookTopics() {
+  return workbookTopics()
+    .filter(workbookTopicMatchesFilters)
+    .sort((a, b) => b.usage - a.usage);
+}
+
+function filteredWorkbookAlbums() {
+  return workbookAlbums.filter(album => {
+    const items = albumTopicsFor(album).filter(workbookTopicMatchesFilters);
+    return items.length > 0;
+  });
+}
+
+function albumTopicsFor(album) {
+  return workbookTopics()
+    .filter(topic => topic.source === album.source)
+    .filter(workbookTopicMatchesFilters)
+    .sort((a, b) => b.usage - a.usage);
+}
+
+function albumCard(album) {
+  const items = albumTopicsFor(album);
+  const displayItems = items.slice(0, 4);
+  return `
+    <article class="series-library-card album-card" data-album="${album.id}">
+      <button class="series-library-heading" type="button" data-album-open="${album.source}">
+        <span class="series-spine">${album.name.slice(0, 1)}</span>
+        <span><small>专辑</small><b>${album.name}</b><em>${items.length} 份题单 · ${album.subtitle}</em></span>
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
+      <div class="series-library-topics">
+        ${displayItems.map(topic => `
+          <button type="button" data-topic="${topic.id}">
+            <span>${topic.title}</span>
+            <small>${topic.questions} 题 · ${topic.usage.toLocaleString()} 人使用</small>
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        `).join("")}
+      </div>
+    </article>`;
+}
+
+function applyAlbumView(options = {}) {
+  if (options.view) albumFilterState.view = options.view;
+  if (options.origin) albumFilterState.origin = options.origin;
+  if (typeof options.query === "string") albumFilterState.query = options.query;
+  if (!curatedOriginOptions.some(option => option.id === albumFilterState.origin)) {
+    albumFilterState.origin = "all";
+  }
+
+  const panel = document.querySelector(".album-category-view");
+  if (!panel) return;
+
+  const albumView = albumFilterState.view === "album";
+  const albums = filteredWorkbookAlbums();
+  const list = filteredWorkbookTopics();
+
+  panel.querySelectorAll("[data-album-view]").forEach(button => {
+    const active = button.dataset.albumView === albumFilterState.view;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  panel.querySelectorAll("[data-album-origin]").forEach(button => {
+    button.classList.toggle("active", button.dataset.albumOrigin === albumFilterState.origin);
+  });
+  panel.querySelectorAll("[data-album-panel]").forEach(section => {
+    section.hidden = section.dataset.albumPanel !== albumFilterState.view;
+  });
+
+  const albumGrid = panel.querySelector(".album-grid");
+  if (albumGrid) {
+    albumGrid.innerHTML = albums.map(albumCard).join("");
+    bindContentEvents(albumGrid);
+  }
+  const topicGrid = panel.querySelector(".album-topic-grid");
+  if (topicGrid) {
+    topicGrid.innerHTML = list.map(topic => topicCard(topic, { context: "series" })).join("");
+    bindContentEvents(topicGrid);
+  }
+
+  const albumEmpty = panel.querySelector(".album-by-album .album-empty");
+  if (albumEmpty) albumEmpty.hidden = albums.length > 0;
+  const topicEmpty = panel.querySelector(".album-by-topic .album-empty");
+  if (topicEmpty) topicEmpty.hidden = list.length > 0;
+  const topicCount = panel.querySelector("[data-album-topic-count]");
+  if (topicCount) topicCount.textContent = `共 ${list.length.toLocaleString()} 份`;
+
+  const search = panel.querySelector("[data-album-search]");
+  if (search && search.value !== albumFilterState.query) search.value = albumFilterState.query;
 }
 
 function render() {
@@ -415,30 +1114,72 @@ function bindContentEvents(root = document) {
   root.querySelectorAll(".resource-tree button").forEach(button => button.addEventListener("click", () => { const browser = button.closest(".resource-browser"); button.parentElement.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); browser.querySelector(".resource-result-heading b").textContent = button.dataset.resultTitle || button.querySelector("b").textContent; }));
   root.querySelectorAll(".resource-chip-group button").forEach(button => button.addEventListener("click", () => { button.parentElement.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); }));
   root.querySelectorAll(".resource-selector-group button").forEach(button => button.addEventListener("click", () => showToast(`正在调整${button.textContent.trim()}`)));
-  root.querySelectorAll("[data-series-search]").forEach(input => input.addEventListener("input", () => filterSeriesTopics(input.value)));
-  root.querySelectorAll("[data-series-query]").forEach(button => button.addEventListener("click", () => { const input = button.closest(".series-category-view").querySelector("[data-series-search]"); input.value = button.dataset.seriesQuery; filterSeriesTopics(input.value); button.closest(".series-quick-links").querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); }));
+  root.querySelectorAll("[data-series-query]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.seriesQuery })));
+  root.querySelectorAll("[data-album-view]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: button.dataset.albumView })));
+  root.querySelectorAll("[data-album-origin]").forEach(button => button.addEventListener("click", () => applyAlbumView({ origin: button.dataset.albumOrigin })));
+  root.querySelectorAll("[data-album-search]").forEach(input => input.addEventListener("input", () => applyAlbumView({ query: input.value })));
+  root.querySelectorAll("[data-album-open]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.albumOpen })));
+  root.querySelectorAll(".paper-sidebar-group-toggle").forEach(button => button.addEventListener("click", () => {
+    const group = button.closest(".paper-sidebar-group");
+    const open = !group.classList.contains("open");
+    group.classList.toggle("open", open);
+    button.setAttribute("aria-expanded", String(open));
+    const items = group.querySelector(".paper-sidebar-items");
+    if (items) items.hidden = !open;
+    const icon = button.querySelector("i");
+    if (icon) icon.className = open ? "ri-arrow-down-s-line" : "ri-arrow-right-s-line";
+  }));
+  root.querySelectorAll("[data-paper-type]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ examType: button.dataset.paperType })));
+  root.querySelectorAll("[data-paper-year]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ year: button.dataset.paperYear })));
+  root.querySelectorAll("[data-paper-grade]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ grade: button.dataset.paperGrade })));
+  root.querySelectorAll("[data-paper-source]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ source: button.dataset.paperSource })));
+  root.querySelectorAll("[data-paper-sort]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ sort: button.dataset.paperSort })));
+  root.querySelectorAll("[data-paper-search]").forEach(input => input.addEventListener("input", () => applyPaperFilters({ query: input.value })));
+  root.querySelectorAll(".paper-filter-select").forEach(button => button.addEventListener("click", () => showToast("地区筛选即将开放")));
+  root.querySelectorAll(".special-sidebar-group-toggle").forEach(button => button.addEventListener("click", () => {
+    const group = button.closest(".special-sidebar-group");
+    const open = !group.classList.contains("open");
+    group.classList.toggle("open", open);
+    button.setAttribute("aria-expanded", String(open));
+    const items = group.querySelector(".special-sidebar-items");
+    if (items) items.hidden = !open;
+    const icon = button.querySelector("i");
+    if (icon) icon.className = open ? "ri-arrow-down-s-line" : "ri-arrow-right-s-line";
+  }));
+  root.querySelectorAll("[data-special-category]").forEach(button => button.addEventListener("click", () => applySpecialFilters({ category: button.dataset.specialCategory })));
+  root.querySelectorAll("[data-special-difficulty]").forEach(button => button.addEventListener("click", () => applySpecialFilters({ difficulty: button.dataset.specialDifficulty })));
+  root.querySelectorAll("[data-special-origin]").forEach(button => button.addEventListener("click", () => applySpecialFilters({ origin: button.dataset.specialOrigin })));
+  root.querySelectorAll("[data-special-search]").forEach(input => input.addEventListener("input", () => applySpecialFilters({ query: input.value })));
+  root.querySelectorAll(".chapter-textbook-select, .chapter-filter-select").forEach(button => button.addEventListener("click", () => showToast("教材与地区筛选即将开放")));
+  root.querySelectorAll("[data-chapter-toggle]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ toggleChapter: button.dataset.chapterToggle })));
+  root.querySelectorAll("[data-chapter-section]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ section: button.dataset.chapterSection })));
+  root.querySelectorAll("[data-chapter-difficulty]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ difficulty: button.dataset.chapterDifficulty })));
+  root.querySelectorAll("[data-chapter-origin]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ origin: button.dataset.chapterOrigin })));
+  root.querySelectorAll("[data-chapter-source]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ source: button.dataset.chapterSource })));
+  root.querySelectorAll("[data-chapter-search]").forEach(input => input.addEventListener("input", () => applyChapterFilters({ query: input.value })));
 }
 
-function filterSeriesTopics(query) {
-  const panel = document.querySelector(".series-category-view");
-  if (!panel) return;
-  const keyword = query.trim().toLowerCase();
-  let visible = 0;
-  panel.querySelectorAll(".series-topic-grid .topic-card").forEach(card => { const matches = !keyword || card.dataset.sourceName.toLowerCase().includes(keyword) || card.querySelector("h3").textContent.toLowerCase().includes(keyword); card.hidden = !matches; if (matches) visible += 1; });
-  panel.querySelector(".series-empty").hidden = visible > 0;
-}
-
-function setMainFilter(filter) {
+function setMainFilter(filter, options = {}) {
+  const previousFilter = currentFilter;
   currentFilter = filter;
   currentQuery = "";
+  if (filter === "workbook" && previousFilter !== "workbook" && !options.keepAlbumState) {
+    albumFilterState.view = "album";
+    albumFilterState.origin = "all";
+    albumFilterState.query = "";
+  }
+  document.body.classList.toggle("is-paper-view", filter === "paper");
+  document.body.classList.toggle("is-special-view", filter === "special");
+  document.body.classList.toggle("is-chapter-view", filter === "chapter");
+  document.body.classList.toggle("is-album-view", filter === "workbook");
   document.querySelectorAll("[data-filter]").forEach(chip => { const active = chip.dataset.filter === filter; chip.classList.toggle("active", active); chip.setAttribute("aria-selected", String(active)); });
   render();
 }
 
 function openSeries(seriesName) {
-  setMainFilter("workbook");
-  const input = document.querySelector("[data-series-search]");
-  if (input) { input.value = seriesName; filterSeriesTopics(seriesName); }
+  albumFilterState.view = "topic";
+  albumFilterState.query = seriesName;
+  setMainFilter("workbook", { keepAlbumState: true });
 }
 
 function openTopic(id) {
@@ -514,7 +1255,12 @@ function renderBankStats() {
 }
 
 renderBankStats();
-render();
+const initFilter = new URLSearchParams(location.search).get("filter");
+if (initFilter && document.querySelector(`#filterChips [data-filter="${initFilter}"]`)) {
+  setMainFilter(initFilter);
+} else {
+  render();
+}
 
 document.querySelector("[data-stat-jump]")?.addEventListener("click", () => {
   if (!document.querySelector("[data-square-section]")) setMainFilter("all");

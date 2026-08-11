@@ -1255,7 +1255,12 @@ function renderBankStats() {
 }
 
 renderBankStats();
-render();
+const initFilter = new URLSearchParams(location.search).get("filter");
+if (initFilter && document.querySelector(`#filterChips [data-filter="${initFilter}"]`)) {
+  setMainFilter(initFilter);
+} else {
+  render();
+}
 
 document.querySelector("[data-stat-jump]")?.addEventListener("click", () => {
   if (!document.querySelector("[data-square-section]")) setMainFilter("all");

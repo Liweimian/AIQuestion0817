@@ -34,8 +34,78 @@ const paperCatalog = {
     questionCount: 4,
     difficulty: "中等",
     usage: 1458
+  },
+  t4: {
+    title: "2024—2026 深圳期末真题汇编：轴对称",
+    shortTitle: "轴对称汇编",
+    focus: "把分散真题整理成可直接使用的课内专题",
+    reason: "真题汇编",
+    region: "深圳",
+    grade: "七年级下册",
+    examType: "期末",
+    questionCount: 6,
+    difficulty: "较难",
+    usage: 1532
+  },
+  t6: {
+    title: "初一期末高频易错周测题单",
+    shortTitle: "期末易错周测",
+    focus: "名校周测，适合分层选题与命题参考",
+    reason: "名校资源",
+    region: "深圳",
+    grade: "七年级上册",
+    examType: "周测",
+    questionCount: 7,
+    difficulty: "较难",
+    usage: 1089
+  },
+  t27: {
+    title: "期末选择题高频考法：审题与快速提分",
+    shortTitle: "期末选择题",
+    focus: "高频选择题与排除方法",
+    reason: "本周热门",
+    region: "龙岗区",
+    grade: "七年级上册",
+    examType: "期末",
+    questionCount: 7,
+    difficulty: "中等",
+    usage: 1328
+  },
+  t33: {
+    title: "期中压轴题：关键步骤分层拆解",
+    shortTitle: "期中压轴题",
+    focus: "按关键步骤拆解综合题",
+    reason: "名校共建",
+    region: "龙岗区",
+    grade: "七年级上册",
+    examType: "期中",
+    questionCount: 6,
+    difficulty: "较难",
+    usage: 1036
   }
 };
+
+const sidebarPaperList = Object.entries(paperCatalog).map(([id, meta]) => ({
+  id,
+  ...meta,
+  recommendScore: Number(meta.usage || 0),
+  latestScore: id === "t14" ? 100 : id === "t25" ? 95 : id === "t2" ? 90 : 80
+}));
+
+const paperListState = {
+  query: "",
+  examType: "all"
+};
+
+const rightPanelSectionState = {
+  selectedCollapsed: true
+};
+
+const MAX_OPEN_TABS = 6;
+const mobileLayoutQuery = window.matchMedia("(max-width: 980px)");
+const expandedAnalysisIds = new Set();
+
+let selectedPreviewTypeFilter = null;
 
 const paperQuestions = {
   t2: [
@@ -61,20 +131,6 @@ const paperQuestions = {
     { id:"3", num:3, section:"二、填空题", type:"填空题", difficulty:"简单", knowledge:"余角", stem:"一个角的余角是 35°，则这个角是 ______。", options:[], answer:"55°", analysis:"90°−35°=55°。" },
     { id:"4", num:4, section:"三、解答题", type:"解答题", difficulty:"中等", knowledge:"角平分线", stem:"如图，已知 ∠AOB = 80°，OC 平分 ∠AOB，求 ∠AOC 的度数，并说明理由。", options:[], answer:"40°", analysis:"角平分线将角分成两个相等的角。" }
   ]
-};
-
-const structuredActions = {
-  delete: { label:"删题", build: ids => ids.length ? `删除第 ${ids.join("、")} 题` : "删除第 3 题" },
-  add: { label:"加题", build: () => "在选择题末尾增加一道有理数运算选择题" },
-  convert: { label:"改题型", build: ids => ids.length ? `把第 ${ids[0]} 题改成填空题` : "把第 1 题改成填空题" },
-  "switch-paper": { label:"换卷", build: () => "打开福田区期中卷" },
-  "lower-difficulty": { label:"降难度", build: ids => ids.length ? `将第 ${ids.join("、")} 题降低难度，保留考点` : "将整卷难度降低一档，保留核心考点" },
-  "change-context": { label:"换情境", build: ids => ids.length ? `将第 ${ids.join("、")} 题改为深圳生活情境，考点不变` : "将整卷情境改为深圳本地场景" },
-  "align-curriculum": { label:"对齐课标", build: ids => ids.length ? `检查第 ${ids.join("、")} 题是否对齐课标，并给出调整建议` : "检查整卷是否对齐七上有理数课标" },
-  "match-region": { label:"对标区风格", build: ids => ids.length ? `将第 ${ids.join("、")} 题调整为南山区期末命题风格` : "将整卷调整为南山区期末命题风格" },
-  "ai-adapt": { label:"AI 改编试卷", build: () => "将整卷改为深圳情境题，考点不变" },
-  parallel: { label:"平行组卷", build: () => "生成一份考点一致的平行卷" },
-  "paper-analysis": { label:"试卷分析", build: () => "分析本卷考点分布、难度结构和命题特点" }
 };
 
 const params = new URLSearchParams(location.search);
@@ -196,15 +252,16 @@ function loadWorkspace() {
       return {
         tabs: [],
         activeTabId: null,
-        messages: [],
         basketCount: 0,
         showAnswers: false,
         paperFavorited: false,
+        globalSelectedQuestions: [],
+        favoriteQuestions: [],
         ...parsed
       };
     }
   } catch {}
-  return { tabs: [], activeTabId: null, messages: [], basketCount: 0, showAnswers: false, paperFavorited: false };
+  return { tabs: [], activeTabId: null, basketCount: 0, showAnswers: false, paperFavorited: false, globalSelectedQuestions: [], favoriteQuestions: [] };
 }
 
 function saveWorkspace() {
@@ -213,6 +270,107 @@ function saveWorkspace() {
   try {
     localStorage.setItem(STORAGE_KEY, json);
   } catch {}
+}
+
+function getQuestionSelectionKey(topicId, qId) {
+  return `${getBaseTopicId(topicId)}::${qId}`;
+}
+
+function ensureGlobalSelected() {
+  if (!Array.isArray(workspace.globalSelectedQuestions)) {
+    workspace.globalSelectedQuestions = [];
+  }
+  if (workspace.globalSelectedQuestions.length) return;
+  workspace.tabs.forEach(tab => {
+    if (tab.isQuestionList || tab.fromQuestionId) return;
+    (tab.selectedQuestionIds || []).forEach(qId => {
+      const q = tab.questions.find(item => item.id === qId);
+      if (!q || tab.removedQuestionIds?.includes(qId)) return;
+      const entry = buildGlobalSelectedEntry(tab, q);
+      if (!workspace.globalSelectedQuestions.some(item => item.selectionKey === entry.selectionKey)) {
+        workspace.globalSelectedQuestions.push(entry);
+      }
+    });
+  });
+}
+
+function getGlobalSelectedQuestions() {
+  ensureGlobalSelected();
+  return workspace.globalSelectedQuestions;
+}
+
+function isQuestionGloballySelected(topicId, qId) {
+  const key = getQuestionSelectionKey(topicId, qId);
+  return getGlobalSelectedQuestions().some(item => item.selectionKey === key);
+}
+
+function ensureFavoriteQuestions() {
+  if (!Array.isArray(workspace.favoriteQuestions)) workspace.favoriteQuestions = [];
+  return workspace.favoriteQuestions;
+}
+
+function isQuestionFavorited(topicId, qId) {
+  return ensureFavoriteQuestions().includes(getQuestionSelectionKey(topicId, qId));
+}
+
+function toggleQuestionFavorite(qId) {
+  const tab = getActiveTab();
+  if (!tab) return false;
+  const key = getQuestionSelectionKey(tab.topicId, qId);
+  const list = ensureFavoriteQuestions();
+  const index = list.indexOf(key);
+  if (index >= 0) list.splice(index, 1);
+  else list.push(key);
+  saveWorkspace();
+  renderQuestionCards();
+  return index < 0;
+}
+
+function buildGlobalSelectedEntry(tab, q) {
+  const topicId = getBaseTopicId(tab.topicId);
+  const resolved = resolveTabQuestion(tab, q);
+  return {
+    selectionKey: getQuestionSelectionKey(topicId, q.id),
+    topicId,
+    sourceTitle: getTabBaseTitle(tab),
+    question: { ...resolved }
+  };
+}
+
+function matchesSelectedType(questionType, filterKey) {
+  const type = questionType || "";
+  if (filterKey === "选择") return type.includes("选择");
+  if (filterKey === "填空") return type.includes("填空");
+  if (filterKey === "解答") return type.includes("解答");
+  return true;
+}
+
+function renderSelectedTypeSummaryHtml(items) {
+  const counts = { 选择: 0, 填空: 0, 解答: 0 };
+  items.forEach(item => {
+    const type = item.question?.type || "";
+    if (type.includes("选择")) counts.选择 += 1;
+    else if (type.includes("填空")) counts.填空 += 1;
+    else if (type.includes("解答")) counts.解答 += 1;
+  });
+  return ["选择", "填空", "解答"]
+    .filter(key => counts[key] > 0)
+    .map(key => `<button type="button" class="ai-selected-summary-count ${selectedPreviewTypeFilter === key ? "active" : ""}" data-selected-type="${key}">${counts[key]}</button>道${key}`)
+    .join(" ");
+}
+
+function syncTabSelectedQuestionIds(tab) {
+  if (!tab) return;
+  tab.selectedQuestionIds = tab.questions
+    .filter(q => !tab.removedQuestionIds.includes(q.id) && isQuestionGloballySelected(tab.topicId, q.id))
+    .map(q => q.id);
+}
+
+function removeGlobalSelectedByKey(selectionKey) {
+  workspace.globalSelectedQuestions = getGlobalSelectedQuestions().filter(item => item.selectionKey !== selectionKey);
+  syncTabSelectedQuestionIds(getActiveTab());
+  saveWorkspace();
+  renderQuestionCards();
 }
 
 function getActiveTab() {
@@ -253,20 +411,9 @@ function resolveTopicMeta(topicId, tabContext = contextName) {
   };
 }
 
-function favoriteResourceLabel(saved = false, tab = getActiveTab()) {
-  const noun = tabIsWorkbook(tab) ? "题单" : "试卷";
-  if (saved) return `<i class="ri-star-fill"></i><span>已收藏</span>`;
-  return `<i class="ri-star-line"></i><span>收藏${noun}</span>`;
-}
-
-function createWelcomeMessages() {
-  return [{
-    role: "assistant",
-    html: `
-      <p>你好，我是飞象题库AI。</p>
-        <p>· 悬浮题目可看到操作按钮（纠错 / 收藏 / 解析 / 加入对话）<br>· 点击题目可选中并加入 AI 对话<br>· 下方可使用 AI 改编、平行组卷、试卷分析等功能</p>
-      <span class="chat-action-chip"><i class="ri-cursor-line"></i> 先点几道题试试</span>`
-  }];
+function favoriteResourceLabel(saved = false) {
+  if (saved) return `<i class="ri-star-fill"></i><span id="favoritePaperLabel">已收藏</span>`;
+  return `<i class="ri-star-line"></i><span id="favoritePaperLabel">收藏</span>`;
 }
 
 function createTab(topicId, tabContext = contextName) {
@@ -310,17 +457,15 @@ function hasSingleChoiceSection(tab) {
 
 function formatQuestionListTitle() {
   const now = new Date();
-  const pad = value => String(value).padStart(2, "0");
-  return `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}题单`;
+  return `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}题单`;
 }
 
-function formatQuestionListShortTitle(title = formatQuestionListTitle()) {
-  return title.replace(/题单$/, "");
+function formatQuestionListShortTitle() {
+  const now = new Date();
+  return `题单 ${now.getMonth() + 1}.${now.getDate()}`;
 }
 
 function ensureInitialTab() {
-  if (!workspace.messages.length) workspace.messages = createWelcomeMessages();
-
   const baseId = getBaseTopicId(initialTopicId);
   let mainTab = workspace.tabs.find(tab =>
     getBaseTopicId(tab.topicId) === baseId && !tab.fromQuestionId && !tab.isQuestionList
@@ -434,78 +579,38 @@ function showToast(message) {
   showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
 }
 
-function diffBlock(summary, items) {
-  return `
-    <details class="chat-block" open>
-      <summary><i class="ri-git-commit-line"></i> 变更摘要</summary>
-      <div class="chat-block-body">
-        <p>${escapeHtml(summary)}</p>
-        <ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-      </div>
-    </details>`;
-}
-
-function renderChat() {
-  const thread = document.querySelector("#aiChatThread");
-  if (!thread) return;
-  thread.innerHTML = workspace.messages.map(message => {
-    if (message.role === "user") {
-      return `<article class="chat-message user"><div class="chat-bubble"><p>${escapeHtml(message.text)}</p></div></article>`;
-    }
-    return `
-      <article class="chat-message assistant">
-        <div class="chat-author">
-          <span class="chat-author-avatar"><i class="ri-sparkling-2-fill"></i></span>
-          <span>飞象题库AI</span>
-        </div>
-        <div class="chat-bubble">${message.html}</div>
-      </article>`;
-  }).join("");
-  thread.scrollTop = thread.scrollHeight;
+function buildPaperFacts(tab) {
+  const meta = tab.meta || {};
+  const visibleCount = tab.questions.filter(q => !tab.removedQuestionIds.includes(q.id)).length;
+  if (tab.isQuestionList) {
+    return ["自定义题单", `${visibleCount} 题`, meta.createdAt ? `创建于 ${meta.createdAt}` : ""].filter(Boolean);
+  }
+  return [
+    meta.reason || meta.source,
+    meta.region,
+    meta.grade,
+    meta.examType,
+    `${visibleCount} 题`,
+    meta.difficulty ? `难度 ${meta.difficulty}` : "",
+    meta.usage ? `${meta.usage} 次下载` : ""
+  ].filter(Boolean);
 }
 
 function renderMeta(tab) {
-  const visibleCount = tab.questions.filter(q => !tab.removedQuestionIds.includes(q.id)).length;
   const displayTitle = tab.fromQuestionId
     ? `${getTabBaseTitle(tab)} · 第 ${tab.questions[0]?.num || ""} 题`
     : tab.title;
   document.querySelector("#topicTitle").textContent = displayTitle;
 
-  if (tab.fromQuestionId) {
-    const q = tab.questions[0];
-    document.querySelector("#paperMetaStats").innerHTML = `
-      <div><dt>题量</dt><dd>1 题</dd></div>
-      <div><dt>题型</dt><dd>${escapeHtml(q?.type || "—")}</dd></div>
-      <div><dt>难度</dt><dd>${escapeHtml(q?.difficulty || tab.meta.difficulty || "中等")}</dd></div>
-      <div><dt>知识点</dt><dd>${escapeHtml(q?.knowledge || "—")}</dd></div>`;
-    return;
+  const facts = document.querySelector("#paperMetaFacts");
+  if (facts) {
+    facts.innerHTML = buildPaperFacts(tab).map(text => `<span>${escapeHtml(text)}</span>`).join("");
   }
 
-  if (tab.isQuestionList) {
-    document.querySelector("#paperMetaStats").innerHTML = `
-      <div><dt>题量</dt><dd>${visibleCount} 题</dd></div>
-      <div><dt>难度</dt><dd>${escapeHtml(tab.meta.difficulty || "中等")}</dd></div>
-      <div><dt>来源</dt><dd>${escapeHtml(tab.meta.source || "自定义题单")}</dd></div>
-      <div><dt>创建时间</dt><dd>${escapeHtml(tab.meta.createdAt || "—")}</dd></div>`;
-    return;
+  if (!isWorkbook) {
+    const leaf = document.querySelector("#breadcrumbLeaf");
+    if (leaf) leaf.textContent = displayTitle;
   }
-
-  if (tabIsWorkbook(tab)) {
-    document.querySelector("#paperMetaStats").innerHTML = `
-      <div><dt>题量</dt><dd>${visibleCount || tab.meta.questionCount || 0} 题</dd></div>
-      <div><dt>难度</dt><dd>${escapeHtml(tab.meta.difficulty || "中等")}</dd></div>
-      <div><dt>来源</dt><dd>${escapeHtml(tab.meta.source || "系列题单")}</dd></div>
-      <div><dt>使用量</dt><dd>${Number(tab.meta.usage || 0).toLocaleString()} 人</dd></div>`;
-    return;
-  }
-
-  document.querySelector("#paperMetaStats").innerHTML = `
-    <div><dt>地区</dt><dd>${escapeHtml(tab.meta.region)}</dd></div>
-    <div><dt>年级</dt><dd>${escapeHtml(tab.meta.grade)}</dd></div>
-    <div><dt>类型</dt><dd>${escapeHtml(tab.meta.examType)}</dd></div>
-    <div><dt>题量</dt><dd>${visibleCount} 题</dd></div>
-    <div><dt>难度</dt><dd>${escapeHtml(tab.meta.difficulty)}</dd></div>
-    <div><dt>使用量</dt><dd>${Number(tab.meta.usage || 0).toLocaleString()} 人</dd></div>`;
 }
 
 function renderWorkbookDirectory() {
@@ -591,7 +696,7 @@ function applyPageMode() {
     document.querySelector("#directoryMask")?.setAttribute("hidden", "");
     document.querySelector("#breadcrumbContext").textContent = "试卷";
     document.querySelector("#breadcrumbLeaf").textContent = "试卷详情";
-    if (favoriteLabel) favoriteLabel.textContent = "收藏试卷";
+    if (favoriteLabel) favoriteLabel.textContent = "收藏";
     if (docTabs) docTabs.setAttribute("aria-label", "已打开的试卷");
     return;
   }
@@ -606,7 +711,7 @@ function applyPageMode() {
   document.querySelector("#directoryKicker").textContent = workbookDirectory.kicker;
   document.querySelector("#directoryTitle").textContent = workbookDirectory.title;
   document.querySelector("#directorySummary").textContent = workbookDirectory.summary;
-  if (favoriteLabel) favoriteLabel.textContent = "收藏题单";
+  if (favoriteLabel) favoriteLabel.textContent = "收藏";
   if (docTabs) docTabs.setAttribute("aria-label", "已打开的题单");
 
   renderWorkbookDirectory();
@@ -623,18 +728,23 @@ function questionDefaults(q) {
 
 function questionCardHtml(q, tab) {
   const removed = tab.removedQuestionIds.includes(q.id);
-  const selected = tab.selectedQuestionIds.includes(q.id);
+  const selected = isQuestionGloballySelected(tab.topicId, q.id);
+  const favorited = isQuestionFavorited(tab.topicId, q.id);
+  const answerOpen = expandedAnalysisIds.has(q.id);
   const modified = tab.modifiedQuestions[q.id];
   const stem = modified?.stem || q.stem;
   const type = modified?.type || q.type;
   const difficulty = modified?.difficulty || q.difficulty;
   const meta = questionDefaults(q);
-  const options = q.options.length
-    ? `<div class="q-options">${q.options.map(opt => `<span>${escapeHtml(opt)}</span>`).join("")}</div>`
+  const optionList = modified?.options || q.options || [];
+  // 长选项并排会互相错位，超过阈值改单列排版
+  const singleColumn = optionList.some(opt => String(opt).length > 20);
+  const options = optionList.length
+    ? `<div class="q-options ${singleColumn ? "q-options-single" : ""}">${optionList.map(opt => `<span>${escapeHtml(opt)}</span>`).join("")}</div>`
     : "";
   const badges = meta.badges.map(label => `<span class="q-badge ${label.includes("创新") ? "hot" : "ai"}">${escapeHtml(label)}</span>`).join("");
   return `
-    <article class="question-item ${removed ? "removed" : ""} ${selected ? "selected" : ""} ${modified ? "modified" : ""}"
+    <article class="question-item ${removed ? "removed" : ""} ${selected ? "selected" : ""} ${modified ? "modified" : ""} ${answerOpen ? "answer-open" : ""}"
       data-q="${q.id}" tabindex="0" aria-label="第 ${q.num} 题">
       <div class="q-card-top">
         <div class="q-badges">${badges}</div>
@@ -648,17 +758,25 @@ function questionCardHtml(q, tab) {
         <div class="q-inline-answer"><em>答案</em>${escapeHtml(q.answer)}</div>
         <div class="q-inline-analysis"><em>解析</em>${escapeHtml(q.analysis)}</div>
       </div>
-      <footer class="q-card-foot">
+      <div class="q-card-bar">
         <span class="q-knowledge-foot">知识点：${escapeHtml(q.knowledge)} / 核心素养：${escapeHtml(meta.competency)}</span>
-      </footer>
-      <div class="q-card-actions">
-        <button type="button" data-card-action="add-after" data-q="${q.id}"><i class="ri-add-line"></i> 加题</button>
-        <button type="button" data-card-action="delete" data-q="${q.id}"><i class="ri-delete-bin-line"></i> 删题</button>
-        <button type="button" data-card-action="fix" data-q="${q.id}"><i class="ri-error-warning-line"></i> 纠错</button>
-        <button type="button" data-card-action="favorite" data-q="${q.id}"><i class="ri-star-line"></i> 收藏</button>
-        <button type="button" data-card-action="analysis" data-q="${q.id}"><i class="ri-file-text-line"></i> 解析</button>
-        <button type="button" data-card-action="similar" data-q="${q.id}"><i class="ri-stack-line"></i> 相似题</button>
-        <button type="button" class="q-chat-btn" data-card-action="chat" data-q="${q.id}"><i class="ri-chat-3-line"></i> 加入对话</button>
+        <div class="q-card-actions">
+          <button type="button" class="q-action-ghost ${answerOpen ? "active" : ""}" data-card-action="analysis" data-q="${q.id}" aria-pressed="${answerOpen}">
+            <i class="ri-file-text-line"></i><span>${answerOpen ? "收起解析" : "解析"}</span>
+          </button>
+          <button type="button" class="q-action-ghost ${favorited ? "saved" : ""}" data-card-action="favorite" data-q="${q.id}">
+            <i class="${favorited ? "ri-star-fill" : "ri-star-line"}"></i><span>${favorited ? "已收藏" : "收藏"}</span>
+          </button>
+          <button type="button" class="q-action-ghost" data-card-action="similar" data-q="${q.id}">
+            <i class="ri-stack-line"></i><span>相似题</span>
+          </button>
+          <button type="button" class="q-action-ghost" data-card-action="fix" data-q="${q.id}">
+            <i class="ri-error-warning-line"></i><span>纠错</span>
+          </button>
+          ${selected
+    ? `<button type="button" class="q-remove-btn" data-card-action="remove-selected" data-q="${q.id}" title="点击移出已选题目"><i class="ri-check-line"></i><span>已添加</span></button>`
+    : `<button type="button" class="q-add-btn" data-card-action="add-selected" data-q="${q.id}"><i class="ri-add-line"></i><span>添加</span></button>`}
+        </div>
       </div>
     </article>`;
 }
@@ -666,6 +784,7 @@ function questionCardHtml(q, tab) {
 function renderQuestionCards() {
   const tab = getActiveTab();
   if (!tab) return;
+  syncTabSelectedQuestionIds(tab);
   document.title = `${tab.title} · AI 试卷工作台`;
   renderMeta(tab);
 
@@ -688,69 +807,249 @@ function renderQuestionCards() {
   bindQuestionCardEvents();
 }
 
+function renderSelectedFooter(count) {
+  const button = document.querySelector("#createQuestionList");
+  const label = document.querySelector("#createQuestionListLabel");
+  const hint = document.querySelector("#aiSelectedHint");
+  const railBadge = document.querySelector("#aiSelectedExpandCount");
+  const aiEntry = document.querySelector("#openAiCreate");
+  const aiLabel = document.querySelector("#openAiCreateLabel");
+  if (button) button.disabled = count === 0;
+  if (label) label.textContent = count ? `用 ${count} 道题创建题单` : "请先添加题目";
+  if (hint) hint.textContent = count ? `已选 ${count} 题` : "还没有选题";
+  if (railBadge) {
+    railBadge.textContent = count > 99 ? "99+" : String(count);
+    railBadge.hidden = count === 0;
+  }
+  // 没有已选题时 AI 是唯一可用的行动，升为主按钮，避免出现点了没反应的死按钮
+  if (aiEntry) aiEntry.classList.toggle("is-primary", count === 0);
+  if (aiLabel) aiLabel.textContent = count ? `让 AI 基于这 ${count} 题补充` : "用 AI 生成题单";
+}
+
 function renderSelectedContext() {
-  const tab = getActiveTab();
   const wrap = document.querySelector("#aiSelectedContext");
-  const chips = document.querySelector("#aiSelectedChips");
-  if (!tab || !wrap || !chips) return;
-  const selected = tab.questions.filter(q => tab.selectedQuestionIds.includes(q.id));
-  wrap.hidden = !selected.length;
+  const summary = document.querySelector("#aiSelectedSummary");
+  const preview = document.querySelector("#aiSelectedPreview");
+  const empty = document.querySelector("#aiSelectedEmpty");
+  if (!wrap || !preview) return;
+  const selected = getGlobalSelectedQuestions();
+  const visible = selectedPreviewTypeFilter
+    ? selected.filter(item => matchesSelectedType(item.question.type, selectedPreviewTypeFilter))
+    : selected;
   wrap.classList.toggle("has-selection", selected.length > 0);
-  chips.innerHTML = selected.map(q => `
-    <span class="selected-chip" data-q="${q.id}">
-      <span class="selected-chip-label">第 ${q.num} 题 · ${escapeHtml(q.type)}</span>
-      <span class="selected-chip-close" role="button" tabindex="0" data-remove-q="${q.id}" aria-label="移出已选"><i class="ri-close-line"></i></span>
-    </span>`).join("");
+  document.querySelector("#aiSelectedPanel")?.classList.toggle("has-selection", selected.length > 0);
+  renderSelectedFooter(selected.length);
+  if (summary) {
+    summary.innerHTML = renderSelectedTypeSummaryHtml(selected);
+    summary.hidden = !selected.length;
+    summary.querySelectorAll(".ai-selected-summary-count").forEach(button => {
+      button.addEventListener("click", event => {
+        event.stopPropagation();
+        const type = button.dataset.selectedType;
+        selectedPreviewTypeFilter = selectedPreviewTypeFilter === type ? null : type;
+        renderSelectedContext();
+      });
+    });
+  }
+  if (empty) empty.hidden = selected.length > 0;
+  preview.innerHTML = visible.map(item => `
+      <article class="ai-selected-preview-item" data-selection-key="${item.selectionKey}">
+        <header class="ai-selected-preview-head">
+          <strong>${escapeHtml(item.question.type)}</strong>
+          <button type="button" data-selection-key="${item.selectionKey}">移出</button>
+        </header>
+        <p class="ai-selected-preview-stem">${escapeHtml(item.question.stem)}</p>
+      </article>`).join("");
 
-  wrap.onclick = event => {
-    if (event.target.closest("#clearSelectedQuestions")) return;
-    if (event.target.closest(".selected-chip-close")) return;
-    if (!selected.length) return;
-    openSelectedAsQuestionList();
-  };
-
-  chips.querySelectorAll("[data-remove-q]").forEach(button => {
-    const remove = event => {
+  preview.querySelectorAll("[data-selection-key]").forEach(button => {
+    if (button.tagName !== "BUTTON") return;
+    button.addEventListener("click", event => {
       event.stopPropagation();
-      toggleQuestionSelection(button.dataset.removeQ, false);
-    };
-    button.addEventListener("click", remove);
-    button.addEventListener("keydown", event => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        remove(event);
-      }
+      removeGlobalSelectedByKey(button.dataset.selectionKey);
     });
   });
 }
 
+function getFilteredSidebarPapers() {
+  const query = paperListState.query.trim().toLowerCase();
+  let list = sidebarPaperList.filter(paper => {
+    if (query && !`${paper.title} ${paper.region} ${paper.grade} ${paper.examType}`.toLowerCase().includes(query)) {
+      return false;
+    }
+    if (paperListState.examType !== "all" && paper.examType !== paperListState.examType) return false;
+    return true;
+  });
+
+  list = [...list].sort((a, b) => b.recommendScore - a.recommendScore);
+  return list;
+}
+
+function renderPaperList() {
+  const scroll = document.querySelector("#paperListScroll");
+  if (!scroll || isWorkbook) return;
+
+  const activeTopicId = getBaseTopicId(getActiveTab()?.topicId);
+  const list = getFilteredSidebarPapers();
+
+  if (!list.length) {
+    scroll.innerHTML = `<p class="paper-list-empty">没有找到匹配的试卷，试试调整筛选条件。</p>`;
+    return;
+  }
+
+  scroll.innerHTML = list.map(paper => `
+      <button type="button" class="paper-list-card ${paper.id === activeTopicId ? "active" : ""}" data-paper-id="${paper.id}">
+        <p class="paper-list-card-title"><span class="paper-list-card-tag">${escapeHtml(paper.examType)}</span>${escapeHtml(paper.title)}</p>
+      </button>`).join("");
+
+  scroll.querySelectorAll("[data-paper-id]").forEach(button => {
+    button.addEventListener("click", () => {
+      openTab(button.dataset.paperId);
+      if (isMobileLayout()) setMobileDrawer("paper", false);
+    });
+  });
+}
+
+function bindPaperListControls() {
+  if (isWorkbook) return;
+
+  const workspace = document.querySelector("#aiWorkspace");
+  const panel = document.querySelector("#paperListPanel");
+  const collapseBtn = document.querySelector("#collapsePaperList");
+  const expandBtn = document.querySelector("#paperListExpand");
+  const topbarExpandBtn = document.querySelector("#topbarExpandPaperList");
+  const searchInput = document.querySelector("#paperListSearch");
+  const typeBtn = document.querySelector("#paperListTypeBtn");
+  const filterBtn = document.querySelector("#paperListFilterBtn");
+
+  const typeOptions = ["all", "期末", "期中", "周测"];
+
+  const setCollapsed = collapsed => {
+    workspace?.classList.toggle("paper-list-collapsed", collapsed);
+    applyResponsiveChrome();
+  };
+
+  const expandPanel = () => {
+    if (isMobileLayout()) setMobileDrawer("paper", true);
+    else setCollapsed(false);
+  };
+
+  collapseBtn?.addEventListener("click", () => {
+    if (isMobileLayout()) setMobileDrawer("paper", false);
+    else setCollapsed(true);
+  });
+  expandBtn?.addEventListener("click", expandPanel);
+  topbarExpandBtn?.addEventListener("click", expandPanel);
+  panel?.addEventListener("click", event => {
+    if (isMobileLayout()) return;
+    if (!workspace?.classList.contains("paper-list-collapsed")) return;
+    if (event.target.closest(".paper-list-expand") || event.target === panel) expandPanel();
+  });
+
+  searchInput?.addEventListener("input", () => {
+    paperListState.query = searchInput.value;
+    renderPaperList();
+  });
+
+  typeBtn?.addEventListener("click", () => {
+    const index = typeOptions.indexOf(paperListState.examType);
+    paperListState.examType = typeOptions[(index + 1) % typeOptions.length];
+    document.querySelector("#paperListTypeLabel").textContent =
+      paperListState.examType === "all" ? "类型" : paperListState.examType;
+    renderPaperList();
+  });
+
+  filterBtn?.addEventListener("click", () => showToast("更多筛选即将开放"));
+}
+
+function isMobileLayout() {
+  return mobileLayoutQuery.matches;
+}
+
+function setMobileDrawer(name, open) {
+  const root = document.querySelector("#aiWorkspace");
+  if (!root) return;
+  if (name === "paper") root.classList.toggle("mobile-paper-list-open", open);
+  if (name === "selected") root.classList.toggle("mobile-selected-open", open);
+  const anyOpen = root.classList.contains("mobile-paper-list-open")
+    || root.classList.contains("mobile-selected-open");
+  const mask = document.querySelector("#panelMask");
+  if (mask) mask.hidden = !anyOpen;
+}
+
+function closeMobileDrawers() {
+  setMobileDrawer("paper", false);
+  setMobileDrawer("selected", false);
+}
+
+function applyResponsiveChrome() {
+  const root = document.querySelector("#aiWorkspace");
+  const listBtn = document.querySelector("#topbarExpandPaperList");
+  const selectedBtn = document.querySelector("#topbarExpandSelected");
+  if (isMobileLayout()) {
+    if (listBtn) listBtn.hidden = isWorkbook;
+    if (selectedBtn) selectedBtn.hidden = false;
+    return;
+  }
+  closeMobileDrawers();
+  if (listBtn) listBtn.hidden = !root?.classList.contains("paper-list-collapsed");
+  if (selectedBtn) selectedBtn.hidden = !rightPanelSectionState.selectedCollapsed;
+}
+
+function applySelectedPanelState() {
+  const root = document.querySelector("#aiWorkspace");
+  root?.classList.toggle("selected-panel-collapsed", rightPanelSectionState.selectedCollapsed);
+  applyResponsiveChrome();
+}
+
+function bindSelectedPanelControls() {
+  const panel = document.querySelector("#aiSelectedPanel");
+  const collapseBtn = document.querySelector("#collapseSelectedPanel");
+  const expandBtn = document.querySelector("#aiSelectedExpand");
+  const topbarExpandBtn = document.querySelector("#topbarExpandSelected");
+
+  // 没有已选题目时不占用正文宽度，选中第一题后再展开
+  rightPanelSectionState.selectedCollapsed = getGlobalSelectedQuestions().length === 0;
+
+  collapseBtn?.addEventListener("click", () => {
+    if (isMobileLayout()) {
+      setMobileDrawer("selected", false);
+      return;
+    }
+    rightPanelSectionState.selectedCollapsed = true;
+    applySelectedPanelState();
+  });
+
+  const openPanel = () => {
+    if (isMobileLayout()) setMobileDrawer("selected", true);
+    else expandSelectedPanel();
+  };
+
+  expandBtn?.addEventListener("click", openPanel);
+  topbarExpandBtn?.addEventListener("click", openPanel);
+  panel?.addEventListener("click", event => {
+    if (isMobileLayout()) return;
+    if (!document.querySelector("#aiWorkspace")?.classList.contains("selected-panel-collapsed")) return;
+    if (event.target.closest(".ai-selected-expand") || event.target === panel) expandSelectedPanel();
+  });
+
+  applySelectedPanelState();
+}
+
 function openSelectedAsQuestionList() {
-  const sourceTab = getActiveTab();
-  if (!sourceTab?.selectedQuestionIds.length) {
+  const selectedItems = getGlobalSelectedQuestions();
+  if (!selectedItems.length) {
     showToast("请先选择题目");
     return;
   }
 
-  const selectedQuestions = sourceTab.questions.filter(q =>
-    sourceTab.selectedQuestionIds.includes(q.id) && !sourceTab.removedQuestionIds.includes(q.id)
-  );
+  const selectedQuestions = selectedItems.map(item => ({ ...item.question }));
   if (!selectedQuestions.length) return;
-
-  const selectionKey = [...selectedQuestions.map(q => q.id)].sort().join(",");
-  const existing = workspace.tabs.find(tab =>
-    tab.isQuestionList && tab.fromTabId === sourceTab.id && tab.selectionKey === selectionKey
-  );
-  if (existing) {
-    switchTab(existing.id);
-    showToast(`已切换到「${existing.title}」`);
-    return;
-  }
 
   tabCounter += 1;
   const title = formatQuestionListTitle();
   const now = new Date();
   const pad = value => String(value).padStart(2, "0");
-  const createdAt = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const createdAt = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const questions = selectedQuestions.map((q, index) => ({
     ...q,
     id: `${q.id}-list-${tabCounter}-${index}`,
@@ -760,12 +1059,12 @@ function openSelectedAsQuestionList() {
   const newTab = {
     id: `tab-${tabCounter}`,
     topicId: `list-${Date.now()}`,
-    context: sourceTab.context || contextName,
+    context: getActiveTab()?.context || contextName,
     title,
-    shortTitle: formatQuestionListShortTitle(title),
+    shortTitle: formatQuestionListShortTitle(),
     meta: {
       title,
-      shortTitle: formatQuestionListShortTitle(title),
+      shortTitle: formatQuestionListShortTitle(),
       source: "自定义题单",
       difficulty: "中等",
       questionCount: questions.length,
@@ -776,16 +1075,228 @@ function openSelectedAsQuestionList() {
     removedQuestionIds: [],
     modifiedQuestions: {},
     questions,
-    fromTabId: sourceTab.id,
+    fromTabId: getActiveTab()?.id || null,
     isQuestionList: true,
-    selectionKey
+    selectionKey: selectedItems.map(item => item.selectionKey).sort().join(",")
   };
 
   workspace.tabs.push(newTab);
   workspace.activeTabId = newTab.id;
+  pruneOverflowTabs();
+  clearSelectedQuestionsState();
   saveWorkspace();
+  if (isMobileLayout()) setMobileDrawer("selected", false);
   renderAll();
-  showToast(`已创建「${title}」，共 ${questions.length} 题`);
+  showToast(`已创建「${title}」，共 ${questions.length} 题，已选题目已清空`);
+}
+
+const AI_CREATE_CHIPS_WITH_BASE = ["再补 5 道同类型", "补 2 道压轴题", "删掉太简单的", "总共控制在 10 题"];
+const AI_CREATE_CHIPS_EMPTY = ["七上有理数易错题 15 题", "期末选择题专练 12 题", "中等难度综合练习 20 题"];
+const AI_TOPIC_KEYWORDS = ["有理数", "整式", "一元一次方程", "轴对称", "数轴", "正负数", "不等式", "角平分线", "几何"];
+
+function aiCreateUsesSelected() {
+  const checkbox = document.querySelector("#aiCreateUseSelected");
+  return Boolean(checkbox && !checkbox.disabled && checkbox.checked);
+}
+
+function renderAiCreateChips() {
+  const wrap = document.querySelector("#aiCreateChips");
+  if (!wrap) return;
+  const chips = aiCreateUsesSelected() ? AI_CREATE_CHIPS_WITH_BASE : AI_CREATE_CHIPS_EMPTY;
+  wrap.innerHTML = chips
+    .map(text => `<button type="button" class="ai-create-chip" data-ai-chip="${escapeHtml(text)}">${escapeHtml(text)}</button>`)
+    .join("");
+  wrap.querySelectorAll("[data-ai-chip]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const input = document.querySelector("#aiCreatePrompt");
+      if (!input) return;
+      const value = input.value.trim();
+      input.value = value ? `${value}，${chip.dataset.aiChip}` : chip.dataset.aiChip;
+      input.focus();
+    });
+  });
+}
+
+function openAiCreateModal() {
+  const modal = document.querySelector("#aiCreateModal");
+  if (!modal) return;
+  const selected = getGlobalSelectedQuestions();
+  const context = document.querySelector("#aiCreateContext");
+  const checkbox = document.querySelector("#aiCreateUseSelected");
+  const countNode = document.querySelector("#aiCreateSelectedCount");
+  const summary = document.querySelector("#aiCreateContextSummary");
+
+  if (context) context.hidden = selected.length === 0;
+  if (checkbox) {
+    checkbox.disabled = selected.length === 0;
+    checkbox.checked = selected.length > 0;
+  }
+  if (countNode) countNode.textContent = String(selected.length);
+  if (summary) {
+    const counts = { 选择: 0, 填空: 0, 解答: 0 };
+    selected.forEach(item => {
+      const type = item.question?.type || "";
+      if (type.includes("选择")) counts.选择 += 1;
+      else if (type.includes("填空")) counts.填空 += 1;
+      else if (type.includes("解答")) counts.解答 += 1;
+    });
+    const parts = ["选择", "填空", "解答"].filter(key => counts[key] > 0).map(key => `${counts[key]} 道${key}`);
+    summary.textContent = parts.length ? parts.join(" · ") : "";
+  }
+
+  renderAiCreateChips();
+  modal.hidden = false;
+  document.querySelector("#aiCreatePrompt")?.focus();
+}
+
+function closeAiCreateModal() {
+  const modal = document.querySelector("#aiCreateModal");
+  if (!modal) return;
+  modal.hidden = true;
+  const input = document.querySelector("#aiCreatePrompt");
+  if (input) input.value = "";
+}
+
+function collectAiCandidateQuestions(excludeKeys) {
+  const pool = [];
+  Object.entries(paperQuestions).forEach(([topicId, list]) => {
+    list.forEach(q => {
+      const key = getQuestionSelectionKey(topicId, q.id);
+      if (excludeKeys.has(key)) return;
+      pool.push({ ...q, sourceTopicId: topicId });
+    });
+  });
+  return pool;
+}
+
+function rankAiCandidates(pool, prompt) {
+  const wantsHard = /难|压轴|提高|拔高|挑战/.test(prompt);
+  const wantsEasy = /简单|基础|容易|入门/.test(prompt);
+  const topic = AI_TOPIC_KEYWORDS.find(word => prompt.includes(word));
+  const typeHint = ["选择", "填空", "解答"].find(word => prompt.includes(word));
+
+  return [...pool].sort((a, b) => aiCandidateScore(b) - aiCandidateScore(a));
+
+  function aiCandidateScore(q) {
+    let score = 0;
+    if (topic && `${q.knowledge || ""}${q.stem || ""}`.includes(topic)) score += 6;
+    if (typeHint && String(q.type || "").includes(typeHint)) score += 3;
+    if (wantsHard && /较难|中等/.test(q.difficulty || "")) score += 2;
+    if (wantsEasy && /简单|较易/.test(q.difficulty || "")) score += 2;
+    return score;
+  }
+}
+
+function resolveAiTargetCount(prompt, baseCount) {
+  const total = prompt.match(/(?:控制在|总共|一共|共)\s*(\d+)/);
+  if (total) return Math.max(1, Number(total[1]));
+  const append = prompt.match(/(?:补|加|增|再来)\s*(\d+)/);
+  if (append) return baseCount + Math.max(1, Number(append[1]));
+  const plain = prompt.match(/(\d+)\s*(?:道|题)/);
+  if (plain) return Math.max(1, Number(plain[1]));
+  return baseCount ? baseCount + 4 : 8;
+}
+
+function buildAiListTitle(prompt, baseCount) {
+  const topic = AI_TOPIC_KEYWORDS.find(word => prompt.includes(word));
+  const now = new Date();
+  const stamp = `${now.getMonth() + 1}.${now.getDate()}`;
+  if (topic) return `七上${topic}专项巩固题单`;
+  if (baseCount) return `精选巩固题单 · ${stamp}`;
+  return `AI 生成题单 · ${stamp}`;
+}
+
+function generateAiQuestionList() {
+  const promptInput = document.querySelector("#aiCreatePrompt");
+  const prompt = (promptInput?.value || "").trim();
+  const useSelected = aiCreateUsesSelected();
+  const selected = useSelected ? getGlobalSelectedQuestions() : [];
+
+  if (!prompt && !selected.length) {
+    showToast("先描述一下想要什么样的题单");
+    promptInput?.focus();
+    return;
+  }
+
+  const baseQuestions = selected.map(item => ({ ...item.question }));
+  const excludeKeys = new Set(selected.map(item => item.selectionKey));
+  const targetCount = resolveAiTargetCount(prompt, baseQuestions.length);
+
+  let questions = baseQuestions;
+  if (targetCount < baseQuestions.length) {
+    questions = baseQuestions.slice(0, targetCount);
+  } else if (targetCount > baseQuestions.length) {
+    const need = targetCount - baseQuestions.length;
+    const supplement = rankAiCandidates(collectAiCandidateQuestions(excludeKeys), prompt)
+      .slice(0, need)
+      .map(q => ({ ...q, badges: ["AI 补充"] }));
+    questions = [...baseQuestions, ...supplement];
+  }
+
+  if (!questions.length) {
+    showToast("没有找到合适的题目，换个描述试试");
+    return;
+  }
+
+  tabCounter += 1;
+  const title = buildAiListTitle(prompt, baseQuestions.length);
+  const now = new Date();
+  const pad = value => String(value).padStart(2, "0");
+  const createdAt = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const aiCount = questions.filter(q => (q.badges || []).includes("AI 补充")).length;
+  const listQuestions = questions.map((q, index) => ({
+    ...q,
+    id: `${q.id}-ai-${tabCounter}-${index}`,
+    num: index + 1
+  }));
+
+  const newTab = {
+    id: `tab-${tabCounter}`,
+    topicId: `list-${Date.now()}`,
+    context: getActiveTab()?.context || contextName,
+    title,
+    shortTitle: title.length > 8 ? `${title.slice(0, 8)}…` : title,
+    meta: {
+      title,
+      shortTitle: title,
+      source: "AI 生成题单",
+      difficulty: "中等",
+      questionCount: listQuestions.length,
+      usage: 0,
+      createdAt,
+      aiPrompt: prompt
+    },
+    selectedQuestionIds: [],
+    removedQuestionIds: [],
+    modifiedQuestions: {},
+    questions: listQuestions,
+    fromTabId: getActiveTab()?.id || null,
+    isQuestionList: true,
+    aiGenerated: true
+  };
+
+  workspace.tabs.push(newTab);
+  workspace.activeTabId = newTab.id;
+  pruneOverflowTabs();
+  saveWorkspace();
+  closeAiCreateModal();
+  if (isMobileLayout()) setMobileDrawer("selected", false);
+  renderAll();
+  showToast(aiCount
+    ? `已生成「${title}」，共 ${listQuestions.length} 题（AI 补充 ${aiCount} 题）`
+    : `已生成「${title}」，共 ${listQuestions.length} 题`);
+}
+
+function bindAiCreateControls() {
+  document.querySelector("#openAiCreate")?.addEventListener("click", openAiCreateModal);
+  document.querySelector("#aiCreateSubmit")?.addEventListener("click", generateAiQuestionList);
+  document.querySelector("#aiCreateUseSelected")?.addEventListener("change", renderAiCreateChips);
+  document.querySelectorAll("[data-ai-create-close]").forEach(node => {
+    node.addEventListener("click", closeAiCreateModal);
+  });
+  document.querySelector("#aiCreatePrompt")?.addEventListener("keydown", event => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) generateAiQuestionList();
+  });
 }
 
 function openQuestionInNewTab(qId) {
@@ -838,13 +1349,64 @@ function focusQuestionInView(qId) {
   });
 }
 
+function expandSelectedPanel() {
+  if (isMobileLayout()) return;
+  rightPanelSectionState.selectedCollapsed = false;
+  applySelectedPanelState();
+}
+
+function addQuestionToSelected(qId) {
+  toggleQuestionSelection(qId, true);
+  expandSelectedPanel();
+  const q = getActiveTab()?.questions.find(item => item.id === qId);
+  showToast(`第 ${q?.num || ""} 题已加入已选题目`);
+}
+
+function batchAddAllQuestionsToSelected() {
+  const tab = getActiveTab();
+  if (!tab) return;
+  const visible = tab.questions.filter(q => !tab.removedQuestionIds.includes(q.id));
+  if (!visible.length) {
+    showToast("当前没有可添加的题目");
+    return;
+  }
+  let added = 0;
+  visible.forEach(q => {
+    if (isQuestionGloballySelected(tab.topicId, q.id)) return;
+    workspace.globalSelectedQuestions.push(buildGlobalSelectedEntry(tab, q));
+    added += 1;
+  });
+  syncTabSelectedQuestionIds(tab);
+  saveWorkspace();
+  renderQuestionCards();
+  expandSelectedPanel();
+  if (!added) showToast("题目已全部在已选题目中");
+  else showToast(`已批量添加 ${added} 题到已选题目`);
+}
+
+function removeQuestionFromSelected(qId) {
+  const tab = getActiveTab();
+  if (!tab) return;
+  removeGlobalSelectedByKey(getQuestionSelectionKey(tab.topicId, qId));
+  const q = tab.questions.find(item => item.id === qId);
+  showToast(`第 ${q?.num || ""} 题已移出已选题目`);
+}
+
 function toggleQuestionSelection(qId, force) {
   const tab = getActiveTab();
   if (!tab) return;
-  const has = tab.selectedQuestionIds.includes(qId);
+  const q = tab.questions.find(item => item.id === qId);
+  if (!q || tab.removedQuestionIds.includes(qId)) return;
+  const key = getQuestionSelectionKey(tab.topicId, qId);
+  const has = isQuestionGloballySelected(tab.topicId, qId);
   const next = typeof force === "boolean" ? force : !has;
-  if (next && !has) tab.selectedQuestionIds.push(qId);
-  if (!next) tab.selectedQuestionIds = tab.selectedQuestionIds.filter(id => id !== qId);
+  if (next && !has) {
+    workspace.globalSelectedQuestions.push(buildGlobalSelectedEntry(tab, q));
+  }
+  if (!next) {
+    workspace.globalSelectedQuestions = getGlobalSelectedQuestions().filter(item => item.selectionKey !== key);
+  }
+  syncTabSelectedQuestionIds(tab);
   saveWorkspace();
   renderQuestionCards();
 }
@@ -855,40 +1417,6 @@ function addToBasket(qId) {
   saveWorkspace();
   const q = getActiveTab()?.questions.find(item => item.id === qId);
   showToast(`第 ${q?.num || ""} 题已加入组卷（${basketCount}）`);
-}
-
-function addSelectedToChat() {
-  const tab = getActiveTab();
-  if (!tab?.selectedQuestionIds.length) return;
-  const nums = tab.selectedQuestionIds
-    .map(id => tab.questions.find(q => q.id === id)?.num)
-    .filter(Boolean);
-  pushAssistantMessage(`<p>已收到你选中的 ${nums.length} 道题（第 ${nums.join("、")} 题）。告诉我你想对它们做什么：删改、降难度、换情境都可以。</p>`);
-}
-
-function buildPaperAnalysisHtml(tab) {
-  const visible = tab.questions.filter(q => !tab.removedQuestionIds.includes(q.id));
-  const typeCount = visible.reduce((acc, q) => {
-    acc[q.type] = (acc[q.type] || 0) + 1;
-    return acc;
-  }, {});
-  const diffCount = visible.reduce((acc, q) => {
-    const level = q.difficulty || "中等";
-    acc[level] = (acc[level] || 0) + 1;
-    return acc;
-  }, {});
-  const knowledge = [...new Set(visible.map(q => q.knowledge))];
-  const typeLines = Object.entries(typeCount).map(([type, count]) => `${type} ${count} 题`);
-  const diffLines = Object.entries(diffCount).map(([level, count]) => `${level} ${count} 题`);
-  return `
-    <p>已完成「${escapeHtml(tab.title)}」的试卷分析。</p>
-    ${diffBlock("试卷分析", [
-      `题型分布：${typeLines.join(" · ")}`,
-      `难度分布：${diffLines.join(" · ")}`,
-      `核心考点：${knowledge.slice(0, 5).join("、")}${knowledge.length > 5 ? " 等" : ""}`,
-      `命题特点：选择偏概念辨析，填空/解答侧重应用与运算`,
-      `建议：可结合 AI 改编或平行组卷生成同考点变式卷`
-    ])}`;
 }
 
 function toggleShowAnswers() {
@@ -939,7 +1467,7 @@ function switchTab(tabId) {
 function syncPageChromeForTab(tab) {
   const favoriteLabel = document.querySelector("#favoritePaperLabel");
   if (!tab || !favoriteLabel) return;
-  favoriteLabel.textContent = tabIsWorkbook(tab) ? "收藏题单" : "收藏试卷";
+  favoriteLabel.textContent = "收藏";
 }
 
 function closeTab(tabId) {
@@ -958,16 +1486,31 @@ function openTab(topicId) {
   );
   if (existing) {
     switchTab(existing.id);
-    pushAssistantMessage(`<p>已切换到「${existing.title}」。</p>`);
+    showToast(`已切换到「${existing.title}」`);
     return existing;
   }
   const tab = createTab(topicId);
   workspace.tabs.push(tab);
   workspace.activeTabId = tab.id;
+  pruneOverflowTabs();
   saveWorkspace();
   renderAll();
-  pushAssistantMessage(`<p>已在新标签页打开「${tab.title}」，对话继续保留。</p>`);
+  showToast(`已打开「${tab.title}」`);
   return tab;
+}
+
+// 标签页无限增长会让标题被挤成一串省略号，超出上限时回收最早打开且未激活的一个
+function pruneOverflowTabs() {
+  while (workspace.tabs.length > MAX_OPEN_TABS) {
+    const index = workspace.tabs.findIndex(tab =>
+      tab.id !== workspace.activeTabId
+      && !tab.isQuestionList
+      && !tab.fromQuestionId
+      && !workspace.tabs.some(child => child.fromTabId === tab.id)
+    );
+    if (index < 0) return;
+    workspace.tabs.splice(index, 1);
+  }
 }
 
 function openPaperPicker() {
@@ -981,176 +1524,13 @@ function openPaperPicker() {
   openTab(nextId);
 }
 
-function pushUserMessage(text) {
-  workspace.messages.push({ role: "user", text });
-  saveWorkspace();
-  renderChat();
-}
-
-function pushAssistantMessage(html) {
-  workspace.messages.push({ role: "assistant", html });
-  saveWorkspace();
-  renderChat();
-}
-
-function showTyping() {
-  const thread = document.querySelector("#aiChatThread");
-  const node = document.createElement("article");
-  node.className = "chat-message assistant typing";
-  node.innerHTML = `
-    <div class="chat-author"><span class="chat-author-avatar"><i class="ri-sparkling-2-fill"></i></span><span>飞象题库AI</span></div>
-    <div class="chat-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
-  thread.appendChild(node);
-  thread.scrollTop = thread.scrollHeight;
-  return node;
-}
-
-function selectedNums(tab) {
-  return tab.selectedQuestionIds
-    .map(id => tab.questions.find(q => q.id === id)?.num)
-    .filter(Boolean);
-}
-
-function runStructuredAction(actionKey) {
-  const tab = getActiveTab();
-  const action = structuredActions[actionKey];
-  if (!action) return;
-  const nums = selectedNums(tab);
-  handleAiCommand(action.build(nums), actionKey);
-}
-
-function applyModification(tab, qId, patch, diffItems) {
-  tab.modifiedQuestions[qId] = { ...tab.questions.find(q => q.id === qId), ...tab.modifiedQuestions[qId], ...patch };
-  saveWorkspace();
-  renderQuestionCards();
-  return diffItems;
-}
-
-function handleAiCommand(text, actionKey = "") {
-  const tab = getActiveTab();
-  const normalized = text.trim();
-  if (!normalized) return;
-
-  pushUserMessage(normalized);
-  const typing = showTyping();
-  const targetMatch = normalized.match(/第?\s*(\d+)\s*题/);
-  const targetIds = tab.selectedQuestionIds.length
-    ? [...tab.selectedQuestionIds]
-    : (targetMatch ? [tab.questions.find(q => String(q.num) === targetMatch[1])?.id].filter(Boolean) : []);
-
-  setTimeout(() => {
-    typing.remove();
-    const nums = targetIds.map(id => tab.questions.find(q => q.id === id)?.num).filter(Boolean);
-    const numLabel = nums.length ? `第 ${nums.join("、")} 题` : "整卷";
-
-    if (/打开|换卷|福田|罗湖|南山/.test(normalized) && /打开|换|查看|福田|罗湖|南山/.test(normalized)) {
-      const topicId = /福田/.test(normalized) ? "t14" : /罗湖/.test(normalized) ? "t25" : /南山/.test(normalized) ? "t2" : "t14";
-      openTab(topicId);
-      return;
-    }
-
-    if (/删/.test(normalized) || actionKey === "delete") {
-      const ids = targetIds.length ? targetIds : [tab.questions.find(q => q.num === 3)?.id].filter(Boolean);
-      ids.forEach(id => { if (!tab.removedQuestionIds.includes(id)) tab.removedQuestionIds.push(id); });
-      pushAssistantMessage(`<p>已删除 ${ids.length ? `第 ${ids.map(id => tab.questions.find(q => q.id === id)?.num).join("、")} 题` : "指定题目"}。</p>${diffBlock("删题完成", ids.map(id => `移除第 ${tab.questions.find(q => q.id === id)?.num} 题（${tab.questions.find(q => q.id === id)?.type}）`))}`);
-      saveWorkspace();
-      renderQuestionCards();
-      return;
-    }
-
-    if (/加题|增加|新增/.test(normalized) || actionKey === "add") {
-      const newNum = tab.questions.length + 1;
-      tab.questions.push({
-        id:`new-${Date.now()}`, num:newNum, section:"一、单项选择题", type:"选择题", difficulty:"中等",
-        knowledge:"有理数运算", stem:"（新增）计算：$(-2)+5-(-3)$ 的结果是（　　）。",
-        options:["A. 0","B. 4","C. 6","D. 10"], answer:"C", analysis:"按法则计算得 6。"
-      });
-      pushAssistantMessage(`<p>已新增 1 道选择题。</p>${diffBlock("加题完成", ["在选择题末尾新增 1 道有理数运算题", "难度：中等 · 知识点：有理数运算"])}`);
-      saveWorkspace();
-      renderQuestionCards();
-      return;
-    }
-
-    if (/改题型|改成填空|改为填空/.test(normalized) || actionKey === "convert") {
-      const id = targetIds[0] || tab.questions[0]?.id;
-      const q = tab.questions.find(item => item.id === id);
-      if (q) {
-        applyModification(tab, id, { type:"填空题", stem: q.stem.replace(/（　　）。?$/, " ______。") }, []);
-        pushAssistantMessage(`<p>已将第 ${q.num} 题改为填空题。</p>${diffBlock("改题型", [`第 ${q.num} 题：选择题 → 填空题`, "选项已移除，保留原题干与考点"])}`);
-      }
-      return;
-    }
-
-    if (/降难度/.test(normalized) || actionKey === "lower-difficulty") {
-      const ids = targetIds.length ? targetIds : tab.questions.map(q => q.id);
-      const diff = ids.map(id => {
-        const q = tab.questions.find(item => item.id === id);
-        applyModification(tab, id, { difficulty:"较易" }, []);
-        return `第 ${q.num} 题：${q.difficulty} → 较易`;
-      });
-      pushAssistantMessage(`<p>已对 ${numLabel} 降低难度，考点保留。</p>${diffBlock("降难度", diff)}`);
-      return;
-    }
-
-    if (/换情境|情境/.test(normalized) || actionKey === "change-context") {
-      const ids = targetIds.length ? targetIds : [tab.questions[0]?.id].filter(Boolean);
-      const diff = ids.map(id => {
-        const q = tab.questions.find(item => item.id === id);
-        applyModification(tab, id, { stem:`【深圳情境】${q.stem.replace(/^.*?，/, "")}` }, []);
-        return `第 ${q.num} 题：题干情境改为深圳本地场景`;
-      });
-      pushAssistantMessage(`<p>已将 ${numLabel} 改为深圳情境，考点不变。</p>${diffBlock("换情境", diff)}`);
-      return;
-    }
-
-    if (/课标/.test(normalized) || actionKey === "align-curriculum") {
-      pushAssistantMessage(`<p>已检查 ${numLabel} 与七年级上有理数课标对齐情况。</p>${diffBlock("对齐课标", ["考查点覆盖：正负数意义、数轴、有理数运算", "建议：第 6 题可补充数形结合表述"])}`);
-      return;
-    }
-
-    if (/区风格|对标|风格/.test(normalized) || actionKey === "match-region") {
-      pushAssistantMessage(`<p>已将 ${numLabel} 调整为南山区期末命题风格。</p>${diffBlock("对标区风格", ["选择题偏重概念辨析与应用", "解答题增加实际背景描述", "整体难度与区统考偏差 < 8%"])}`);
-      return;
-    }
-
-    if (/改编|AI改编/.test(normalized) || actionKey === "ai-adapt") {
-      tab.questions.forEach(q => {
-        if (tab.removedQuestionIds.includes(q.id)) return;
-        const stem = tab.modifiedQuestions[q.id]?.stem || q.stem;
-        tab.modifiedQuestions[q.id] = {
-          ...tab.modifiedQuestions[q.id],
-          stem: `【深圳情境】${stem.replace(/^【深圳情境】/, "")}`
-        };
-      });
-      saveWorkspace();
-      renderQuestionCards();
-      pushAssistantMessage(`<p>已完成整卷 AI 改编，考点保持不变。</p>${diffBlock("AI 改编试卷", ["情境统一为深圳本地场景", "题型与题量不变", "难度整体维持中等"])}`);
-      return;
-    }
-
-    if (/平行组卷|平行卷/.test(normalized) || actionKey === "parallel") {
-      pushAssistantMessage(`<p>正在基于当前试卷生成平行组卷…</p>${diffBlock("平行组卷", ["考点结构：与母卷一致", "题干表述：重新命制", "难度偏差：±5% 以内", "预计生成时间：约 30 秒（Demo）"])}`);
-      showToast("正在生成平行组卷…");
-      return;
-    }
-
-    if (/试卷分析|分析本卷|考点分布/.test(normalized) || actionKey === "paper-analysis") {
-      pushAssistantMessage(buildPaperAnalysisHtml(tab));
-      return;
-    }
-
-    pushAssistantMessage(`<p>收到：「${escapeHtml(normalized)}」</p><p>你可以先选中题目，再用上方按钮，或直接输入指令。</p>`);
-    saveWorkspace();
-  }, 650);
-}
-
 function deleteQuestionById(qId) {
   const tab = getActiveTab();
   if (!tab) return;
   const q = tab.questions.find(item => item.id === qId);
   if (!q || tab.removedQuestionIds.includes(qId)) return;
   tab.removedQuestionIds.push(qId);
-  tab.selectedQuestionIds = tab.selectedQuestionIds.filter(id => id !== qId);
+  removeGlobalSelectedByKey(getQuestionSelectionKey(tab.topicId, qId));
   saveWorkspace();
   renderQuestionCards();
   showToast(`已删除第 ${q.num} 题`);
@@ -1184,10 +1564,38 @@ function insertQuestionAfter(qId) {
   showToast(`已在第 ${ref.num} 题后新增加题`);
 }
 
+function clearSelectedQuestionsState(options = {}) {
+  const { collapsePanel = true } = options;
+  workspace.globalSelectedQuestions = [];
+  selectedPreviewTypeFilter = null;
+  workspace.tabs.forEach(tab => {
+    tab.selectedQuestionIds = [];
+  });
+  if (collapsePanel) {
+    rightPanelSectionState.selectedCollapsed = true;
+    applySelectedPanelState();
+  }
+}
+
+function clearAllSelectedQuestions() {
+  clearSelectedQuestionsState();
+  saveWorkspace();
+  renderQuestionCards();
+  showToast("已清空全部已选题目");
+}
+
+function toggleQuestionAnalysis(qId) {
+  if (expandedAnalysisIds.has(qId)) expandedAnalysisIds.delete(qId);
+  else expandedAnalysisIds.add(qId);
+  renderQuestionCards();
+}
+
 function bindQuestionCardEvents() {
   document.querySelectorAll(".question-item").forEach(card => {
     card.addEventListener("click", event => {
       if (event.target.closest("[data-card-action]")) return;
+      // 允许在题干上划词复制，不误触选中
+      if (window.getSelection()?.toString()) return;
       toggleQuestionSelection(card.dataset.q);
     });
   });
@@ -1198,31 +1606,28 @@ function bindQuestionCardEvents() {
       const qId = button.dataset.q;
       const action = button.dataset.cardAction;
       const q = getActiveTab()?.questions.find(item => item.id === qId);
-      if (action === "chat") {
-        toggleQuestionSelection(qId, true);
-        showToast(`第 ${q?.num} 题已加入对话`);
+
+      if (action === "fix") showToast(`已记录第 ${q?.num} 题的纠错反馈，教研会尽快核对`);
+      if (action === "favorite") {
+        const added = toggleQuestionFavorite(qId);
+        showToast(added ? `已收藏第 ${q?.num} 题` : `已取消收藏第 ${q?.num} 题`);
       }
-      if (action === "add-after") insertQuestionAfter(qId);
-      if (action === "delete") deleteQuestionById(qId);
-      if (action === "fix") showToast(`已记录第 ${q?.num} 题纠错反馈`);
-      if (action === "favorite") showToast(`已收藏第 ${q?.num} 题`);
       if (action === "similar") showToast(`正在查找第 ${q?.num} 题的相似题…`);
-      if (action === "analysis") {
-        toggleQuestionSelection(qId, true);
-        pushAssistantMessage(`<p>第 ${q.num} 题解析：</p><p>${escapeHtml(q.analysis)}</p>`);
-      }
+      if (action === "add-selected") addQuestionToSelected(qId);
+      if (action === "remove-selected") removeQuestionFromSelected(qId);
+      if (action === "analysis") toggleQuestionAnalysis(qId);
     });
   });
 }
 
 function renderAll() {
-  renderChat();
   renderQuestionCards();
   renderTabs();
+  renderPaperList();
   const favBtn = document.querySelector("#favoritePaper");
   if (favBtn && workspace.paperFavorited) {
     favBtn.classList.add("saved");
-    favBtn.innerHTML = favoriteResourceLabel(true, getActiveTab());
+    favBtn.innerHTML = favoriteResourceLabel(true);
   }
   syncPageChromeForTab(getActiveTab());
   const ansBtn = document.querySelector("#toggleShowAnswer");
@@ -1231,109 +1636,17 @@ function renderAll() {
   }
 }
 
-function bindAiPanelControls() {
-  const workspace = document.querySelector("#aiWorkspace");
-  const panel = document.querySelector("#aiChatPanel");
-  const collapseBtn = document.querySelector("#collapseAiPanel");
-  const minimizeBtn = document.querySelector("#minimizeAiPanel");
-  const restoreBtn = document.querySelector("#restoreAiPanel");
-  const expandBtn = document.querySelector("#aiPanelExpand");
-  const topbarExpandBtn = document.querySelector("#topbarExpandAi");
-  const floatingBar = document.querySelector("#aiFloatingBar");
-
-  const setMinimizeIcon = minimized => {
-    if (!minimizeBtn) return;
-    minimizeBtn.title = minimized ? "还原" : "缩小到左下角";
-    minimizeBtn.setAttribute("aria-label", minimized ? "还原" : "缩小到左下角");
-    const icon = minimizeBtn.querySelector("i");
-    if (icon) icon.className = minimized ? "ri-layout-top-2-line" : "ri-picture-in-picture-line";
-  };
-
-  const setCollapsed = collapsed => {
-    workspace?.classList.toggle("ai-panel-collapsed", collapsed);
-    if (topbarExpandBtn) topbarExpandBtn.hidden = !collapsed;
-  };
-
-  const setMinimized = minimized => {
-    document.body.classList.toggle("ai-composer-minimized", minimized);
-    floatingBar?.toggleAttribute("hidden", !minimized);
-    setMinimizeIcon(minimized);
-    if (minimized) {
-      setCollapsed(false);
-      if (topbarExpandBtn) topbarExpandBtn.hidden = true;
-    }
-  };
-
-  const expandPanel = () => {
-    setCollapsed(false);
-    setMinimized(false);
-  };
-
-  workspace?.classList.remove("ai-panel-collapsed");
-  setMinimized(false);
-  if (topbarExpandBtn) topbarExpandBtn.hidden = true;
-
-  collapseBtn?.addEventListener("click", () => {
-    setMinimized(false);
-    setCollapsed(true);
-  });
-
-  expandBtn?.addEventListener("click", expandPanel);
-  topbarExpandBtn?.addEventListener("click", expandPanel);
-  restoreBtn?.addEventListener("click", expandPanel);
-
-  panel?.addEventListener("click", event => {
-    if (!workspace?.classList.contains("ai-panel-collapsed")) return;
-    if (event.target.closest(".ai-panel-expand") || event.target === panel) expandPanel();
-  });
-
-  minimizeBtn?.addEventListener("click", () => {
-    if (document.body.classList.contains("ai-composer-minimized")) {
-      expandPanel();
-      return;
-    }
-    setMinimized(true);
-  });
-}
-
 function bindEvents() {
-  const input = document.querySelector("#aiComposerInput");
-  const send = () => {
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-    handleAiCommand(text);
-  };
+  document.querySelector("#createQuestionList")?.addEventListener("click", openSelectedAsQuestionList);
 
-  document.querySelector("#aiSendButton")?.addEventListener("click", send);
-  input?.addEventListener("keydown", event => {
-    if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); }
+  document.querySelector("#clearSelectedQuestions")?.addEventListener("click", event => {
+    event.stopPropagation();
+    clearAllSelectedQuestions();
   });
 
-  document.querySelectorAll("[data-ai-action]").forEach(button => {
-    button.addEventListener("click", () => runStructuredAction(button.dataset.aiAction));
-  });
-
-  document.querySelector("#clearSelectedQuestions")?.addEventListener("click", () => {
-    const tab = getActiveTab();
-    if (!tab) return;
-    tab.selectedQuestionIds = [];
-    saveWorkspace();
-    renderQuestionCards();
-  });
+  document.querySelector("#batchAddAllQuestions")?.addEventListener("click", batchAddAllQuestionsToSelected);
 
   document.querySelector("#toggleShowAnswer")?.addEventListener("click", toggleShowAnswers);
-
-  document.querySelector("#toggleAiQuickMore")?.addEventListener("click", event => {
-    const panel = document.querySelector("#aiQuickPanel");
-    const extra = document.querySelector("#aiQuickExtra");
-    const btn = event.currentTarget;
-    const expanded = !panel?.classList.contains("expanded");
-    panel?.classList.toggle("expanded", expanded);
-    if (extra) extra.hidden = !expanded;
-    btn.setAttribute("aria-expanded", String(expanded));
-    btn.querySelector("span").textContent = expanded ? "收起" : "更多";
-  });
 
   document.querySelector("#favoritePaper")?.addEventListener("click", event => {
     workspace.paperFavorited = !workspace.paperFavorited;
@@ -1341,9 +1654,9 @@ function bindEvents() {
     const btn = event.currentTarget;
     btn.classList.toggle("saved", workspace.paperFavorited);
     btn.innerHTML = workspace.paperFavorited
-      ? favoriteResourceLabel(true, getActiveTab())
-      : favoriteResourceLabel(false, getActiveTab());
-    showToast(workspace.paperFavorited ? `已收藏${tabIsWorkbook(getActiveTab()) ? "题单" : "试卷"}` : "已取消收藏");
+      ? favoriteResourceLabel(true)
+      : favoriteResourceLabel(false);
+    showToast(workspace.paperFavorited ? "已收藏" : "已取消收藏");
   });
 
   document.querySelectorAll("[data-action]").forEach(button => {
@@ -1366,11 +1679,28 @@ function bindEvents() {
       if (action === "download") showToast("正在生成可打印文件…");
     });
   });
+
+  document.querySelector("#panelMask")?.addEventListener("click", closeMobileDrawers);
+
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    closeAiCreateModal();
+    closeMobileDrawers();
+  });
+
+  const handleLayoutChange = () => applyResponsiveChrome();
+  if (typeof mobileLayoutQuery.addEventListener === "function") {
+    mobileLayoutQuery.addEventListener("change", handleLayoutChange);
+  } else {
+    mobileLayoutQuery.addListener(handleLayoutChange);
+  }
 }
 
 applyPageMode();
 ensureInitialTab();
 renderAll();
 bindEvents();
-bindAiPanelControls();
+bindSelectedPanelControls();
+bindAiCreateControls();
 bindDirectoryEvents();
+bindPaperListControls();

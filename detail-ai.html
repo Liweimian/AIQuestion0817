@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
     <link rel="stylesheet" href="./detail.css" />
-    <link rel="stylesheet" href="./detail-ai.css?v=20260806r" />
+    <link rel="stylesheet" href="./detail-ai.css?v=20260811aicreate" />
     <style id="ai-panel-legacy-toggle-hide">
       #aiPanelExpand.legacy-hidden,
       #openAiPanel,
@@ -25,146 +25,159 @@
         <i class="ri-arrow-right-s-line"></i>
         <strong id="breadcrumbLeaf">试卷详情</strong>
       </nav>
-      <button id="topbarExpandAi" class="topbar-expand-ai" type="button" hidden>
-        <i class="ri-sparkling-2-line"></i><span>展开 AI</span>
+      <button id="topbarExpandPaperList" class="topbar-expand-rail" type="button" hidden>
+        <i class="ri-file-list-3-line"></i><span>展开试卷列表</span>
+      </button>
+      <button id="topbarExpandSelected" class="topbar-expand-selected" type="button" hidden>
+        <i class="ri-checkbox-multiple-line"></i><span>展开已选题目</span>
       </button>
       <button id="mobileDirectory" class="mobile-directory" type="button" hidden><i class="ri-list-unordered"></i>目录</button>
     </header>
 
     <div class="ai-workspace" id="aiWorkspace">
-      <aside class="ai-chat-panel" id="aiChatPanel" aria-label="AI 对话">
-        <button class="ai-panel-expand" id="aiPanelExpand" type="button" aria-label="展开飞象题库AI">
-          <i class="ri-sparkling-2-line"></i>
-          <span>飞象AI</span>
-          <em>点击展开</em>
+      <aside class="paper-list-panel" id="paperListPanel" aria-label="试卷列表">
+        <button class="paper-list-expand" id="paperListExpand" type="button" aria-label="展开试卷列表">
+          <i class="ri-file-list-3-line"></i>
+          <span>展开列表</span>
         </button>
-        <div class="ai-panel-body">
-          <header class="ai-panel-head">
-            <div class="ai-panel-head-main">
-              <strong><i class="ri-sparkling-2-line" aria-hidden="true"></i> 飞象题库AI</strong>
-              <span>对话改卷 · 选题后可直接下指令</span>
+        <div class="paper-list-body">
+          <header class="paper-list-head">
+            <div class="paper-list-head-main">
+              <strong>试卷列表</strong>
+              <a class="paper-list-head-more" id="paperListViewMore" href="./index.html?filter=paper">更多</a>
             </div>
-            <div class="ai-panel-head-actions">
-              <button type="button" class="ai-panel-icon-btn" id="minimizeAiPanel" aria-label="缩小" title="缩小"><i class="ri-picture-in-picture-line"></i></button>
-              <button type="button" class="ai-panel-icon-btn" id="collapseAiPanel" aria-label="收起" title="收起"><i class="ri-sidebar-fold-line"></i></button>
-            </div>
+            <button type="button" class="panel-action-btn panel-action-btn-compact" id="collapsePaperList" aria-label="收起试卷列表" title="收起试卷列表">
+              <i class="ri-arrow-left-double-line"></i><span>收起</span>
+            </button>
           </header>
-          <div id="aiChatThread" class="ai-chat-thread" aria-live="polite">
-            <article class="chat-message assistant">
-              <div class="chat-author">
-                <span class="chat-author-avatar"><i class="ri-sparkling-2-fill"></i></span>
-                <span>飞象题库AI</span>
-              </div>
-              <div class="chat-bubble">
-                <p>你好，我是飞象题库AI。</p>
-                <p>· 悬浮题目可看到操作按钮（纠错 / 收藏 / 解析 / 加入对话）<br>· 点击题目可选中并加入 AI 对话<br>· 下方可使用 AI 改编、平行组卷、试卷分析等功能</p>
-                <span class="chat-action-chip"><i class="ri-cursor-line"></i> 先点几道题试试</span>
-              </div>
-            </article>
-          </div>
-          <div class="ai-chat-composer">
-            <div class="ai-floating-bar" id="aiFloatingBar" hidden>
-              <strong><i class="ri-sparkling-2-line"></i> 飞象题库AI</strong>
-              <button type="button" class="ai-panel-icon-btn" id="restoreAiPanel" aria-label="还原" title="还原"><i class="ri-layout-top-2-line"></i></button>
-            </div>
-            <div id="aiSelectedContext" class="ai-selected-context" hidden title="点击创建题单">
-              <div class="ai-selected-head">
-                <strong>已选题目</strong>
-                <span class="ai-selected-hint">点击创建题单</span>
-                <button type="button" id="clearSelectedQuestions">清空</button>
-              </div>
-              <div id="aiSelectedChips" class="ai-selected-chips"></div>
-            </div>
-            <div class="ai-quick-panel" id="aiQuickPanel">
-              <div class="ai-quick-line">
-                <div class="ai-quick-actions ai-quick-actions-main">
-                  <button type="button" class="ai-feature-btn" data-ai-action="ai-adapt"><i class="ri-sparkling-2-line"></i> AI 改编试卷</button>
-                  <button type="button" class="ai-feature-btn" data-ai-action="parallel"><i class="ri-file-copy-2-line"></i> 平行组卷</button>
-                  <button type="button" class="ai-feature-btn" data-ai-action="paper-analysis"><i class="ri-pie-chart-2-line"></i> 试卷分析</button>
-                </div>
-                <button type="button" class="ai-quick-more-btn" id="toggleAiQuickMore" aria-expanded="false">
-                  <span>更多</span><i class="ri-arrow-down-s-line" aria-hidden="true"></i>
-                </button>
-              </div>
-              <div class="ai-quick-extra" id="aiQuickExtra" hidden>
-                <div class="ai-quick-group">
-                  <div class="ai-quick-actions">
-                    <button type="button" data-ai-action="delete">删题</button>
-                    <button type="button" data-ai-action="add">加题</button>
-                    <button type="button" data-ai-action="convert">改题型</button>
-                    <button type="button" data-ai-action="switch-paper">换卷</button>
-                  </div>
-                </div>
-                <div class="ai-quick-group">
-                  <div class="ai-quick-actions">
-                    <button type="button" data-ai-action="lower-difficulty">降难度</button>
-                    <button type="button" data-ai-action="change-context">换情境</button>
-                    <button type="button" data-ai-action="align-curriculum">对齐课标</button>
-                    <button type="button" data-ai-action="match-region">对标区风格</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="ai-composer-box">
-              <textarea id="aiComposerInput" rows="3" placeholder="输入指令，或点击右侧题目选题后继续描述…"></textarea>
-              <div class="composer-tools">
-                <button type="button" aria-label="上传附件"><i class="ri-attachment-2"></i></button>
-                <button type="button" aria-label="上传图片"><i class="ri-image-line"></i></button>
-                <button id="aiSendButton" class="composer-send" type="button" aria-label="发送"><i class="ri-arrow-up-line"></i></button>
-              </div>
+          <div class="paper-list-toolbar-wrap">
+            <div class="paper-list-filter-row">
+              <button type="button" class="paper-list-select" id="paperListTypeBtn"><span id="paperListTypeLabel">类型</span><i class="ri-arrow-down-s-line"></i></button>
+              <label class="paper-list-search paper-list-search-inline">
+                <i class="ri-search-line"></i>
+                <input id="paperListSearch" type="search" placeholder="关键词搜索" />
+              </label>
+              <button type="button" class="paper-list-filter-btn" id="paperListFilterBtn" aria-label="更多筛选" title="更多筛选"><i class="ri-filter-3-line"></i></button>
             </div>
           </div>
+          <div id="paperListScroll" class="paper-list-scroll"></div>
         </div>
       </aside>
 
-      <div class="ai-content-shell" id="aiContentShell">
-        <aside id="directoryPanel" class="ai-directory-panel" aria-label="练习册目录" hidden>
-          <button id="directoryToggle" class="directory-toggle" type="button" aria-expanded="false" aria-controls="directoryTree">
-            <span class="directory-toggle-label"><i class="ri-list-unordered"></i><span>目录</span></span>
-            <i class="ri-sidebar-fold-line directory-toggle-fold" aria-hidden="true"></i>
-          </button>
-          <div class="directory-head">
-            <small id="directoryKicker">练习册目录</small>
-            <h2 id="directoryTitle">多维导学案 · 七年级上册</h2>
-            <p id="directorySummary">共 6 章 · 36 课时</p>
-          </div>
-          <nav id="directoryTree" class="directory-tree"></nav>
-          <footer class="directory-footer">
-            <i class="ri-sparkling-2-line"></i>
-            <span>目录由课时自动归类</span>
-          </footer>
-        </aside>
-
-      <section class="doc-workspace" aria-label="试卷预览">
-        <div class="doc-preview-scroll">
-          <div class="paper-detail-layout">
-            <div class="paper-main-column">
-              <section class="paper-meta-bar">
-                <div class="paper-meta-main">
-                  <h2 id="topicTitle">2026 深圳南山区初一上期末数学真题</h2>
-                  <dl class="paper-meta-stats" id="paperMetaStats"></dl>
-                </div>
-                <div class="paper-meta-inline-actions">
-                  <button type="button" id="toggleShowAnswer"><i class="ri-eye-line"></i><span>显示答案</span></button>
-                  <button type="button" id="favoritePaper"><i class="ri-star-line"></i><span id="favoritePaperLabel">收藏试卷</span></button>
-                  <button type="button" data-action="download"><i class="ri-download-2-line"></i><span>下载</span></button>
-                  <button type="button" data-action="edit"><i class="ri-layout-2-line"></i><span>排版</span></button>
-                </div>
-              </section>
-
-              <div id="questionCardBoard" class="question-card-board"></div>
+      <div class="ai-main-column" id="aiMainColumn">
+        <div class="ai-content-shell" id="aiContentShell">
+          <aside id="directoryPanel" class="ai-directory-panel" aria-label="练习册目录" hidden>
+            <button id="directoryToggle" class="directory-toggle" type="button" aria-expanded="false" aria-controls="directoryTree">
+              <span class="directory-toggle-label"><i class="ri-list-unordered"></i><span>目录</span></span>
+              <span class="panel-action-btn panel-action-btn-compact directory-toggle-fold"><i class="ri-arrow-left-double-line"></i><span>收起</span></span>
+            </button>
+            <div class="directory-head">
+              <small id="directoryKicker">练习册目录</small>
+              <h2 id="directoryTitle">多维导学案 · 七年级上册</h2>
+              <p id="directorySummary">共 6 章 · 36 课时</p>
             </div>
-          </div>
-        </div>
+            <nav id="directoryTree" class="directory-tree"></nav>
+            <footer class="directory-footer">
+              <i class="ri-sparkling-2-line"></i>
+              <span>目录由课时自动归类</span>
+            </footer>
+          </aside>
 
-        <nav class="doc-tabs" id="docTabs" aria-label="已打开的试卷"></nav>
-      </section>
+          <section class="doc-workspace" aria-label="试卷预览">
+            <nav class="doc-tabs doc-tabs-top" id="docTabs" aria-label="已打开的试卷"></nav>
+            <div class="doc-preview-scroll">
+              <div class="paper-detail-layout">
+                <div class="paper-main-column">
+                  <section class="paper-meta-bar">
+                    <div class="paper-meta-main">
+                      <h2 id="topicTitle">2026 深圳南山区初一上期末数学真题</h2>
+                      <p class="paper-meta-facts" id="paperMetaFacts"></p>
+                    </div>
+                    <div class="paper-meta-inline-actions">
+                      <button type="button" class="paper-action-ghost" id="toggleShowAnswer"><i class="ri-eye-line"></i><span>显示答案</span></button>
+                      <button type="button" class="paper-action-ghost" id="favoritePaper"><i class="ri-star-line"></i><span id="favoritePaperLabel">收藏</span></button>
+                      <button type="button" class="paper-action-ghost" data-action="download"><i class="ri-download-2-line"></i><span>下载</span></button>
+                      <button type="button" class="paper-action-ghost" data-action="edit"><i class="ri-layout-2-line"></i><span>排版</span></button>
+                      <button type="button" class="paper-action-primary" id="batchAddAllQuestions"><i class="ri-add-box-line"></i><span>全部添加</span></button>
+                    </div>
+                  </section>
+
+                  <div id="questionCardBoard" class="question-card-board"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
+
+      <aside class="ai-selected-panel" id="aiSelectedPanel" aria-label="已选题目">
+        <button class="ai-selected-expand" id="aiSelectedExpand" type="button" aria-label="展开已选题目">
+          <i class="ri-checkbox-multiple-line"></i>
+          <span class="ai-selected-expand-count" id="aiSelectedExpandCount" hidden>0</span>
+          <span>已选题目</span>
+        </button>
+        <div class="ai-selected-body">
+          <header class="ai-section-head" id="selectedSectionHead">
+            <div class="ai-section-head-main">
+              <strong>已选题目</strong>
+              <span class="ai-selected-hint" id="aiSelectedHint">还没有选题</span>
+            </div>
+            <div class="ai-section-head-actions">
+              <button type="button" id="clearSelectedQuestions">清空</button>
+              <button type="button" class="panel-action-btn panel-action-btn-compact" id="collapseSelectedPanel" aria-label="收起已选题目" title="收起已选题目">
+                <i class="ri-arrow-right-double-line"></i><span>收起</span>
+              </button>
+            </div>
+          </header>
+          <div id="aiSelectedContext" class="ai-selected-context">
+            <p class="ai-selected-summary" id="aiSelectedSummary" hidden></p>
+            <div id="aiSelectedPreview" class="ai-selected-preview"></div>
+            <p class="ai-selected-empty" id="aiSelectedEmpty">在中间题目卡片上点「添加」，选中的题目会出现在这里</p>
+          </div>
+          <footer class="ai-selected-footer">
+            <button type="button" class="ai-selected-create" id="createQuestionList" disabled>
+              <i class="ri-file-add-line"></i><span id="createQuestionListLabel">请先添加题目</span>
+            </button>
+            <button type="button" class="ai-selected-ai-entry" id="openAiCreate">
+              <i class="ri-sparkling-2-line"></i><span id="openAiCreateLabel">用 AI 生成题单</span>
+            </button>
+          </footer>
+        </div>
+      </aside>
     </div>
 
     <div id="directoryMask" class="directory-mask" hidden></div>
+    <div id="panelMask" class="panel-mask" hidden></div>
+
+    <div id="aiCreateModal" class="ai-create-modal" hidden>
+      <div class="ai-create-mask" data-ai-create-close></div>
+      <div class="ai-create-panel" role="dialog" aria-modal="true" aria-labelledby="aiCreateTitle">
+        <header class="ai-create-head">
+          <strong id="aiCreateTitle"><i class="ri-sparkling-2-line"></i>AI 创建题单</strong>
+          <button type="button" class="ai-create-close" data-ai-create-close aria-label="关闭"><i class="ri-close-line"></i></button>
+        </header>
+        <div class="ai-create-body">
+          <div class="ai-create-context" id="aiCreateContext" hidden>
+            <label class="ai-create-checkbox">
+              <input type="checkbox" id="aiCreateUseSelected" checked />
+              <span>以已选 <b id="aiCreateSelectedCount">0</b> 题为基础</span>
+            </label>
+            <p class="ai-create-context-summary" id="aiCreateContextSummary"></p>
+          </div>
+          <label class="ai-create-field">
+            <span>想要什么样的题单？</span>
+            <textarea id="aiCreatePrompt" rows="3" placeholder="例如：再补 5 道同类型但难一点的题，总共控制在 12 题"></textarea>
+          </label>
+          <div class="ai-create-chips" id="aiCreateChips"></div>
+        </div>
+        <footer class="ai-create-foot">
+          <button type="button" class="ai-create-cancel" data-ai-create-close>取消</button>
+          <button type="button" class="ai-create-submit" id="aiCreateSubmit"><i class="ri-sparkling-2-line"></i><span>生成题单</span></button>
+        </footer>
+      </div>
+    </div>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./detail-ai.js?v=20260806r"></script>
+    <script src="./detail-ai.js?v=20260811aicreate"></script>
   </body>
 </html>
