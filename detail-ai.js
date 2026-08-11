@@ -102,7 +102,7 @@ const rightPanelSectionState = {
 };
 
 const MAX_OPEN_TABS = 6;
-const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811album";
+const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811special";
 const QUESTION_DRAG_MIME = "application/x-aiq-questions";
 const BROWSE_FILTER_META = {
   chapter: { filter: "chapter", label: "同步练习", icon: "ri-book-open-line" },
@@ -148,8 +148,13 @@ const params = new URLSearchParams(location.search);
 const contextName = params.get("context") || "paper";
 const isWorkbook = contextName === "series";
 const initialTopicId = params.get("topic") || (isWorkbook ? "t9" : "t2");
-const STORAGE_KEY = `feixiang-ai-workspace-v4-${contextName}`;
+// 试卷 / 专项 / 同步等共用同一工作台，避免从首页点不同类型资源时 tab 互相隔离
+const STORAGE_KEY = "feixiang-ai-workspace-v5";
 const LEGACY_STORAGE_KEYS = [
+  "feixiang-ai-workspace-v4-paper",
+  "feixiang-ai-workspace-v4-special",
+  "feixiang-ai-workspace-v4-chapter",
+  "feixiang-ai-workspace-v4-series",
   "feixiang-ai-workspace-v2",
   "feixiang-ai-workspace-v1"
 ];
@@ -224,6 +229,34 @@ function getBaseTopicId(topicId) {
 
 function tabIsWorkbook(tab) {
   return (tab?.context || contextName) === "series";
+}
+
+function tabIsSpecial(tab) {
+  return (tab?.context || contextName) === "special";
+}
+
+function tabContextLabel(tab) {
+  const ctx = tab?.context || contextName;
+  if (ctx === "series") return "练习册";
+  if (ctx === "special") return "专项练习";
+  if (ctx === "chapter") return "同步练习";
+  return "试卷";
+}
+
+function tabDocIcon(tab) {
+  if (tabIsWorkbook(tab)) return "ri-book-open-line";
+  if (tabIsSpecial(tab)) return "ri-focus-3-line";
+  if ((tab?.context || "") === "chapter") return "ri-book-open-line";
+  return "ri-file-list-3-line";
+}
+
+function shortenTabTitle(title, max = 12) {
+  const text = String(title || "").trim();
+  if (!text) return "题单";
+  if (text.length <= max) return text;
+  const cut = text.split(/[：:·—-]/)[0].trim();
+  if (cut && cut.length <= max) return cut;
+  return `${text.slice(0, max)}…`;
 }
 
 function getTabBaseTitle(tab) {
@@ -408,32 +441,38 @@ function resolveTopicMeta(topicId, tabContext = contextName, overrides = {}) {
       ? { ...catalog }
       : {
         title: params.get("title") || "练习册题单",
-        shortTitle: (params.get("title") || "题单").slice(0, 12),
+        shortTitle: shortenTabTitle(params.get("title") || "题单"),
         source: params.get("source") || "系列题单",
         difficulty: params.get("difficulty") || "中等",
         questionCount: Number(params.get("questions") || 0),
         usage: Number(params.get("usage") || 0)
       };
+  } else if (paperCatalog[baseId]) {
+    meta = { ...paperCatalog[baseId] };
   } else {
-    meta = paperCatalog[baseId] || {
-      title: params.get("title") || "未命名试卷",
-      shortTitle: "试卷",
+    const fallbackTitle = params.get("title") || (tabContext === "special" ? "专项题单" : tabContext === "chapter" ? "同步练习" : "未命名试卷");
+    meta = {
+      title: fallbackTitle,
+      shortTitle: shortenTabTitle(params.get("shortTitle") || fallbackTitle),
       focus: params.get("focus") || "",
-      reason: params.get("reason") || "试卷",
+      reason: params.get("reason") || (tabContext === "special" ? "专项练习" : tabContext === "chapter" ? "同步练习" : "试卷"),
       region: "深圳",
       grade: "七年级",
-      examType: "试卷",
-      questionCount: 0,
-      difficulty: "中等",
-      usage: 0
+      examType: tabContext === "special" ? "专项" : tabContext === "chapter" ? "同步" : "试卷",
+      questionCount: Number(params.get("questions") || 0),
+      difficulty: params.get("difficulty") || "中等",
+      usage: Number(params.get("usage") || 0),
+      source: params.get("source") || ""
     };
   }
 
   if (overrides.title) {
     meta.title = overrides.title;
-    meta.shortTitle = overrides.shortTitle || overrides.title;
+    meta.shortTitle = overrides.shortTitle || shortenTabTitle(overrides.title);
   } else if (overrides.shortTitle) {
     meta.shortTitle = overrides.shortTitle;
+  } else if (!meta.shortTitle) {
+    meta.shortTitle = shortenTabTitle(meta.title);
   }
   if (overrides.source) meta.source = overrides.source;
   if (overrides.difficulty) meta.difficulty = overrides.difficulty;
@@ -654,6 +693,15 @@ function buildPaperFacts(tab) {
       meta.usage ? `${meta.usage} 人使用` : ""
     ].filter(Boolean);
   }
+  if (tabIsSpecial(tab)) {
+    return [
+      meta.reason || "专项练习",
+      meta.source,
+      `${visibleCount} 题`,
+      meta.difficulty ? `难度 ${meta.difficulty}` : "",
+      meta.usage ? `${meta.usage} 人使用` : ""
+    ].filter(Boolean);
+  }
   return [
     meta.reason || meta.source,
     meta.region,
@@ -678,7 +726,7 @@ function renderMeta(tab) {
 
   const context = document.querySelector("#breadcrumbContext");
   const leaf = document.querySelector("#breadcrumbLeaf");
-  if (context) context.textContent = tabIsWorkbook(tab) ? "练习册" : "试卷";
+  if (context) context.textContent = tabContextLabel(tab);
   if (leaf) leaf.textContent = displayTitle;
 }
 
@@ -1842,7 +1890,7 @@ function renderTabs() {
     }).join("")}
     ${workspace.tabs.map(tab => `
       <button class="doc-tab ${!homeActive && !browseActive && tab.id === workspace.activeTabId ? "active" : ""}" type="button" data-tab-id="${tab.id}">
-        <i class="${tabIsWorkbook(tab) ? "ri-book-open-line" : "ri-file-list-3-line"} doc-tab-icon" aria-hidden="true"></i>
+        <i class="${tabDocIcon(tab)} doc-tab-icon" aria-hidden="true"></i>
         <span class="doc-tab-label">${escapeHtml(tab.shortTitle)}</span>
         <span class="doc-tab-close" role="button" tabindex="0" data-close-tab="${tab.id}" aria-label="关闭 ${escapeHtml(tab.shortTitle)}"><i class="ri-close-line"></i></span>
       </button>`).join("")}

@@ -361,9 +361,9 @@ function homepageSeriesSection() {
           <button class="module-more" data-open-filter="paper">查看更多试卷 <i class="ri-arrow-right-s-line"></i></button>
           <div class="paper-special-strip">
             <div class="paper-special-grid">
-              <button data-topic="t18"><span class="special-card-tags"><em>跨单元专题</em><em>阶段复习</em></span><b>数与式综合：有理数、整式与一元一次方程</b><p>串联三个核心单元，适合期中前整体查漏补缺。</p><small>3 个单元 · 中等—提高 · 22 题</small></button>
-              <button data-topic="t3"><span class="special-card-tags"><em>深圳情境题</em><em>建模方法</em></span><b>真实情境中的代数式建模</b><p>用深圳生活情境训练列式、解释和迁移能力。</p><small>情境应用 · 中等 · 12 题</small></button>
-              <button data-topic="t32"><span class="special-card-tags"><em>方法专题</em><em>规范表达</em></span><b>几何语言转换与规范表达</b><p>强化读图、符号转换和几何推理书写。</p><small>图形与几何 · 基础—中等 · 12 题</small></button>
+              <button type="button" data-topic="t18" data-context="special" data-lesson-title="数与式综合：有理数、整式与一元一次方程" data-short-title="数与式综合"><span class="special-card-tags"><em>跨单元专题</em><em>阶段复习</em></span><b>数与式综合：有理数、整式与一元一次方程</b><p>串联三个核心单元，适合期中前整体查漏补缺。</p><small>3 个单元 · 中等—提高 · 22 题</small></button>
+              <button type="button" data-topic="t3" data-context="special" data-lesson-title="真实情境中的代数式建模" data-short-title="代数式建模"><span class="special-card-tags"><em>深圳情境题</em><em>建模方法</em></span><b>真实情境中的代数式建模</b><p>用深圳生活情境训练列式、解释和迁移能力。</p><small>情境应用 · 中等 · 12 题</small></button>
+              <button type="button" data-topic="t32" data-context="special" data-lesson-title="几何语言转换与规范表达" data-short-title="几何语言转换"><span class="special-card-tags"><em>方法专题</em><em>规范表达</em></span><b>几何语言转换与规范表达</b><p>强化读图、符号转换和几何推理书写。</p><small>图形与几何 · 基础—中等 · 12 题</small></button>
             </div>
             <button class="special-more-button" data-open-filter="special">更多专题 <i class="ri-arrow-right-s-line"></i></button>
           </div>
@@ -1120,12 +1120,18 @@ function bindContentEvents(root = document) {
     });
   }));
   root.querySelectorAll("[data-topic]").forEach(element => {
-    const open = () => openTopic(element.dataset.topic, {
-      title: element.dataset.lessonTitle,
-      shortTitle: element.dataset.lessonTitle,
-      lessonKey: element.dataset.lessonKey || element.dataset.lessonTitle,
-      context: element.dataset.context
-    });
+    const open = () => {
+      const cardTitle = element.dataset.lessonTitle
+        || element.querySelector("b, h3")?.textContent?.trim()
+        || "";
+      const shortTitle = element.dataset.shortTitle || cardTitle;
+      openTopic(element.dataset.topic, {
+        title: cardTitle || undefined,
+        shortTitle: shortTitle || undefined,
+        lessonKey: element.dataset.lessonKey || cardTitle || undefined,
+        context: element.dataset.context || undefined
+      });
+    };
     element.addEventListener("click", event => { if (event.target.closest("[data-bookmark], [data-series]")) return; open(); });
     if (element.matches("[tabindex]")) element.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } });
   });
@@ -1240,7 +1246,7 @@ function openTopic(id, options = {}) {
     || (topic?.tag === "workbook" ? "series" : topic?.tag === "paper" ? "paper" : topic?.tag === "special" ? "special" : "chapter");
   const title = options.title || topic?.title || "";
   const shortTitle = options.shortTitle || title;
-  const lessonKey = options.lessonKey || (options.title ? options.title : "");
+  const lessonKey = options.lessonKey || (options.title ? options.title : id);
   const qs = new URLSearchParams({
     topic: id,
     context,
