@@ -39,36 +39,29 @@
 
 .ai-workspace {
   display: grid;
-  grid-template-columns: var(--paper-list-width) minmax(0, 1fr) var(--selected-panel-width);
+  grid-template-columns: var(--selected-panel-width) minmax(0, 1fr);
   height: calc(100vh - 56px);
   min-height: 0;
   overflow: hidden;
   transition: grid-template-columns .24s ease;
 }
 
-.ai-workspace.paper-list-collapsed {
-  grid-template-columns: 64px minmax(0, 1fr) var(--selected-panel-width);
-}
-
 .ai-workspace.selected-panel-collapsed {
-  grid-template-columns: var(--paper-list-width) minmax(0, 1fr) 64px;
-}
-
-.ai-workspace.paper-list-collapsed.selected-panel-collapsed {
-  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  grid-template-columns: 64px minmax(0, 1fr);
 }
 
 .ai-workspace.workbook-mode {
-  grid-template-columns: minmax(0, 1fr) var(--selected-panel-width);
-}
-
-.ai-workspace.workbook-mode.paper-list-collapsed,
-.ai-workspace.workbook-mode .paper-list-panel {
-  display: none;
+  grid-template-columns: var(--selected-panel-width) minmax(0, 1fr);
 }
 
 .ai-workspace.workbook-mode.selected-panel-collapsed {
-  grid-template-columns: minmax(0, 1fr) 64px;
+  grid-template-columns: 64px minmax(0, 1fr);
+}
+
+/* 试卷列表已移除，保留选择器以防旧状态类残留 */
+.ai-workspace .paper-list-panel,
+.topbar-expand-rail {
+  display: none !important;
 }
 
 .ai-main-column {
@@ -663,7 +656,7 @@
   display: none !important;
 }
 
-/* ---- Right panel: selected + AI ---- */
+/* ---- Left panel: selected + AI ---- */
 
 .ai-selected-panel {
   position: relative;
@@ -672,7 +665,7 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  border-left: 1px solid var(--ai-border);
+  border-right: 1px solid var(--ai-border);
   background: #fff;
 }
 
@@ -1575,6 +1568,28 @@
   padding: 14px 20px 16px;
 }
 
+/* 首页页签：整页题库首页嵌在正文区，页签与已选题目常驻 */
+.home-view {
+  flex: 1;
+  min-height: 0;
+  background: #fff;
+}
+
+.home-view[hidden] {
+  display: none;
+}
+
+.home-view-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.ai-workspace.home-view .doc-preview-scroll {
+  display: none;
+}
+
 .paper-detail-layout {
   display: block;
   max-width: 980px;
@@ -1699,7 +1714,39 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
-  padding: 0 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: grab;
+  transition: background .12s, box-shadow .12s;
+}
+
+.question-section-head:active {
+  cursor: grabbing;
+}
+
+.question-section-head:hover {
+  background: rgba(45, 106, 79, .05);
+}
+
+.question-section-head-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.question-section-drag {
+  color: #9bb0a5;
+  font-size: 15px;
+}
+
+.question-section-head:hover .question-section-drag {
+  color: var(--green-800);
+}
+
+.question-section-head.is-dragging,
+.question-section.is-section-dragging .paper-sheet {
+  opacity: .55;
 }
 
 .question-section-head h3 {
@@ -1733,7 +1780,81 @@
   border-radius: 0;
   background: transparent;
   transition: border-color .15s, box-shadow .15s, background .15s, padding .15s;
-  cursor: default;
+  cursor: grab;
+}
+
+.question-item:active {
+  cursor: grabbing;
+}
+
+.question-item.drag-picked {
+  background: rgba(45, 106, 79, .06);
+  box-shadow: inset 3px 0 0 var(--green-800);
+}
+
+.question-item.drag-picked:hover,
+.question-item.drag-picked:focus-within {
+  box-shadow: 0 4px 18px rgba(45, 106, 79, .1), inset 3px 0 0 var(--green-800);
+}
+
+.question-item.is-dragging,
+.question-item.is-drag-group {
+  opacity: .55;
+}
+
+.question-drag-ghost {
+  position: fixed;
+  top: -120px;
+  left: -120px;
+  z-index: 9999;
+  display: grid;
+  gap: 2px;
+  min-width: 148px;
+  padding: 10px 14px;
+  color: #fff;
+  border-radius: 10px;
+  background: rgba(31, 87, 67, .92);
+  box-shadow: 0 10px 28px rgba(20, 40, 31, .22);
+  pointer-events: none;
+}
+
+.question-drag-ghost strong {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.question-drag-ghost span {
+  color: rgba(255, 255, 255, .82);
+  font-size: 11px;
+}
+
+.ai-selected-panel.is-drop-target {
+  outline: 2px dashed transparent;
+  outline-offset: -4px;
+  transition: outline-color .12s, background .12s, box-shadow .12s;
+}
+
+.ai-selected-panel.is-drop-target .ai-selected-body,
+.ai-selected-panel.is-drop-target .ai-selected-expand {
+  background: #f3faf6;
+}
+
+.ai-selected-panel.is-drag-over {
+  outline-color: var(--green-800);
+  box-shadow: inset 0 0 0 2px rgba(47, 113, 87, .18);
+}
+
+.ai-selected-panel.is-drag-over .ai-selected-empty {
+  color: var(--green-900);
+  font-weight: 650;
+}
+
+body.is-question-dragging {
+  cursor: grabbing;
+}
+
+body.is-question-dragging .question-item {
+  cursor: grabbing;
 }
 
 .question-item:last-child {
@@ -2109,6 +2230,39 @@
   font-size: 14px;
 }
 
+.doc-tab-home {
+  padding-right: 12px;
+  font-weight: 650;
+}
+
+.doc-tab-home i.doc-tab-icon,
+.doc-tab-browse i.doc-tab-icon {
+  color: var(--green-800);
+}
+
+.doc-tab-browse {
+  font-weight: 650;
+}
+
+.doc-tab-home + .doc-tab {
+  margin-left: 6px;
+}
+
+.doc-tab-home + .doc-tab::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: #dde5e1;
+}
+
+.doc-tab-home.active + .doc-tab::before,
+.doc-tab-home + .doc-tab.active::before {
+  display: none;
+}
+
 .doc-tab-label {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2388,11 +2542,11 @@
 @media (max-width: 980px) {
   /* 窄屏只保留正文，两侧面板改为抽屉 */
   .ai-workspace,
-  .ai-workspace.paper-list-collapsed,
   .ai-workspace.selected-panel-collapsed,
-  .ai-workspace.paper-list-collapsed.selected-panel-collapsed,
   .ai-workspace.workbook-mode,
-  .ai-workspace.workbook-mode.selected-panel-collapsed {
+  .ai-workspace.workbook-mode.selected-panel-collapsed,
+  .ai-workspace.home-view,
+  .ai-workspace.home-view.selected-panel-collapsed {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
   }
@@ -2401,49 +2555,30 @@
     min-height: 0;
   }
 
-  .paper-list-panel,
   .ai-selected-panel {
     position: fixed;
     top: 56px;
     bottom: 0;
+    left: 0;
     z-index: 50;
     width: min(320px, 86vw);
     height: auto;
     background: #fff;
-    transition: transform .22s ease;
-  }
-
-  .paper-list-panel {
-    left: 0;
     border-right: 1px solid var(--ai-border);
     transform: translateX(-100%);
     box-shadow: 16px 0 34px rgba(20, 40, 31, .12);
+    transition: transform .22s ease;
   }
 
-  .ai-selected-panel {
-    right: 0;
-    border-left: 1px solid var(--ai-border);
-    transform: translateX(100%);
-    box-shadow: -16px 0 34px rgba(20, 40, 31, .12);
-  }
-
-  .ai-workspace.mobile-paper-list-open .paper-list-panel,
   .ai-workspace.mobile-selected-open .ai-selected-panel {
     transform: translateX(0);
   }
 
-  .ai-workspace.workbook-mode .paper-list-panel {
-    display: none;
-  }
-
-  .ai-workspace.selected-panel-collapsed .ai-selected-body,
-  .ai-workspace.paper-list-collapsed .paper-list-body {
+  .ai-workspace.selected-panel-collapsed .ai-selected-body {
     display: flex !important;
   }
 
   .ai-selected-expand,
-  .paper-list-expand,
-  .ai-workspace.paper-list-collapsed .paper-list-expand,
   .ai-workspace.selected-panel-collapsed .ai-selected-expand {
     display: none !important;
   }

@@ -102,8 +102,19 @@ const rightPanelSectionState = {
 };
 
 const MAX_OPEN_TABS = 6;
+const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811album";
+const QUESTION_DRAG_MIME = "application/x-aiq-questions";
+const BROWSE_FILTER_META = {
+  chapter: { filter: "chapter", label: "同步练习", icon: "ri-book-open-line" },
+  special: { filter: "special", label: "专项练习", icon: "ri-focus-3-line" },
+  paper: { filter: "paper", label: "试卷", icon: "ri-file-list-3-line" },
+  workbook: { filter: "workbook", label: "专辑", icon: "ri-book-shelf-line" }
+};
 const mobileLayoutQuery = window.matchMedia("(max-width: 980px)");
 const expandedAnalysisIds = new Set();
+const dragPickIds = new Set();
+let questionDragActive = false;
+let questionDragGhost = null;
 
 let selectedPreviewTypeFilter = null;
 
@@ -252,16 +263,21 @@ function loadWorkspace() {
       return {
         tabs: [],
         activeTabId: null,
+        homeActive: false,
+        browseTabs: [],
+        activeBrowseFilter: null,
         basketCount: 0,
         showAnswers: false,
         paperFavorited: false,
         globalSelectedQuestions: [],
         favoriteQuestions: [],
-        ...parsed
+        ...parsed,
+        browseTabs: Array.isArray(parsed.browseTabs) ? parsed.browseTabs : [],
+        activeBrowseFilter: parsed.activeBrowseFilter || null
       };
     }
   } catch {}
-  return { tabs: [], activeTabId: null, basketCount: 0, showAnswers: false, paperFavorited: false, globalSelectedQuestions: [], favoriteQuestions: [] };
+  return { tabs: [], activeTabId: null, homeActive: false, browseTabs: [], activeBrowseFilter: null, basketCount: 0, showAnswers: false, paperFavorited: false, globalSelectedQuestions: [], favoriteQuestions: [] };
 }
 
 function saveWorkspace() {
@@ -383,32 +399,49 @@ function getQuestions(topicId) {
   return questions.map(q => ({ ...q }));
 }
 
-function resolveTopicMeta(topicId, tabContext = contextName) {
+function resolveTopicMeta(topicId, tabContext = contextName, overrides = {}) {
   const baseId = getBaseTopicId(topicId);
+  let meta;
   if (tabContext === "series") {
     const catalog = workbookCatalog[baseId];
-    if (catalog) return { ...catalog };
-    return {
-      title: params.get("title") || "练习册题单",
-      shortTitle: (params.get("title") || "题单").slice(0, 8),
-      source: params.get("source") || "系列题单",
-      difficulty: params.get("difficulty") || "中等",
-      questionCount: Number(params.get("questions") || 0),
-      usage: Number(params.get("usage") || 0)
+    meta = catalog
+      ? { ...catalog }
+      : {
+        title: params.get("title") || "练习册题单",
+        shortTitle: (params.get("title") || "题单").slice(0, 12),
+        source: params.get("source") || "系列题单",
+        difficulty: params.get("difficulty") || "中等",
+        questionCount: Number(params.get("questions") || 0),
+        usage: Number(params.get("usage") || 0)
+      };
+  } else {
+    meta = paperCatalog[baseId] || {
+      title: params.get("title") || "未命名试卷",
+      shortTitle: "试卷",
+      focus: params.get("focus") || "",
+      reason: params.get("reason") || "试卷",
+      region: "深圳",
+      grade: "七年级",
+      examType: "试卷",
+      questionCount: 0,
+      difficulty: "中等",
+      usage: 0
     };
   }
-  return paperCatalog[baseId] || {
-    title: params.get("title") || "未命名试卷",
-    shortTitle: "试卷",
-    focus: params.get("focus") || "",
-    reason: params.get("reason") || "试卷",
-    region: "深圳",
-    grade: "七年级",
-    examType: "试卷",
-    questionCount: 0,
-    difficulty: "中等",
-    usage: 0
-  };
+
+  if (overrides.title) {
+    meta.title = overrides.title;
+    meta.shortTitle = overrides.shortTitle || overrides.title;
+  } else if (overrides.shortTitle) {
+    meta.shortTitle = overrides.shortTitle;
+  }
+  if (overrides.source) meta.source = overrides.source;
+  if (overrides.difficulty) meta.difficulty = overrides.difficulty;
+  if (overrides.reason) meta.reason = overrides.reason;
+  if (overrides.focus) meta.focus = overrides.focus;
+  if (overrides.questionCount != null) meta.questionCount = Number(overrides.questionCount);
+  if (overrides.usage != null) meta.usage = Number(overrides.usage);
+  return meta;
 }
 
 function favoriteResourceLabel(saved = false) {
@@ -416,16 +449,17 @@ function favoriteResourceLabel(saved = false) {
   return `<i class="ri-star-line"></i><span id="favoritePaperLabel">收藏</span>`;
 }
 
-function createTab(topicId, tabContext = contextName) {
+function createTab(topicId, tabContext = contextName, overrides = {}) {
   tabCounter += 1;
-  const meta = resolveTopicMeta(topicId, tabContext);
+  const meta = resolveTopicMeta(topicId, tabContext, overrides);
   const questions = getQuestions(topicId).map(q => ({ ...q }));
   return {
     id: `tab-${tabCounter}`,
     topicId: getBaseTopicId(topicId),
     context: tabContext,
     title: meta.title,
-    shortTitle: meta.shortTitle || meta.title.slice(0, 10),
+    shortTitle: meta.shortTitle || meta.title.slice(0, 12),
+    lessonKey: overrides.lessonKey || "",
     meta,
     selectedQuestionIds: [],
     removedQuestionIds: [],
@@ -467,19 +501,45 @@ function formatQuestionListShortTitle() {
 
 function ensureInitialTab() {
   const baseId = getBaseTopicId(initialTopicId);
+  const urlTitle = String(params.get("title") || "").trim();
+  const urlLessonKey = String(params.get("lessonKey") || urlTitle || "").trim();
   let mainTab = workspace.tabs.find(tab =>
-    getBaseTopicId(tab.topicId) === baseId && !tab.fromQuestionId && !tab.isQuestionList
+    getBaseTopicId(tab.topicId) === baseId
+    && !tab.fromQuestionId
+    && !tab.isQuestionList
+    && (!urlLessonKey || tab.lessonKey === urlLessonKey || tab.title === urlLessonKey)
   );
 
   if (!mainTab) {
-    mainTab = createTab(initialTopicId);
+    mainTab = createTab(initialTopicId, contextName, {
+      title: urlTitle || undefined,
+      shortTitle: params.get("shortTitle") || urlTitle || undefined,
+      lessonKey: urlLessonKey || undefined,
+      source: params.get("source") || undefined,
+      difficulty: params.get("difficulty") || undefined,
+      reason: params.get("reason") || undefined,
+      focus: params.get("focus") || undefined,
+      questionCount: params.get("questions") || undefined,
+      usage: params.get("usage") || undefined
+    });
     workspace.tabs.push(mainTab);
   } else if (params.get("topic") || !hasSingleChoiceSection(mainTab)) {
     refreshMainTabFromSource(mainTab);
+    if (urlTitle) {
+      mainTab.title = urlTitle;
+      mainTab.shortTitle = params.get("shortTitle") || urlTitle;
+      mainTab.lessonKey = urlLessonKey || mainTab.lessonKey;
+      if (mainTab.meta) {
+        mainTab.meta.title = urlTitle;
+        mainTab.meta.shortTitle = mainTab.shortTitle;
+      }
+    }
   }
 
   if (params.get("topic")) {
     workspace.activeTabId = mainTab.id;
+    workspace.homeActive = false;
+    workspace.activeBrowseFilter = null;
   } else if (params.get("tabId")) {
     const urlTab = workspace.tabs.find(tab => tab.id === params.get("tabId"));
     if (urlTab) workspace.activeTabId = urlTab.id;
@@ -585,6 +645,15 @@ function buildPaperFacts(tab) {
   if (tab.isQuestionList) {
     return ["自定义题单", `${visibleCount} 题`, meta.createdAt ? `创建于 ${meta.createdAt}` : ""].filter(Boolean);
   }
+  if (tabIsWorkbook(tab)) {
+    return [
+      meta.source || "练习册",
+      "章节练习",
+      `${visibleCount} 题`,
+      meta.difficulty ? `难度 ${meta.difficulty}` : "",
+      meta.usage ? `${meta.usage} 人使用` : ""
+    ].filter(Boolean);
+  }
   return [
     meta.reason || meta.source,
     meta.region,
@@ -607,10 +676,10 @@ function renderMeta(tab) {
     facts.innerHTML = buildPaperFacts(tab).map(text => `<span>${escapeHtml(text)}</span>`).join("");
   }
 
-  if (!isWorkbook) {
-    const leaf = document.querySelector("#breadcrumbLeaf");
-    if (leaf) leaf.textContent = displayTitle;
-  }
+  const context = document.querySelector("#breadcrumbContext");
+  const leaf = document.querySelector("#breadcrumbLeaf");
+  if (context) context.textContent = tabIsWorkbook(tab) ? "练习册" : "试卷";
+  if (leaf) leaf.textContent = displayTitle;
 }
 
 function renderWorkbookDirectory() {
@@ -688,34 +757,16 @@ function applyPageMode() {
   const docTabs = document.querySelector("#docTabs");
   const favoriteLabel = document.querySelector("#favoritePaperLabel");
 
-  if (!isWorkbook) {
-    document.body.classList.remove("ai-workbook-page");
-    workspace?.classList.remove("workbook-mode", "directory-open");
-    directoryPanel?.setAttribute("hidden", "");
-    mobileDirectory?.setAttribute("hidden", "");
-    document.querySelector("#directoryMask")?.setAttribute("hidden", "");
-    document.querySelector("#breadcrumbContext").textContent = "试卷";
-    document.querySelector("#breadcrumbLeaf").textContent = "试卷详情";
-    if (favoriteLabel) favoriteLabel.textContent = "收藏";
-    if (docTabs) docTabs.setAttribute("aria-label", "已打开的试卷");
-    return;
-  }
-
-  document.body.classList.add("ai-workbook-page");
-  workspace?.classList.add("workbook-mode");
-  directoryPanel?.removeAttribute("hidden");
-  mobileDirectory?.removeAttribute("hidden");
-
-  document.querySelector("#breadcrumbContext").textContent = workbookDirectory.breadcrumb[0];
-  document.querySelector("#breadcrumbLeaf").textContent = workbookDirectory.breadcrumb[1];
-  document.querySelector("#directoryKicker").textContent = workbookDirectory.kicker;
-  document.querySelector("#directoryTitle").textContent = workbookDirectory.title;
-  document.querySelector("#directorySummary").textContent = workbookDirectory.summary;
+  // 练习册与试卷共用详情布局，不再展示左侧目录
+  document.body.classList.remove("ai-workbook-page");
+  workspace?.classList.remove("workbook-mode", "directory-open");
+  directoryPanel?.setAttribute("hidden", "");
+  mobileDirectory?.setAttribute("hidden", "");
+  document.querySelector("#directoryMask")?.setAttribute("hidden", "");
+  document.querySelector("#breadcrumbContext").textContent = isWorkbook ? "练习册" : "试卷";
+  document.querySelector("#breadcrumbLeaf").textContent = isWorkbook ? "章节练习" : "试卷详情";
   if (favoriteLabel) favoriteLabel.textContent = "收藏";
   if (docTabs) docTabs.setAttribute("aria-label", "已打开的题单");
-
-  renderWorkbookDirectory();
-  setDirectoryOpen(false);
 }
 
 function questionDefaults(q) {
@@ -743,9 +794,10 @@ function questionCardHtml(q, tab) {
     ? `<div class="q-options ${singleColumn ? "q-options-single" : ""}">${optionList.map(opt => `<span>${escapeHtml(opt)}</span>`).join("")}</div>`
     : "";
   const badges = meta.badges.map(label => `<span class="q-badge ${label.includes("创新") ? "hot" : "ai"}">${escapeHtml(label)}</span>`).join("");
+  const picked = dragPickIds.has(q.id);
   return `
-    <article class="question-item ${removed ? "removed" : ""} ${selected ? "selected" : ""} ${modified ? "modified" : ""} ${answerOpen ? "answer-open" : ""}"
-      data-q="${q.id}" tabindex="0" aria-label="第 ${q.num} 题">
+    <article class="question-item ${removed ? "removed" : ""} ${selected ? "selected" : ""} ${picked ? "drag-picked" : ""} ${modified ? "modified" : ""} ${answerOpen ? "answer-open" : ""}"
+      data-q="${q.id}" tabindex="0" aria-label="第 ${q.num} 题" draggable="${removed ? "false" : "true"}" title="拖到左侧已选题目可添加；Shift / ⌘ 多选后可一起拖入">
       <div class="q-card-top">
         <div class="q-badges">${badges}</div>
         <p class="q-trail">初中 / 数学 / ${escapeHtml(type)} / ${escapeHtml(difficulty)} / ${meta.minutes} 分钟</p>
@@ -794,9 +846,16 @@ function renderQuestionCards() {
   board.classList.toggle("show-answers", workspace.showAnswers);
   board.innerHTML = sections.map(section => {
     const items = visible.filter(q => q.section === section);
+    const qIds = items.map(q => q.id).join(",");
     return `
-      <section class="question-section">
-        <header class="question-section-head"><h3>${escapeHtml(section)}</h3><span>${items.length} 题</span></header>
+      <section class="question-section" data-section="${escapeHtml(section)}">
+        <header class="question-section-head" draggable="true" data-section="${escapeHtml(section)}" data-q-ids="${qIds}" title="拖到左侧已选题目，可整组加入本模块全部题目">
+          <div class="question-section-head-main">
+            <i class="ri-draggable question-section-drag" aria-hidden="true"></i>
+            <h3>${escapeHtml(section)}</h3>
+          </div>
+          <span>${items.length} 题</span>
+        </header>
         <div class="paper-sheet">
           <div class="question-list-flow">${items.map(q => questionCardHtml(q, tab)).join("")}</div>
         </div>
@@ -968,30 +1027,23 @@ function isMobileLayout() {
 function setMobileDrawer(name, open) {
   const root = document.querySelector("#aiWorkspace");
   if (!root) return;
-  if (name === "paper") root.classList.toggle("mobile-paper-list-open", open);
   if (name === "selected") root.classList.toggle("mobile-selected-open", open);
-  const anyOpen = root.classList.contains("mobile-paper-list-open")
-    || root.classList.contains("mobile-selected-open");
+  const anyOpen = root.classList.contains("mobile-selected-open");
   const mask = document.querySelector("#panelMask");
   if (mask) mask.hidden = !anyOpen;
 }
 
 function closeMobileDrawers() {
-  setMobileDrawer("paper", false);
   setMobileDrawer("selected", false);
 }
 
 function applyResponsiveChrome() {
-  const root = document.querySelector("#aiWorkspace");
-  const listBtn = document.querySelector("#topbarExpandPaperList");
   const selectedBtn = document.querySelector("#topbarExpandSelected");
   if (isMobileLayout()) {
-    if (listBtn) listBtn.hidden = isWorkbook;
     if (selectedBtn) selectedBtn.hidden = false;
     return;
   }
   closeMobileDrawers();
-  if (listBtn) listBtn.hidden = !root?.classList.contains("paper-list-collapsed");
   if (selectedBtn) selectedBtn.hidden = !rightPanelSectionState.selectedCollapsed;
 }
 
@@ -1355,11 +1407,192 @@ function expandSelectedPanel() {
   applySelectedPanelState();
 }
 
-function addQuestionToSelected(qId) {
-  toggleQuestionSelection(qId, true);
+function clearDragPicks() {
+  if (!dragPickIds.size) return;
+  dragPickIds.clear();
+  document.querySelectorAll(".question-item.drag-picked").forEach(node => node.classList.remove("drag-picked"));
+}
+
+function toggleDragPick(qId) {
+  if (!qId) return;
+  if (dragPickIds.has(qId)) dragPickIds.delete(qId);
+  else dragPickIds.add(qId);
+  document.querySelector(`.question-item[data-q="${qId}"]`)?.classList.toggle("drag-picked", dragPickIds.has(qId));
+}
+
+function getDragPayloadQuestionIds(primaryQId) {
+  if (primaryQId && dragPickIds.has(primaryQId) && dragPickIds.size > 1) {
+    return [...dragPickIds];
+  }
+  return primaryQId ? [primaryQId] : [];
+}
+
+function destroyQuestionDragGhost() {
+  questionDragGhost?.remove();
+  questionDragGhost = null;
+}
+
+function createQuestionDragGhost(qIds, label = "") {
+  destroyQuestionDragGhost();
+  const tab = getActiveTab();
+  const first = tab?.questions.find(item => item.id === qIds[0]);
+  const ghost = document.createElement("div");
+  ghost.className = "question-drag-ghost";
+  if (label && qIds.length > 1) {
+    ghost.innerHTML = `<strong>${escapeHtml(label)}</strong><span>整组拖入 ${qIds.length} 题</span>`;
+  } else if (qIds.length > 1) {
+    ghost.innerHTML = `<strong>拖入 ${qIds.length} 题</strong><span>到左侧已选题目</span>`;
+  } else {
+    ghost.innerHTML = `<strong>第 ${first?.num || ""} 题</strong><span>拖到左侧已选题目</span>`;
+  }
+  document.body.appendChild(ghost);
+  questionDragGhost = ghost;
+  return ghost;
+}
+
+function setQuestionDropTargetActive(active) {
+  document.querySelector("#aiSelectedPanel")?.classList.toggle("is-drop-target", active);
+  document.body.classList.toggle("is-question-dragging", questionDragActive);
+}
+
+function startQuestionDrag(event, qIds, options = {}) {
+  const ids = [...new Set((qIds || []).map(String).filter(Boolean))];
+  if (!ids.length) {
+    event.preventDefault();
+    return false;
+  }
+  questionDragActive = true;
+  const payload = JSON.stringify({ qIds: ids, section: options.section || "" });
+  event.dataTransfer.effectAllowed = "copy";
+  event.dataTransfer.setData(QUESTION_DRAG_MIME, payload);
+  event.dataTransfer.setData("text/plain", payload);
+  const ghost = createQuestionDragGhost(ids, options.label || "");
+  event.dataTransfer.setDragImage(ghost, 24, 18);
+  ids.forEach(id => document.querySelector(`.question-item[data-q="${id}"]`)?.classList.add("is-drag-group"));
+  if (options.sourceEl) options.sourceEl.classList.add("is-dragging");
+  setQuestionDropTargetActive(true);
   expandSelectedPanel();
+  return true;
+}
+
+function endQuestionDrag() {
+  questionDragActive = false;
+  destroyQuestionDragGhost();
+  setQuestionDropTargetActive(false);
+  document.querySelectorAll(".question-item.is-dragging, .question-item.is-drag-group, .question-section-head.is-dragging").forEach(node => {
+    node.classList.remove("is-dragging", "is-drag-group");
+  });
+}
+
+function addQuestionsToSelected(qIds) {
+  const tab = getActiveTab();
+  if (!tab || !Array.isArray(qIds) || !qIds.length) return 0;
+  let added = 0;
+  qIds.forEach(qId => {
+    const q = tab.questions.find(item => item.id === qId);
+    if (!q || tab.removedQuestionIds.includes(qId)) return;
+    if (isQuestionGloballySelected(tab.topicId, qId)) return;
+    workspace.globalSelectedQuestions.push(buildGlobalSelectedEntry(tab, q));
+    added += 1;
+  });
+  if (!added) return 0;
+  syncTabSelectedQuestionIds(tab);
+  saveWorkspace();
+  clearDragPicks();
+  renderQuestionCards();
+  expandSelectedPanel();
+  if (isMobileLayout()) setMobileDrawer("selected", true);
+  return added;
+}
+
+function addQuestionToSelected(qId) {
+  const added = addQuestionsToSelected([qId]);
   const q = getActiveTab()?.questions.find(item => item.id === qId);
+  if (!added) {
+    showToast(`第 ${q?.num || ""} 题已在已选题目中`);
+    expandSelectedPanel();
+    return;
+  }
   showToast(`第 ${q?.num || ""} 题已加入已选题目`);
+}
+
+function bindQuestionDragEvents() {
+  document.querySelectorAll(".question-item[draggable='true']").forEach(card => {
+    card.addEventListener("dragstart", event => {
+      if (event.target.closest("button, a, input, textarea, [data-card-action]")) {
+        event.preventDefault();
+        return;
+      }
+      const qId = card.dataset.q;
+      const qIds = getDragPayloadQuestionIds(qId);
+      startQuestionDrag(event, qIds, { sourceEl: card });
+    });
+    card.addEventListener("dragend", endQuestionDrag);
+  });
+
+  document.querySelectorAll(".question-section-head[draggable='true']").forEach(head => {
+    head.addEventListener("dragstart", event => {
+      const qIds = String(head.dataset.qIds || "").split(",").filter(Boolean);
+      const section = head.dataset.section || "本模块";
+      startQuestionDrag(event, qIds, {
+        sourceEl: head,
+        section,
+        label: section
+      });
+      head.closest(".question-section")?.classList.add("is-section-dragging");
+    });
+    head.addEventListener("dragend", () => {
+      document.querySelectorAll(".question-section.is-section-dragging").forEach(node => {
+        node.classList.remove("is-section-dragging");
+      });
+      endQuestionDrag();
+    });
+  });
+}
+
+function bindSelectedDropZone() {
+  const panel = document.querySelector("#aiSelectedPanel");
+  if (!panel || panel.dataset.dropBound === "1") return;
+  panel.dataset.dropBound = "1";
+
+  const onDragOver = event => {
+    if (!questionDragActive && ![...event.dataTransfer.types].includes(QUESTION_DRAG_MIME) && ![...event.dataTransfer.types].includes("text/plain")) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    panel.classList.add("is-drag-over");
+  };
+
+  const onDragLeave = event => {
+    if (panel.contains(event.relatedTarget)) return;
+    panel.classList.remove("is-drag-over");
+  };
+
+  const onDrop = event => {
+    event.preventDefault();
+    panel.classList.remove("is-drag-over");
+    let qIds = [];
+    let section = "";
+    try {
+      const raw = event.dataTransfer.getData(QUESTION_DRAG_MIME) || event.dataTransfer.getData("text/plain");
+      const parsed = JSON.parse(raw || "{}");
+      qIds = Array.isArray(parsed.qIds) ? parsed.qIds.map(String) : [];
+      section = String(parsed.section || "");
+    } catch {
+      qIds = [];
+    }
+    if (!qIds.length) return;
+    const added = addQuestionsToSelected(qIds);
+    if (!added) showToast("这些题目已在已选题目中");
+    else if (section) showToast(`已拖入「${section}」${added} 题到已选题目`);
+    else showToast(added === 1 ? "已拖入 1 题到已选题目" : `已拖入 ${added} 题到已选题目`);
+  };
+
+  panel.addEventListener("dragenter", onDragOver);
+  panel.addEventListener("dragover", onDragOver);
+  panel.addEventListener("dragleave", onDragLeave);
+  panel.addEventListener("drop", onDrop);
 }
 
 function batchAddAllQuestionsToSelected() {
@@ -1378,6 +1611,7 @@ function batchAddAllQuestionsToSelected() {
   });
   syncTabSelectedQuestionIds(tab);
   saveWorkspace();
+  clearDragPicks();
   renderQuestionCards();
   expandSelectedPanel();
   if (!added) showToast("题目已全部在已选题目中");
@@ -1431,17 +1665,202 @@ function toggleShowAnswers() {
   renderQuestionCards();
 }
 
+function isHomeViewActive() {
+  return Boolean(workspace.homeActive);
+}
+
+function isBrowseViewActive() {
+  return Boolean(workspace.activeBrowseFilter) && !workspace.homeActive;
+}
+
+function isShellFrameActive() {
+  return isHomeViewActive() || isBrowseViewActive();
+}
+
+function getBrowseMeta(filter) {
+  return BROWSE_FILTER_META[filter] || null;
+}
+
+function ensureBrowseTabs() {
+  if (!Array.isArray(workspace.browseTabs)) workspace.browseTabs = [];
+  workspace.browseTabs = workspace.browseTabs.filter(filter => getBrowseMeta(filter));
+  if (workspace.activeBrowseFilter && !getBrowseMeta(workspace.activeBrowseFilter)) {
+    workspace.activeBrowseFilter = null;
+  }
+}
+
+function syncHomeFrameFilter(filter) {
+  const frame = document.querySelector("#homeFrame");
+  if (!frame?.contentWindow || frame.dataset.loaded !== "1") return;
+  frame.contentWindow.postMessage({ type: "aiq-set-filter", filter: filter || "all" }, "*");
+}
+
+// 首页 / 分类浏览共用 iframe；分类 tab 紧挨在「首页」后
+function applyHomeView() {
+  ensureBrowseTabs();
+  const root = document.querySelector("#aiWorkspace");
+  const homeView = document.querySelector("#homeView");
+  const frame = document.querySelector("#homeFrame");
+  const shellActive = isShellFrameActive();
+  const browseFilter = isBrowseViewActive() ? workspace.activeBrowseFilter : null;
+
+  root?.classList.toggle("home-view", shellActive);
+  if (homeView) homeView.hidden = !shellActive;
+  if (shellActive && frame && frame.dataset.loaded !== "1") {
+    const srcFilter = browseFilter || "all";
+    const url = new URL(HOME_FRAME_SRC, location.href);
+    if (srcFilter && srcFilter !== "all") url.searchParams.set("filter", srcFilter);
+    frame.src = `${url.pathname}${url.search}`;
+    frame.dataset.loaded = "1";
+    frame.dataset.filter = srcFilter;
+  } else if (shellActive && frame?.dataset.loaded === "1") {
+    const nextFilter = browseFilter || "all";
+    if (frame.dataset.filter !== nextFilter) {
+      frame.dataset.filter = nextFilter;
+      syncHomeFrameFilter(nextFilter);
+    }
+  }
+  if (shellActive) {
+    const meta = browseFilter ? getBrowseMeta(browseFilter) : null;
+    const context = document.querySelector("#breadcrumbContext");
+    const leaf = document.querySelector("#breadcrumbLeaf");
+    if (context) context.textContent = "题库";
+    if (leaf) leaf.textContent = meta?.label || "首页";
+    document.title = `${meta?.label || "题库首页"} · AI 试卷工作台`;
+  }
+  applyResponsiveChrome();
+}
+
+function setHomeView(active) {
+  const next = Boolean(active);
+  if (next) {
+    workspace.homeActive = true;
+    workspace.activeBrowseFilter = null;
+  } else if (workspace.homeActive) {
+    workspace.homeActive = false;
+  } else {
+    applyHomeView();
+    return;
+  }
+  saveWorkspace();
+  if (!next && !isBrowseViewActive()) syncPageChromeForTab(getActiveTab());
+  renderAll();
+}
+
+function openBrowseTab(filter) {
+  const meta = getBrowseMeta(filter);
+  if (!meta) return;
+  ensureBrowseTabs();
+  if (!workspace.browseTabs.includes(filter)) workspace.browseTabs.push(filter);
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = filter;
+  saveWorkspace();
+  renderAll();
+  showToast(`已打开「${meta.label}」`);
+}
+
+function closeBrowseTab(filter) {
+  ensureBrowseTabs();
+  workspace.browseTabs = workspace.browseTabs.filter(item => item !== filter);
+  if (workspace.activeBrowseFilter === filter) {
+    workspace.activeBrowseFilter = null;
+    workspace.homeActive = true;
+  }
+  saveWorkspace();
+  renderAll();
+}
+
+function setBrowseView(filter) {
+  if (!getBrowseMeta(filter)) return;
+  ensureBrowseTabs();
+  if (!workspace.browseTabs.includes(filter)) workspace.browseTabs.push(filter);
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = filter;
+  saveWorkspace();
+  renderAll();
+}
+
+function bindHomeFrameBridge() {
+  window.addEventListener("message", event => {
+    const frame = document.querySelector("#homeFrame");
+    if (!frame || event.source !== frame.contentWindow) return;
+    const data = event.data;
+    if (!data || typeof data !== "object") return;
+
+    if (data.type === "aiq-open-filter") {
+      openBrowseTab(String(data.filter || ""));
+      return;
+    }
+
+    if (data.type !== "aiq-open-topic") return;
+
+    const topicId = getBaseTopicId(String(data.topicId || ""));
+    if (!topicId) return;
+
+    const query = new URLSearchParams(data.query || "");
+    const title = String(data.title || query.get("title") || "").trim();
+    const shortTitle = String(data.shortTitle || query.get("shortTitle") || title).trim();
+    const tabContext = String(data.context || query.get("context") || "paper");
+    const lessonKey = String(data.lessonKey || query.get("lessonKey") || title || topicId);
+
+    openTab(topicId, {
+      context: tabContext,
+      title: title || undefined,
+      shortTitle: shortTitle || undefined,
+      lessonKey,
+      source: query.get("source") || undefined,
+      difficulty: query.get("difficulty") || undefined,
+      reason: query.get("reason") || undefined,
+      focus: query.get("focus") || undefined,
+      questionCount: query.get("questions") || undefined,
+      usage: query.get("usage") || undefined
+    });
+  });
+}
+
 function renderTabs() {
   const bar = document.querySelector("#docTabs");
   if (!bar) return;
+  ensureBrowseTabs();
+  const homeActive = isHomeViewActive();
+  const browseActive = isBrowseViewActive();
+  const activeBrowse = workspace.activeBrowseFilter;
   bar.innerHTML = `
+    <button class="doc-tab doc-tab-home ${homeActive ? "active" : ""}" type="button" data-home-tab aria-label="题库首页">
+      <i class="ri-home-4-line doc-tab-icon" aria-hidden="true"></i>
+      <span class="doc-tab-label">首页</span>
+    </button>
+    ${workspace.browseTabs.map(filter => {
+      const meta = getBrowseMeta(filter);
+      if (!meta) return "";
+      return `
+      <button class="doc-tab doc-tab-browse ${browseActive && activeBrowse === filter ? "active" : ""}" type="button" data-browse-filter="${filter}">
+        <i class="${meta.icon} doc-tab-icon" aria-hidden="true"></i>
+        <span class="doc-tab-label">${escapeHtml(meta.label)}</span>
+        <span class="doc-tab-close" role="button" tabindex="0" data-close-browse="${filter}" aria-label="关闭 ${escapeHtml(meta.label)}"><i class="ri-close-line"></i></span>
+      </button>`;
+    }).join("")}
     ${workspace.tabs.map(tab => `
-      <button class="doc-tab ${tab.id === workspace.activeTabId ? "active" : ""}" type="button" data-tab-id="${tab.id}">
-        <i class="ri-file-list-3-line doc-tab-icon" aria-hidden="true"></i>
+      <button class="doc-tab ${!homeActive && !browseActive && tab.id === workspace.activeTabId ? "active" : ""}" type="button" data-tab-id="${tab.id}">
+        <i class="${tabIsWorkbook(tab) ? "ri-book-open-line" : "ri-file-list-3-line"} doc-tab-icon" aria-hidden="true"></i>
         <span class="doc-tab-label">${escapeHtml(tab.shortTitle)}</span>
         <span class="doc-tab-close" role="button" tabindex="0" data-close-tab="${tab.id}" aria-label="关闭 ${escapeHtml(tab.shortTitle)}"><i class="ri-close-line"></i></span>
       </button>`).join("")}
     <button class="doc-tab-add" type="button" id="docTabAdd" aria-label="打开新试卷"><i class="ri-add-line"></i></button>`;
+
+  bar.querySelector("[data-home-tab]")?.addEventListener("click", () => setHomeView(true));
+  bar.querySelectorAll("[data-browse-filter]").forEach(button => {
+    button.addEventListener("click", event => {
+      if (event.target.closest("[data-close-browse]")) return;
+      setBrowseView(button.dataset.browseFilter);
+    });
+  });
+  bar.querySelectorAll("[data-close-browse]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      closeBrowseTab(button.dataset.closeBrowse);
+    });
+  });
 
   bar.querySelectorAll("[data-tab-id]").forEach(button => {
     button.addEventListener("click", event => {
@@ -1457,7 +1876,9 @@ function renderTabs() {
 }
 
 function switchTab(tabId) {
-  if (workspace.activeTabId === tabId) return;
+  if (workspace.activeTabId === tabId && !isHomeViewActive() && !isBrowseViewActive()) return;
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = null;
   workspace.activeTabId = tabId;
   saveWorkspace();
   syncPageChromeForTab(getActiveTab());
@@ -1479,23 +1900,31 @@ function closeTab(tabId) {
   renderAll();
 }
 
-function openTab(topicId) {
+function openTab(topicId, options = {}) {
   const baseId = getBaseTopicId(topicId);
+  const tabContext = options.context || contextName;
+  const lessonKey = options.lessonKey || options.title || "";
   const existing = workspace.tabs.find(tab =>
-    getBaseTopicId(tab.topicId) === baseId && !tab.fromQuestionId && !tab.isQuestionList
+    getBaseTopicId(tab.topicId) === baseId
+    && !tab.fromQuestionId
+    && !tab.isQuestionList
+    && (tab.context || contextName) === tabContext
+    && (!lessonKey || tab.lessonKey === lessonKey || tab.title === lessonKey)
   );
   if (existing) {
     switchTab(existing.id);
-    showToast(`已切换到「${existing.title}」`);
+    showToast(`已切换到「${existing.shortTitle || existing.title}」`);
     return existing;
   }
-  const tab = createTab(topicId);
+  const tab = createTab(topicId, tabContext, options);
   workspace.tabs.push(tab);
   workspace.activeTabId = tab.id;
+  workspace.homeActive = false;
+  workspace.activeBrowseFilter = null;
   pruneOverflowTabs();
   saveWorkspace();
   renderAll();
-  showToast(`已打开「${tab.title}」`);
+  showToast(`已打开「${tab.shortTitle || tab.title}」`);
   return tab;
 }
 
@@ -1568,6 +1997,7 @@ function clearSelectedQuestionsState(options = {}) {
   const { collapsePanel = true } = options;
   workspace.globalSelectedQuestions = [];
   selectedPreviewTypeFilter = null;
+  clearDragPicks();
   workspace.tabs.forEach(tab => {
     tab.selectedQuestionIds = [];
   });
@@ -1596,6 +2026,12 @@ function bindQuestionCardEvents() {
       if (event.target.closest("[data-card-action]")) return;
       // 允许在题干上划词复制，不误触选中
       if (window.getSelection()?.toString()) return;
+      // Shift / ⌘ / Ctrl：多选待拖题目，不直接加入已选
+      if (event.shiftKey || event.metaKey || event.ctrlKey) {
+        event.preventDefault();
+        toggleDragPick(card.dataset.q);
+        return;
+      }
       toggleQuestionSelection(card.dataset.q);
     });
   });
@@ -1618,12 +2054,13 @@ function bindQuestionCardEvents() {
       if (action === "analysis") toggleQuestionAnalysis(qId);
     });
   });
+
+  bindQuestionDragEvents();
 }
 
 function renderAll() {
   renderQuestionCards();
   renderTabs();
-  renderPaperList();
   const favBtn = document.querySelector("#favoritePaper");
   if (favBtn && workspace.paperFavorited) {
     favBtn.classList.add("saved");
@@ -1634,6 +2071,7 @@ function renderAll() {
   if (ansBtn && workspace.showAnswers) {
     ansBtn.innerHTML = '<i class="ri-eye-off-line"></i><span>隐藏答案</span>';
   }
+  applyHomeView();
 }
 
 function bindEvents() {
@@ -1683,10 +2121,15 @@ function bindEvents() {
   document.querySelector("#panelMask")?.addEventListener("click", closeMobileDrawers);
 
   document.addEventListener("keydown", event => {
-    if (event.key !== "Escape") return;
-    closeAiCreateModal();
-    closeMobileDrawers();
+    if (event.key === "Escape") {
+      clearDragPicks();
+      closeAiCreateModal();
+      closeMobileDrawers();
+      return;
+    }
   });
+
+  bindSelectedDropZone();
 
   const handleLayoutChange = () => applyResponsiveChrome();
   if (typeof mobileLayoutQuery.addEventListener === "function") {
@@ -1700,7 +2143,7 @@ applyPageMode();
 ensureInitialTab();
 renderAll();
 bindEvents();
+bindHomeFrameBridge();
 bindSelectedPanelControls();
 bindAiCreateControls();
 bindDirectoryEvents();
-bindPaperListControls();

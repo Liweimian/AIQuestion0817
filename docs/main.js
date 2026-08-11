@@ -91,6 +91,42 @@ function matchesResourceOrigin(topic, origin) {
   return option?.match?.(topic) ?? true;
 }
 
+// 首页可以被 AI 试卷工作台的「首页」页签以 iframe 嵌入，此时打开题单交给外层开标签页
+const isEmbedded = (() => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+})();
+
+function requestParentOpenTopic(topicId, context, query, extra = {}) {
+  window.parent.postMessage({
+    type: "aiq-open-topic",
+    topicId,
+    context,
+    query,
+    title: extra.title || "",
+    shortTitle: extra.shortTitle || "",
+    lessonKey: extra.lessonKey || ""
+  }, "*");
+}
+
+function requestParentOpenFilter(filter) {
+  window.parent.postMessage({ type: "aiq-open-filter", filter }, "*");
+}
+
+window.addEventListener("message", event => {
+  const data = event.data;
+  if (!data || typeof data !== "object") return;
+  if (data.type === "aiq-set-filter" && typeof data.filter === "string") {
+    if (document.querySelector(`#filterChips [data-filter="${data.filter}"]`) || data.filter === "all") {
+      setMainFilter(data.filter === "all" ? "all" : data.filter);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+});
+
 const byId = Object.fromEntries(topics.map(topic => [topic.id, topic]));
 const toneMap = { sage:"var(--sage)", cream:"var(--cream)", lilac:"var(--lilac)", mist:"var(--mist)" };
 const aiPlaceholder = "描述你想要的题单，例如：七上有理数易错题，15 题，中等难度";
@@ -266,8 +302,9 @@ function topicCard(topic, options = "default") {
     </article>`;
 }
 
-function bookLessonRow(index, title, meta, usage) {
-  return `<a class="book-topic-row" href="./detail-ai.html?topic=t9&context=series"><i>${String(index).padStart(2, "0")}</i><span><b>${title}</b><small>${meta}</small></span><strong>${usage.toLocaleString()} 人使用</strong></a>`;
+function bookLessonRow(index, title, meta, usage, topicId = "t9") {
+  const safeTitle = String(title).replace(/"/g, "&quot;");
+  return `<button type="button" class="book-topic-row" data-topic="${topicId}" data-context="series" data-lesson-title="${safeTitle}" data-lesson-key="${safeTitle}"><i>${String(index).padStart(2, "0")}</i><span><b>${title}</b><small>${meta}</small></span><strong>${usage.toLocaleString()} 人使用</strong></button>`;
 }
 
 function homepageSeriesSection() {
@@ -295,7 +332,7 @@ function homepageSeriesSection() {
                   ${bookLessonRow(3, "第2课时 棱柱、圆柱、圆锥的展开与折叠", "15 题 · 中等", 695)}
                 </div>
               </div>
-              <button class="book-view-all" type="button" data-open-filter="workbook">更多系列题单 <i class="ri-arrow-right-s-line"></i></button>
+              <button class="book-view-all" type="button" data-open-filter="chapter">更多同步练习 <i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
           <div class="classification-resources">
@@ -1083,14 +1120,28 @@ function bindContentEvents(root = document) {
     });
   }));
   root.querySelectorAll("[data-topic]").forEach(element => {
-    const open = () => openTopic(element.dataset.topic);
+    const open = () => openTopic(element.dataset.topic, {
+      title: element.dataset.lessonTitle,
+      shortTitle: element.dataset.lessonTitle,
+      lessonKey: element.dataset.lessonKey || element.dataset.lessonTitle,
+      context: element.dataset.context
+    });
     element.addEventListener("click", event => { if (event.target.closest("[data-bookmark], [data-series]")) return; open(); });
     if (element.matches("[tabindex]")) element.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } });
   });
   root.querySelectorAll("[data-bookmark]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); button.classList.toggle("saved"); button.innerHTML = button.classList.contains("saved") ? '<i class="ri-bookmark-fill"></i>' : '<i class="ri-bookmark-line"></i>'; showToast(button.classList.contains("saved") ? "已收藏到我的题单" : "已取消收藏"); }));
   root.querySelectorAll("[data-preview-topic]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); openTopic(button.dataset.previewTopic); }));
   root.querySelectorAll("[data-use-topic]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); location.href = `./editor.html?topic=${encodeURIComponent(button.dataset.useTopic)}`; }));
-  root.querySelectorAll("[data-open-filter]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); setMainFilter(button.dataset.openFilter); window.scrollTo({ top: 0, behavior: "smooth" }); }));
+  root.querySelectorAll("[data-open-filter]").forEach(button => button.addEventListener("click", event => {
+    event.stopPropagation();
+    const filter = button.dataset.openFilter;
+    if (isEmbedded) {
+      requestParentOpenFilter(filter);
+      return;
+    }
+    setMainFilter(filter);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }));
   root.querySelectorAll("[data-series]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); openSeries(button.dataset.series); }));
   root.querySelectorAll("[data-author]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); showToast(`正在查看${button.dataset.author}发布的题单`); }));
   root.querySelectorAll("[data-feed-key]").forEach(button => button.addEventListener("click", () => { const { feedKey, feedValue } = button.dataset; feedFilterState[feedKey] = feedValue; document.querySelectorAll(`[data-feed-key="${feedKey}"]`).forEach(item => item.classList.toggle("active", item === button)); applyFeedFilters(); updateFilterSummary(); }));
@@ -1182,21 +1233,31 @@ function openSeries(seriesName) {
   setMainFilter("workbook", { keepAlbumState: true });
 }
 
-function openTopic(id) {
+function openTopic(id, options = {}) {
   const topic = byId[id];
-  if (!topic) return;
-  const context = topic.tag === "workbook" ? "series" : topic.tag === "paper" ? "paper" : topic.tag === "special" ? "special" : "chapter";
+  if (!topic && !options.title) return;
+  const context = options.context
+    || (topic?.tag === "workbook" ? "series" : topic?.tag === "paper" ? "paper" : topic?.tag === "special" ? "special" : "chapter");
+  const title = options.title || topic?.title || "";
+  const shortTitle = options.shortTitle || title;
+  const lessonKey = options.lessonKey || (options.title ? options.title : "");
   const qs = new URLSearchParams({
     topic: id,
     context,
-    title: topic.title,
-    focus: topic.focus,
-    reason: topic.reason,
-    questions: String(topic.questions),
-    difficulty: topic.difficulty,
-    source: topic.source,
-    usage: String(topic.usage)
+    title,
+    focus: options.focus || topic?.focus || "",
+    reason: options.reason || topic?.reason || "",
+    questions: String(options.questions || topic?.questions || ""),
+    difficulty: options.difficulty || topic?.difficulty || "",
+    source: options.source || topic?.source || "",
+    usage: String(options.usage || topic?.usage || "")
   });
+  if (shortTitle) qs.set("shortTitle", shortTitle);
+  if (lessonKey) qs.set("lessonKey", lessonKey);
+  if (isEmbedded) {
+    requestParentOpenTopic(id, context, qs.toString(), { title, shortTitle, lessonKey });
+    return;
+  }
   location.href = `./detail-ai.html?${qs.toString()}`;
 }
 
@@ -1255,6 +1316,18 @@ function renderBankStats() {
 }
 
 renderBankStats();
+
+if (isEmbedded) {
+  document.body.classList.add("is-embedded");
+  document.addEventListener("click", event => {
+    const link = event.target.closest('a[href*="detail-ai.html"]');
+    if (!link) return;
+    event.preventDefault();
+    const url = new URL(link.getAttribute("href"), location.href);
+    requestParentOpenTopic(url.searchParams.get("topic"), url.searchParams.get("context") || "paper", url.searchParams.toString());
+  });
+}
+
 const initFilter = new URLSearchParams(location.search).get("filter");
 if (initFilter && document.querySelector(`#filterChips [data-filter="${initFilter}"]`)) {
   setMainFilter(initFilter);

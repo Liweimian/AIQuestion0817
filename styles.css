@@ -5689,11 +5689,13 @@ body {
   gap: 7px;
   padding: 0;
   color: inherit;
+  font: inherit;
   text-decoration: none;
   text-align: left;
   border: 0;
   border-bottom: 1px solid var(--line-soft);
   background: transparent;
+  cursor: pointer;
 }
 .book-topic-row:hover {
   background: #f7faf8;
@@ -5987,4 +5989,14 @@ body {
     flex: none;
     margin: 0 0 8px 0;
   }
+}
+
+/* 嵌入 AI 工作台「首页」页签时隐藏顶栏导航、AI 入口与统计（外层已有页签与已选题目） */
+body.is-embedded .discovery.site-header,
+body.is-embedded .home-entry-row,
+body.is-embedded .ai-dock-shell {
+  display: none !important;
+}
+body.is-embedded .page {
+  padding-top: 12px;
 }
