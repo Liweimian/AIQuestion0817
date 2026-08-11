@@ -307,11 +307,47 @@ function bookLessonRow(index, title, meta, usage, topicId = "t9") {
   return `<button type="button" class="book-topic-row" data-topic="${topicId}" data-context="series" data-lesson-title="${safeTitle}" data-lesson-key="${safeTitle}"><i>${String(index).padStart(2, "0")}</i><span><b>${title}</b><small>${meta}</small></span><strong>${usage.toLocaleString()} 人使用</strong></button>`;
 }
 
-function homepageSeriesSection() {
+function bookLessonCell(title, topicId = "t9", questionCount = 12) {
+  const safeTitle = String(title).replace(/"/g, "&quot;");
+  return `<button type="button" class="sync-lesson-cell" data-topic="${topicId}" data-lesson-title="${safeTitle}" data-lesson-key="${safeTitle}"><span>${title}</span><strong>${questionCount} 题</strong></button>`;
+}
+
+function bookLessonGrid(lessons) {
+  return `<div class="sync-lesson-grid">${lessons.map((lesson, index) => bookLessonCell(lesson.title, lesson.topic || "t9", lesson.questions || [12, 10, 14, 16, 15, 12, 20, 18][index] || 12)).join("")}</div>`;
+}
+
+const syncBookLessons = {
+  duowei: [
+    { title: "第 1 课时 生活中的立体图形（1）", topic: "t8" },
+    { title: "第 2 课时 生活中的立体图形（2）", topic: "t8" },
+    { title: "第 3 课时 从立体图形到平面图形（1）", topic: "t10" },
+    { title: "第 4 课时 从立体图形到平面图形（2）", topic: "t4" },
+    { title: "第 5 课时 从立体图形到平面图形（3）", topic: "t1" },
+    { title: "第 6 课时 从三个方向看物体的形状", topic: "t24" },
+    { title: "教材经典母题及变式", topic: "t10" },
+    { title: "单元复习", topic: "t13" }
+  ],
+  quanpin: [
+    { title: "认识生活中的立体图形", topic: "t8" },
+    { title: "立体图形的构成", topic: "t8" },
+    { title: "棱柱、圆柱、圆锥", topic: "t10" },
+    { title: "展开与折叠", topic: "t4" },
+    { title: "图形的认识与分类", topic: "t23" },
+    { title: "综合应用", topic: "t13" },
+    { title: "线段与角的度量", topic: "t10" },
+    { title: "几何作图基础", topic: "t24" }
+  ]
+};
+
+function homepagePracticeModule() {
   return `
-    <section class="resource-showcase" aria-label="备课资源推荐">
-      <div class="resource-showcase-grid">
-        <article class="resource-lane sync-lane">
+    <section class="home-mod home-mod-practice" aria-label="同步练习与同步章节真题汇编">
+      <div class="practice-split">
+        <article class="practice-book home-panel">
+          <header class="mod-head mod-head-compact">
+            <span class="mod-kicker"><i class="ri-book-open-line"></i>同步练习</span>
+            <button class="mod-link" type="button" data-open-filter="chapter">全部 <i class="ri-arrow-right-s-line"></i></button>
+          </header>
           <div class="book-resource">
             <div class="book-detail">
               <div class="book-series-tabs" role="tablist" aria-label="同步练习系列">
@@ -319,57 +355,165 @@ function homepageSeriesSection() {
                 <button type="button" role="tab" aria-selected="false" data-book-tab="quanpin">全品学练考</button>
               </div>
               <div class="book-tab-panel active" data-book-panel="duowei" role="tabpanel">
-                <div class="book-topic-list">
-                  ${bookLessonRow(1, "第 1 课时 生活中的立体图形（1）", "12 题 · 基础", 864)}
-                  ${bookLessonRow(2, "生活中的立体图形（2）", "10 题 · 基础", 742)}
-                  ${bookLessonRow(3, "从立体图形到平面图形（1）——正方体的展开与折叠", "14 题 · 中等", 618)}
-                </div>
+                ${bookLessonGrid(syncBookLessons.duowei)}
               </div>
               <div class="book-tab-panel" data-book-panel="quanpin" role="tabpanel" hidden>
-                <div class="book-topic-list">
-                  ${bookLessonRow(1, "第1课时 认识生活中的立体图形", "11 题 · 基础", 936)}
-                  ${bookLessonRow(2, "第2课时 立体图形的构成", "13 题 · 基础", 812)}
-                  ${bookLessonRow(3, "第2课时 棱柱、圆柱、圆锥的展开与折叠", "15 题 · 中等", 695)}
-                </div>
+                ${bookLessonGrid(syncBookLessons.quanpin)}
               </div>
-              <button class="book-view-all" type="button" data-open-filter="chapter">更多同步练习 <i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
-          <div class="classification-resources">
-            <div class="classification-heading"><span class="resource-type-tag">章节真题汇编</span></div>
-            <button class="resource-list-item" data-topic="t4"><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：一般的正方体展开图</b><small>图形初步认识 · 24 题</small></span><i class="ri-arrow-right-s-line"></i></button>
-            <button class="resource-list-item" data-topic="t23"><span><b>2023—2025 深圳各区初一（上）期末数学汇编：立体图形的识别与分类</b><small>高频考点 · 26 题</small></span><i class="ri-arrow-right-s-line"></i></button>
-            <button class="resource-list-item" data-topic="t1"><span><b>2023—2025 深圳各区初一（上）期中数学汇编：点、线、面、体</b><small>易错题分类 · 28 题</small></span><i class="ri-arrow-right-s-line"></i></button>
-            <button class="resource-list-item" data-topic="t10"><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：几何直观空间观念</b><small>核心题型 · 22 题</small></span><i class="ri-arrow-right-s-line"></i></button>
-          </div>
-          <button class="module-more" data-open-filter="workbook">更多章节真题汇编 <i class="ri-arrow-right-s-line"></i></button>
         </article>
-
-        <article class="resource-lane paper-lane">
-          <div class="paper-card-grid">
-            <article class="paper-feature" data-topic="t2" tabindex="0" role="button" aria-label="查看南山区七年级上期末数学试卷">
-              <span class="paper-kicker"><i class="ri-thumb-up-line"></i> 本周推荐 <em class="exam-tag">期末</em></span>
-              <b>2025—2026 学年广东省深圳市南山区七年级（上）期末数学试卷</b>
-              <p class="paper-match-reason"><i class="ri-equalizer-2-line" aria-label="推荐依据"></i><span>教学进度一致，题型结构相似，与本校近三次考试难度偏差小于 8%</span></p>
-              <footer class="paper-metrics"><span><i class="ri-eye-line"></i>8,642 浏览</span><span><i class="ri-download-line"></i>1,206 下载</span></footer>
-            </article>
-            <article class="paper-mini-card peer-card" data-topic="t39" tabindex="0" role="button"><div class="mini-card-top"><span><em>同类校</em><em class="exam-tag">期中</em></span></div><b>2025—2026 学年广东省深圳市龙岗区实验学校七年级（上）期中数学试卷</b><span><small><i class="ri-eye-line"></i>3,286 浏览</small><small><i class="ri-download-line"></i>684 下载</small></span></article>
-            <button class="paper-mini-card regional-card" data-topic="t14"><span class="mini-card-top"><em>区统考</em><em class="exam-tag">期中</em></span><b>2025—2026 学年广东省深圳市福田区七年级（上）期中数学试卷</b><span><small><i class="ri-eye-line"></i>5,462 浏览</small><small><i class="ri-download-line"></i>932 下载</small></span></button>
-            <button class="paper-mini-card group-card" data-topic="t37"><span class="mini-card-top"><em>集团联考</em><em class="exam-tag">期中</em></span><b>2025—2026 学年广东省深圳市龙华区实验教育集团七年级（上）期中数学试卷</b><span><small><i class="ri-eye-line"></i>4,108 浏览</small><small><i class="ri-download-line"></i>756 下载</small></span></button>
-            <button class="paper-mini-card famous-card" data-topic="t36"><span class="mini-card-top"><em>名校试卷</em><em class="exam-tag">期中</em></span><b>2025—2026 学年广东省深圳中学七年级（上）期中数学试卷</b><span><small><i class="ri-eye-line"></i>6,735 浏览</small><small><i class="ri-download-line"></i>1,184 下载</small></span></button>
-          </div>
-          <button class="module-more" data-open-filter="paper">查看更多试卷 <i class="ri-arrow-right-s-line"></i></button>
-          <div class="paper-special-strip">
-            <div class="paper-special-grid">
-              <button type="button" data-topic="t18" data-context="special" data-lesson-title="数与式综合：有理数、整式与一元一次方程" data-short-title="数与式综合"><span class="special-card-tags"><em>跨单元专题</em><em>阶段复习</em></span><b>数与式综合：有理数、整式与一元一次方程</b><p>串联三个核心单元，适合期中前整体查漏补缺。</p><small>3 个单元 · 中等—提高 · 22 题</small></button>
-              <button type="button" data-topic="t3" data-context="special" data-lesson-title="真实情境中的代数式建模" data-short-title="代数式建模"><span class="special-card-tags"><em>深圳情境题</em><em>建模方法</em></span><b>真实情境中的代数式建模</b><p>用深圳生活情境训练列式、解释和迁移能力。</p><small>情境应用 · 中等 · 12 题</small></button>
-              <button type="button" data-topic="t32" data-context="special" data-lesson-title="几何语言转换与规范表达" data-short-title="几何语言转换"><span class="special-card-tags"><em>方法专题</em><em>规范表达</em></span><b>几何语言转换与规范表达</b><p>强化读图、符号转换和几何推理书写。</p><small>图形与几何 · 基础—中等 · 12 题</small></button>
+        <div class="practice-right-col">
+          <aside class="bank-stats-bar" aria-label="题库概览">
+            <span class="bank-stats-item"><strong id="statTopicTotal">—</strong><small>题单总量</small></span>
+            <button class="bank-stats-item is-new" type="button" data-stat-jump aria-label="查看最新入库的题单">
+              <strong id="statWeeklyNew">—</strong><small>7 天新增 <i class="ri-arrow-right-s-line"></i></small>
+            </button>
+            <span class="bank-stats-item"><strong id="statQuestionTotal">—</strong><small>题目总量</small></span>
+          </aside>
+          <article class="practice-compile home-panel">
+            <header class="mod-head mod-head-compact">
+              <span class="mod-kicker"><i class="ri-folder-chart-line"></i>同步章节真题汇编</span>
+              <button class="mod-link" type="button" data-open-filter="workbook">全部 <i class="ri-arrow-right-s-line"></i></button>
+            </header>
+            <div class="compile-list">
+              <button class="compile-row" data-topic="t4"><em>01</em><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：正方体的展开与折叠（深圳版）</b><small>图形初步认识 · 高频考点整理</small></span><strong class="compile-qcount"><b>24</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
+              <button class="compile-row" data-topic="t23"><em>02</em><span><b>2023—2025 深圳各区初一（上）期末数学汇编：立体图形的识别与分类（深圳版）</b><small>各区期末真题 · 分类训练</small></span><strong class="compile-qcount"><b>26</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
+              <button class="compile-row" data-topic="t1"><em>03</em><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：点、线、面、体（深圳版）</b><small>易错题分类 · 重点校真题</small></span><strong class="compile-qcount"><b>28</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
+              <button class="compile-row" data-topic="t10"><em>04</em><span><b>2023—2025 深圳各区初一（上）期中数学汇编：几何直观与空间观念（深圳版）</b><small>核心题型 · 重点校期中汇编</small></span><strong class="compile-qcount"><b>22</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
             </div>
-            <button class="special-more-button" data-open-filter="special">更多专题 <i class="ri-arrow-right-s-line"></i></button>
-          </div>
-        </article>
+          </article>
+        </div>
       </div>
     </section>`;
+}
+
+function paperBadge(tag) {
+  if (tag === "最新") return "";
+  if (tag === "深圳热门" || tag === "用的人多") {
+    return `<span class="paper-mark is-hot" aria-label="${tag}"><i class="ri-fire-fill"></i></span>`;
+  }
+  if (tag === "高采用") {
+    return `<span class="paper-mark is-adopt" aria-label="高采用"><i class="ri-thumb-up-fill"></i><em>采用</em></span>`;
+  }
+  if (tag === "期中" || tag === "期末") {
+    return `<em class="paper-mark is-exam">${tag}</em>`;
+  }
+  return `<em class="paper-mark">${tag}</em>`;
+}
+
+function paperRibbon(tags) {
+  return "";
+}
+
+function homepagePaperModule() {
+  const papers = [
+    { kind: "peer", label: "同类校", title: "龙岗区实验学校七年级（上）期中数学试卷", views: "8,642", downloads: "1,206", usage: "3,286", questions: "22 题", tags: ["期中", "深圳热门", "高采用"], topic: "t39" },
+    { kind: "regional", label: "区统考", title: "福田区七年级（上）期中数学试卷", views: "5,462", downloads: "932", usage: "2,180", questions: "20 题", tags: ["期中", "最新", "深圳热门"], topic: "t14" },
+    { kind: "group", label: "集团联考", title: "龙华区实验教育集团七年级（上）期中数学试卷", views: "4,108", downloads: "756", usage: "1,642", questions: "20 题", tags: ["期中", "高采用", "用的人多"], topic: "t37" },
+    { kind: "famous", label: "名校试卷", title: "深圳中学七年级（上）期中数学试卷", views: "6,735", downloads: "1,184", usage: "2,860", questions: "22 题", tags: ["期中", "深圳热门", "高采用"], topic: "t36" },
+    { kind: "peer", label: "同类校", title: "深圳外国语学校龙岗学校七年级（上）期末数学试卷", views: "3,286", downloads: "684", usage: "1,089", questions: "18 题", tags: ["期末", "高采用"], topic: "t6" },
+    { kind: "regional", label: "区统考", title: "罗湖区七年级（上）期末数学试卷", views: "5,120", downloads: "890", usage: "1,458", questions: "20 题", tags: ["期末", "深圳热门", "最新"], topic: "t25" },
+    { kind: "group", label: "集团联考", title: "龙岗区四中联考七年级（上）期中数学试卷", views: "3,980", downloads: "612", usage: "1,036", questions: "20 题", tags: ["期中", "高采用"], topic: "t33" },
+    { kind: "famous", label: "名校试卷", title: "南山区七年级（上）期末数学试卷", views: "4,860", downloads: "978", usage: "1,206", questions: "22 题", tags: ["期末", "深圳热门", "高采用"], topic: "t2" }
+  ];
+  return `
+    <section class="home-mod home-mod-papers" aria-label="试卷">
+      <header class="mod-head mod-head-compact">
+        <span class="mod-kicker"><i class="ri-file-list-3-line"></i>试卷</span>
+        <button class="mod-link" type="button" data-open-filter="paper">更多试卷 <i class="ri-arrow-right-s-line"></i></button>
+      </header>
+      <div class="paper-board">
+        ${papers.map(item => `
+          <button class="paper-card is-${item.kind}${item.tags.includes("最新") ? " has-ribbon" : ""}" type="button" data-topic="${item.topic}">
+            ${paperRibbon(item.tags)}
+            <div class="paper-card-head">
+              <span class="paper-card-kind">${item.label}</span>
+              <span class="paper-card-category">${item.tags.find(tag => tag === "期中" || tag === "期末") || "阶段测试"}</span>
+              <span class="paper-card-badges" aria-label="资源标识">
+                ${item.tags.includes("最新") ? '<span class="paper-mark is-new" aria-label="最新">NEW</span>' : ''}
+                ${item.tags.some(tag => tag === "深圳热门" || tag === "用的人多") ? '<span class="paper-mark is-hot" aria-label="热门"><i class="ri-fire-fill"></i></span>' : ''}
+                ${item.tags.includes("高采用") ? '<span class="paper-mark is-adopt" aria-label="高采用"><i class="ri-thumb-up-fill"></i></span>' : ''}
+              </span>
+            </div>
+            <p class="paper-card-title">${item.title}</p>
+            <div class="paper-card-foot paper-card-stats">
+              <span><small>题量</small><strong>${item.questions}</strong></span>
+              <span><small><i class="ri-eye-line" aria-label="浏览量"></i></small><strong>${item.views}</strong></span>
+              <span><small><i class="ri-heart-3-line" aria-label="收藏量"></i></small><strong>${item.usage}</strong></span>
+              <span><small><i class="ri-download-2-line" aria-label="下载量"></i></small><strong>${item.downloads}</strong></span>
+            </div>
+          </button>
+        `).join("")}
+      </div>
+    </section>`;
+}
+
+function homepageSpecialModule() {
+  const items = [
+    { id: "t18", tags: ["跨单元", "阶段复习"], title: "数与式综合：有理数、整式与方程", meta: "22 题 · 中等—提高", short: "数与式综合" },
+    { id: "t3", tags: ["深圳情境", "建模"], title: "真实情境中的代数式建模", meta: "12 题 · 中等", short: "代数式建模" },
+    { id: "t32", tags: ["方法", "规范表达"], title: "几何语言转换与规范表达", meta: "12 题 · 基础—中等", short: "几何语言转换" },
+    { id: "t1", tags: ["易错二练", "二次过关"], title: "有理数符号与运算易错二练", meta: "15 题 · 中等", short: "有理数易错" },
+    { id: "t28", tags: ["阅读理解", "情境"], title: "数学阅读理解：情境信息提取", meta: "10 题 · 较难", short: "数学阅读" }
+  ];
+  return `
+    <section class="home-mod home-mod-specials" aria-label="专题">
+      <header class="mod-head mod-head-compact">
+        <span class="mod-kicker"><i class="ri-focus-3-line"></i>专题</span>
+        <button class="mod-link" type="button" data-open-filter="special">更多专题 <i class="ri-arrow-right-s-line"></i></button>
+      </header>
+      <div class="special-rail">
+        ${items.map((item, index) => `
+          <button class="special-chip" type="button" data-topic="${item.id}" data-context="special" data-lesson-title="${item.title}" data-short-title="${item.short}">
+            <span class="special-chip-index">${String(index + 1).padStart(2, "0")}</span>
+            <span class="special-chip-body">
+              <span class="special-chip-tags">${item.tags.map(tag => `<em>${tag}</em>`).join("")}</span>
+              <b>${item.title}</b>
+              <small>${item.meta}</small>
+            </span>
+          </button>
+        `).join("")}
+      </div>
+    </section>`;
+}
+
+function homepageAlbumModule() {
+  const albums = workbookAlbums.map((album, index) => {
+    const count = topics.filter(topic => topic.source === album.source).length;
+    const tones = ["sage", "cream", "lilac", "mist", "sage"];
+    return { ...album, count, tone: tones[index % tones.length] };
+  });
+  return `
+    <section class="home-mod home-mod-albums" aria-label="专辑">
+      <header class="mod-head mod-head-compact">
+        <span class="mod-kicker"><i class="ri-book-shelf-line"></i>专辑</span>
+        <button class="mod-link" type="button" data-open-filter="workbook">进入专辑库 <i class="ri-arrow-right-s-line"></i></button>
+      </header>
+      <div class="album-shelf">
+        ${albums.map(album => `
+          <button class="album-cover tone-${album.tone}" type="button" data-album-jump="${album.source}">
+            <span class="album-cover-spine">${album.name.slice(0, 1)}</span>
+            <span class="album-cover-body">
+              <small>专辑</small>
+              <b>${album.name}</b>
+              <em>${album.subtitle}</em>
+              <strong>${album.count} 份题单</strong>
+            </span>
+          </button>
+        `).join("")}
+      </div>
+    </section>`;
+}
+
+function homepageSeriesSection() {
+  return `
+    <div class="home-first-screen">
+      ${homepagePracticeModule()}
+      ${homepagePaperModule()}
+      ${homepageSpecialModule()}
+    </div>
+    ${homepageAlbumModule()}`;
 }
 
 const feedTopicIds = ["t36","t37","t4","t6","t25","t41","t9","t18","t1","t16","t14","t35","t11","t23","t40","t3","t38","t39","t21","t2","t27","t10","t17","t33","t5","t8","t13","t15","t19","t20","t22","t24","t26","t28","t29","t30","t31","t32","t34","t42","t43","t44","t45","t46","t47","t48","t49","t50","t51"];
@@ -436,7 +580,7 @@ function setSquareFilterCollapsed(collapsed) {
 }
 
 function homepageFeed() {
-  return `${homepageSeriesSection()}${infiniteFeedMarkup()}`;
+  return homepageSeriesSection();
 }
 
 function paperTopics() {
@@ -1054,9 +1198,11 @@ function render() {
   contentFeed.hidden = false;
   bindContentEvents();
   setupFeed(defaultState);
-  setupAiDockObserver(defaultState);
+  setupAiDock(defaultState);
+  renderBankStats();
   filterManuallyExpanded = false;
   setSquareFilterCollapsed(true);
+  document.body.classList.toggle("is-home-view", defaultState);
 }
 
 function setupFeed(isHomepage) {
@@ -1176,6 +1322,24 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-album-origin]").forEach(button => button.addEventListener("click", () => applyAlbumView({ origin: button.dataset.albumOrigin })));
   root.querySelectorAll("[data-album-search]").forEach(input => input.addEventListener("input", () => applyAlbumView({ query: input.value })));
   root.querySelectorAll("[data-album-open]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.albumOpen })));
+  root.querySelectorAll("[data-album-jump]").forEach(button => button.addEventListener("click", () => {
+    if (isEmbedded) {
+      requestParentOpenFilter("workbook");
+      return;
+    }
+    openSeries(button.dataset.albumJump);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }));
+  root.querySelectorAll("[data-stat-jump]").forEach(button => button.addEventListener("click", () => {
+    const albums = document.querySelector(".home-mod-albums");
+    if (albums) {
+      albums.scrollIntoView({ behavior: "smooth", block: "start" });
+      showToast("本周新增资源已更新到专辑与试卷");
+      return;
+    }
+    setMainFilter("paper");
+    showToast("已切换到最新试卷");
+  }));
   root.querySelectorAll(".paper-sidebar-group-toggle").forEach(button => button.addEventListener("click", () => {
     const group = button.closest(".paper-sidebar-group");
     const open = !group.classList.contains("open");
@@ -1268,32 +1432,34 @@ function openTopic(id, options = {}) {
 }
 
 function showAiDock(visible) {
-  const shouldShow = visible && !aiModalOpen;
+  const shouldShow = Boolean(visible) && !aiModalOpen;
   const dock = document.querySelector("#aiDock");
-  dock.hidden = !shouldShow;
-  dock.setAttribute("aria-hidden", String(!shouldShow));
+  const shell = document.querySelector(".ai-dock-shell");
+  if (dock) {
+    dock.hidden = !shouldShow;
+    dock.setAttribute("aria-hidden", String(!shouldShow));
+  }
+  if (shell) shell.hidden = !shouldShow;
   document.body.classList.toggle("has-ai-dock", shouldShow);
 }
 
-function setupAiDockObserver(isHomepage) {
-  if (aiDockObserver) aiDockObserver.disconnect();
-  showAiDock(false);
-  if (!isHomepage) return;
-  const square = document.querySelector("[data-square-section]");
-  if (!square || !("IntersectionObserver" in window)) return;
-  aiDockObserver = new IntersectionObserver(entries => {
-    const inView = entries.some(entry => entry.isIntersecting && entry.boundingClientRect.top < window.innerHeight * .58);
-    showAiDock(hasUserScrolled && inView);
-  }, { threshold: 0, rootMargin: "0px" });
-  aiDockObserver.observe(square);
+function setupAiDock(isHomepage) {
+  if (aiDockObserver) {
+    aiDockObserver.disconnect();
+    aiDockObserver = null;
+  }
+  showAiDock(Boolean(isHomepage));
 }
 
 function syncAiInputs(value, sourceId) {
-  ["#aiStarterInput", "#aiQuickInput"].forEach(selector => { const input = document.querySelector(selector); if (input && input.id !== sourceId && input.value !== value) input.value = value; });
+  ["#aiQuickInput"].forEach(selector => {
+    const input = document.querySelector(selector);
+    if (input && input.id !== sourceId && input.value !== value) input.value = value;
+  });
 }
 
 function openAi(prompt = "") {
-  const value = prompt || document.querySelector("#aiStarterInput").value || document.querySelector("#aiQuickInput").value;
+  const value = prompt || document.querySelector("#aiQuickInput")?.value || "";
   if (value) syncAiInputs(value, "");
   document.querySelector("#aiForm").hidden = false;
   document.querySelector("#aiResult").hidden = true;
@@ -1304,7 +1470,12 @@ function openAi(prompt = "") {
   document.body.style.overflow = "hidden";
 }
 
-function closeAi() { aiModalOpen = false; aiMask.hidden = true; document.body.style.overflow = ""; const square = document.querySelector("[data-square-section]"); if (square && aiDockObserver) showAiDock(square.getBoundingClientRect().top < window.innerHeight && square.getBoundingClientRect().bottom > 0); }
+function closeAi() {
+  aiModalOpen = false;
+  aiMask.hidden = true;
+  document.body.style.overflow = "";
+  setupAiDock(currentFilter === "all" && !currentQuery);
+}
 function showToast(message) { toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 1700); }
 
 function formatStat(value) {
@@ -1341,24 +1512,12 @@ if (initFilter && document.querySelector(`#filterChips [data-filter="${initFilte
   render();
 }
 
-document.querySelector("[data-stat-jump]")?.addEventListener("click", () => {
-  if (!document.querySelector("[data-square-section]")) setMainFilter("all");
-  document.querySelector('[data-feed-key="sort"][data-feed-value="latest"]')?.click();
-  const square = document.querySelector("[data-square-section]");
-  if (square) square.scrollIntoView({ behavior: "smooth", block: "start" });
-  showToast("已按最新入库排序");
-});
-
 window.addEventListener("scroll", () => {
   hasUserScrolled = window.scrollY > 160;
   const square = document.querySelector("[data-square-section]");
   if (!square) return;
-  const rect = square.getBoundingClientRect();
-  if (aiDockObserver) showAiDock(hasUserScrolled && rect.top < window.innerHeight * .45 && rect.bottom > 0);
   if (window.scrollY < 80) {
     filterManuallyExpanded = false;
-    setSquareFilterCollapsed(true);
-  } else if (rect.top <= 120 && !filterManuallyExpanded && square.querySelector("[data-filter-toggle]")?.getAttribute("aria-expanded") !== "true") {
     setSquareFilterCollapsed(true);
   }
 }, { passive: true });
@@ -1369,10 +1528,11 @@ document.querySelector("#resetFilter").addEventListener("click", () => setMainFi
 function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
   const form = document.querySelector(formSelector);
   const input = document.querySelector(inputSelector);
+  if (!form || !input) return;
   form.addEventListener("submit", event => { event.preventDefault(); const value = input.value.trim(); if (!value) { input.focus(); showToast("先描述一下想要什么题单"); return; } syncAiInputs(value, input.id); openAi(value); });
   input.addEventListener("input", () => syncAiInputs(input.value, input.id));
-  document.querySelector(addSelector).addEventListener("click", () => showToast("可以添加试卷、图片或资料作为参考"));
-  document.querySelector(voiceSelector).addEventListener("click", event => { event.currentTarget.classList.toggle("active"); showToast(event.currentTarget.classList.contains("active") ? "正在听，请说出题单要求" : "已停止语音输入"); });
+  document.querySelector(addSelector)?.addEventListener("click", () => showToast("可以添加试卷、图片或资料作为参考"));
+  document.querySelector(voiceSelector)?.addEventListener("click", event => { event.currentTarget.classList.toggle("active"); showToast(event.currentTarget.classList.contains("active") ? "正在听，请说出题单要求" : "已停止语音输入"); });
 }
 
 const aiHintExamples = {
@@ -1409,12 +1569,10 @@ function setupAiHints(inputSelector, hintsSelector) {
   });
 }
 
-bindAiForm("#aiStarter", "#aiStarterInput", "#aiStarterAdd", "#aiStarterVoice");
 bindAiForm("#aiDock", "#aiQuickInput", "#aiAdd", "#aiVoice");
-setupAiHints("#aiStarterInput", "#aiStarterHints");
 setupAiHints("#aiQuickInput", "#aiDockHints");
 document.addEventListener("click", event => {
-  if (event.target.closest(".ai-starter-shell, .ai-dock-shell")) return;
+  if (event.target.closest(".ai-dock-shell")) return;
   document.querySelectorAll(".ai-input-hints").forEach(panel => { panel.hidden = true; });
 });
 document.querySelector("#closeAi").addEventListener("click", closeAi);

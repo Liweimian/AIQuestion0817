@@ -102,7 +102,7 @@ const rightPanelSectionState = {
 };
 
 const MAX_OPEN_TABS = 6;
-const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811special";
+const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811aibar";
 const QUESTION_DRAG_MIME = "application/x-aiq-questions";
 const BROWSE_FILTER_META = {
   chapter: { filter: "chapter", label: "同步练习", icon: "ri-book-open-line" },
@@ -112,11 +112,14 @@ const BROWSE_FILTER_META = {
 };
 const mobileLayoutQuery = window.matchMedia("(max-width: 980px)");
 const expandedAnalysisIds = new Set();
+const selectedExpandedAnalysisKeys = new Set();
 const dragPickIds = new Set();
 let questionDragActive = false;
 let questionDragGhost = null;
 
 let selectedPreviewTypeFilter = null;
+let selectedPanelEnlarged = false;
+let selectedShowAnswers = false;
 
 const paperQuestions = {
   t2: [
@@ -362,10 +365,10 @@ function isQuestionFavorited(topicId, qId) {
   return ensureFavoriteQuestions().includes(getQuestionSelectionKey(topicId, qId));
 }
 
-function toggleQuestionFavorite(qId) {
-  const tab = getActiveTab();
-  if (!tab) return false;
-  const key = getQuestionSelectionKey(tab.topicId, qId);
+function toggleQuestionFavorite(qId, topicId) {
+  const resolvedTopicId = topicId || getActiveTab()?.topicId;
+  if (!resolvedTopicId) return false;
+  const key = getQuestionSelectionKey(resolvedTopicId, qId);
   const list = ensureFavoriteQuestions();
   const index = list.indexOf(key);
   if (index >= 0) list.splice(index, 1);
@@ -922,7 +925,7 @@ function renderSelectedFooter(count) {
   const aiEntry = document.querySelector("#openAiCreate");
   const aiLabel = document.querySelector("#openAiCreateLabel");
   if (button) button.disabled = count === 0;
-  if (label) label.textContent = count ? `用 ${count} 道题创建题单` : "请先添加题目";
+  if (label) label.textContent = count ? `创建题单(${count})` : "创建题单";
   if (hint) hint.textContent = count ? `已选 ${count} 题` : "还没有选题";
   if (railBadge) {
     railBadge.textContent = count > 99 ? "99+" : String(count);
@@ -930,7 +933,152 @@ function renderSelectedFooter(count) {
   }
   // 没有已选题时 AI 是唯一可用的行动，升为主按钮，避免出现点了没反应的死按钮
   if (aiEntry) aiEntry.classList.toggle("is-primary", count === 0);
-  if (aiLabel) aiLabel.textContent = count ? `让 AI 基于这 ${count} 题补充` : "用 AI 生成题单";
+  if (aiLabel) aiLabel.textContent = count ? `AI 补充(${count})` : "AI 生成";
+}
+
+function syncSelectedPanelChrome() {
+  const root = document.querySelector("#aiWorkspace");
+  root?.classList.toggle("selected-panel-enlarged", selectedPanelEnlarged);
+  document.querySelector("#aiSelectedPanel")?.classList.toggle("is-enlarged", selectedPanelEnlarged);
+  const enlargeBtn = document.querySelector("#enlargeSelectedPanel");
+  const answerBtn = document.querySelector("#toggleSelectedAnswers");
+  const preview = document.querySelector("#aiSelectedPreview");
+  if (enlargeBtn) {
+    enlargeBtn.textContent = selectedPanelEnlarged ? "还原" : "放大查看";
+    enlargeBtn.setAttribute("aria-pressed", selectedPanelEnlarged ? "true" : "false");
+    enlargeBtn.title = selectedPanelEnlarged ? "退出全屏，还原侧栏" : "全屏查看已选题目";
+  }
+  if (answerBtn) {
+    answerBtn.hidden = !selectedPanelEnlarged;
+    answerBtn.textContent = selectedShowAnswers ? "隐藏答案" : "显示答案";
+    answerBtn.setAttribute("aria-pressed", selectedShowAnswers ? "true" : "false");
+  }
+  preview?.classList.toggle("show-answers", selectedPanelEnlarged && selectedShowAnswers);
+  preview?.classList.toggle("is-enlarged", selectedPanelEnlarged);
+}
+
+function setSelectedPanelEnlarged(next) {
+  selectedPanelEnlarged = Boolean(next);
+  if (selectedPanelEnlarged) {
+    rightPanelSectionState.selectedCollapsed = false;
+    applySelectedPanelState();
+  } else {
+    selectedShowAnswers = false;
+    selectedExpandedAnalysisKeys.clear();
+  }
+  syncSelectedPanelChrome();
+  renderSelectedContext();
+}
+
+function toggleSelectedPanelEnlarge() {
+  setSelectedPanelEnlarged(!selectedPanelEnlarged);
+}
+
+function toggleSelectedShowAnswers() {
+  if (!selectedPanelEnlarged) return;
+  selectedShowAnswers = !selectedShowAnswers;
+  syncSelectedPanelChrome();
+  renderSelectedContext();
+}
+
+function toggleSelectedQuestionAnalysis(selectionKey) {
+  if (selectedExpandedAnalysisKeys.has(selectionKey)) selectedExpandedAnalysisKeys.delete(selectionKey);
+  else selectedExpandedAnalysisKeys.add(selectionKey);
+  renderSelectedContext();
+}
+
+function selectedPreviewCompactHtml(item) {
+  return `
+    <article class="ai-selected-preview-item" data-selection-key="${item.selectionKey}">
+      <header class="ai-selected-preview-head">
+        <strong>${escapeHtml(item.question.type)}</strong>
+        <button type="button" data-selected-action="remove" data-selection-key="${item.selectionKey}">移出</button>
+      </header>
+      <p class="ai-selected-preview-stem">${escapeHtml(item.question.stem)}</p>
+    </article>`;
+}
+
+function selectedPreviewEnlargedHtml(item, index) {
+  const q = item.question;
+  const meta = questionDefaults(q);
+  const favorited = isQuestionFavorited(item.topicId, q.id);
+  const answerOpen = selectedExpandedAnalysisKeys.has(item.selectionKey);
+  const optionList = q.options || [];
+  const singleColumn = optionList.some(opt => String(opt).length > 20);
+  const options = optionList.length
+    ? `<div class="q-options ${singleColumn ? "q-options-single" : ""}">${optionList.map(opt => `<span>${escapeHtml(opt)}</span>`).join("")}</div>`
+    : "";
+  const badges = meta.badges.map(label => `<span class="q-badge ${label.includes("创新") ? "hot" : "ai"}">${escapeHtml(label)}</span>`).join("");
+  const displayNum = q.num || index + 1;
+  return `
+    <article class="question-item ai-selected-enlarged-item ${answerOpen ? "answer-open" : ""}"
+      data-selection-key="${item.selectionKey}" data-topic-id="${escapeHtml(item.topicId)}" data-q="${escapeHtml(q.id)}" tabindex="0"
+      aria-label="已选第 ${displayNum} 题">
+      <div class="q-card-top">
+        <div class="q-badges">${badges}</div>
+        <p class="q-trail">初中 / 数学 / ${escapeHtml(q.type)} / ${escapeHtml(q.difficulty || "中等")} / ${meta.minutes} 分钟</p>
+      </div>
+      <div class="q-body">
+        <p class="q-stem"><b>${displayNum}.</b> ${escapeHtml(q.stem)}</p>
+        ${options}
+      </div>
+      <div class="q-answer-panel">
+        <div class="q-inline-answer"><em>答案</em>${escapeHtml(q.answer || "暂无")}</div>
+        <div class="q-inline-analysis"><em>解析</em>${escapeHtml(q.analysis || "暂无")}</div>
+      </div>
+      <div class="q-card-bar">
+        <span class="q-knowledge-foot">知识点：${escapeHtml(q.knowledge || "未标注")} / 核心素养：${escapeHtml(meta.competency)}</span>
+        <div class="q-card-actions">
+          <button type="button" class="q-action-ghost ${answerOpen ? "active" : ""}" data-selected-action="analysis" data-selection-key="${item.selectionKey}" aria-pressed="${answerOpen}">
+            <i class="ri-file-text-line"></i><span>${answerOpen ? "收起解析" : "解析"}</span>
+          </button>
+          <button type="button" class="q-action-ghost ${favorited ? "saved" : ""}" data-selected-action="favorite" data-selection-key="${item.selectionKey}" data-topic-id="${escapeHtml(item.topicId)}" data-q="${escapeHtml(q.id)}">
+            <i class="${favorited ? "ri-star-fill" : "ri-star-line"}"></i><span>${favorited ? "已收藏" : "收藏"}</span>
+          </button>
+          <button type="button" class="q-action-ghost" data-selected-action="similar" data-q="${escapeHtml(q.id)}">
+            <i class="ri-stack-line"></i><span>相似题</span>
+          </button>
+          <button type="button" class="q-action-ghost" data-selected-action="fix" data-q="${escapeHtml(q.id)}">
+            <i class="ri-error-warning-line"></i><span>纠错</span>
+          </button>
+          <button type="button" class="q-remove-btn" data-selected-action="remove" data-selection-key="${item.selectionKey}" title="移出已选题目">
+            <i class="ri-close-line"></i><span>移出</span>
+          </button>
+        </div>
+      </div>
+    </article>`;
+}
+
+function bindSelectedPreviewEvents() {
+  const preview = document.querySelector("#aiSelectedPreview");
+  if (!preview) return;
+  preview.querySelectorAll("[data-selected-action]").forEach(button => {
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      const action = button.dataset.selectedAction;
+      const selectionKey = button.dataset.selectionKey;
+      const topicId = button.dataset.topicId;
+      const qId = button.dataset.q;
+      const item = getGlobalSelectedQuestions().find(entry => entry.selectionKey === selectionKey);
+      const q = item?.question;
+
+      if (action === "remove" && selectionKey) {
+        removeGlobalSelectedByKey(selectionKey);
+        return;
+      }
+      if (action === "analysis" && selectionKey) {
+        toggleSelectedQuestionAnalysis(selectionKey);
+        return;
+      }
+      if (action === "favorite" && topicId && qId) {
+        const added = toggleQuestionFavorite(qId, topicId);
+        showToast(added ? `已收藏第 ${q?.num || ""} 题` : `已取消收藏第 ${q?.num || ""} 题`);
+        return;
+      }
+      if (action === "similar") showToast(`正在查找第 ${q?.num || ""} 题的相似题…`);
+      if (action === "fix") showToast(`已记录第 ${q?.num || ""} 题的纠错反馈，教研会尽快核对`);
+    });
+  });
 }
 
 function renderSelectedContext() {
@@ -946,6 +1094,7 @@ function renderSelectedContext() {
   wrap.classList.toggle("has-selection", selected.length > 0);
   document.querySelector("#aiSelectedPanel")?.classList.toggle("has-selection", selected.length > 0);
   renderSelectedFooter(selected.length);
+  syncSelectedPanelChrome();
   if (summary) {
     summary.innerHTML = renderSelectedTypeSummaryHtml(selected);
     summary.hidden = !selected.length;
@@ -959,22 +1108,10 @@ function renderSelectedContext() {
     });
   }
   if (empty) empty.hidden = selected.length > 0;
-  preview.innerHTML = visible.map(item => `
-      <article class="ai-selected-preview-item" data-selection-key="${item.selectionKey}">
-        <header class="ai-selected-preview-head">
-          <strong>${escapeHtml(item.question.type)}</strong>
-          <button type="button" data-selection-key="${item.selectionKey}">移出</button>
-        </header>
-        <p class="ai-selected-preview-stem">${escapeHtml(item.question.stem)}</p>
-      </article>`).join("");
-
-  preview.querySelectorAll("[data-selection-key]").forEach(button => {
-    if (button.tagName !== "BUTTON") return;
-    button.addEventListener("click", event => {
-      event.stopPropagation();
-      removeGlobalSelectedByKey(button.dataset.selectionKey);
-    });
-  });
+  preview.innerHTML = selectedPanelEnlarged
+    ? visible.map((item, index) => selectedPreviewEnlargedHtml(item, index)).join("")
+    : visible.map(item => selectedPreviewCompactHtml(item)).join("");
+  bindSelectedPreviewEvents();
 }
 
 function getFilteredSidebarPapers() {
@@ -1098,6 +1235,12 @@ function applyResponsiveChrome() {
 function applySelectedPanelState() {
   const root = document.querySelector("#aiWorkspace");
   root?.classList.toggle("selected-panel-collapsed", rightPanelSectionState.selectedCollapsed);
+  if (rightPanelSectionState.selectedCollapsed && selectedPanelEnlarged) {
+    selectedPanelEnlarged = false;
+    selectedShowAnswers = false;
+    selectedExpandedAnalysisKeys.clear();
+  }
+  syncSelectedPanelChrome();
   applyResponsiveChrome();
 }
 
@@ -1115,8 +1258,22 @@ function bindSelectedPanelControls() {
       setMobileDrawer("selected", false);
       return;
     }
+    selectedPanelEnlarged = false;
+    selectedShowAnswers = false;
+    selectedExpandedAnalysisKeys.clear();
     rightPanelSectionState.selectedCollapsed = true;
     applySelectedPanelState();
+    renderSelectedContext();
+  });
+
+  document.querySelector("#enlargeSelectedPanel")?.addEventListener("click", event => {
+    event.stopPropagation();
+    toggleSelectedPanelEnlarge();
+  });
+
+  document.querySelector("#toggleSelectedAnswers")?.addEventListener("click", event => {
+    event.stopPropagation();
+    toggleSelectedShowAnswers();
   });
 
   const openPanel = () => {
@@ -2069,7 +2226,7 @@ function toggleQuestionAnalysis(qId) {
 }
 
 function bindQuestionCardEvents() {
-  document.querySelectorAll(".question-item").forEach(card => {
+  document.querySelectorAll("#questionCardBoard .question-item").forEach(card => {
     card.addEventListener("click", event => {
       if (event.target.closest("[data-card-action]")) return;
       // 允许在题干上划词复制，不误触选中
@@ -2084,7 +2241,7 @@ function bindQuestionCardEvents() {
     });
   });
 
-  document.querySelectorAll("[data-card-action]").forEach(button => {
+  document.querySelectorAll("#questionCardBoard [data-card-action]").forEach(button => {
     button.addEventListener("click", event => {
       event.stopPropagation();
       const qId = button.dataset.q;

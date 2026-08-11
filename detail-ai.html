@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
     <link rel="stylesheet" href="./detail.css" />
-    <link rel="stylesheet" href="./detail-ai.css?v=20260811special" />
+    <link rel="stylesheet" href="./detail-ai.css?v=20260811full" />
     <style id="ai-panel-legacy-toggle-hide">
       #aiPanelExpand.legacy-hidden,
       #openAiPanel,
@@ -45,6 +45,8 @@
               <span class="ai-selected-hint" id="aiSelectedHint">还没有选题</span>
             </div>
             <div class="ai-section-head-actions">
+              <button type="button" id="toggleSelectedAnswers" hidden>显示答案</button>
+              <button type="button" id="enlargeSelectedPanel" aria-pressed="false">放大查看</button>
               <button type="button" id="clearSelectedQuestions">清空</button>
               <button type="button" class="panel-action-btn panel-action-btn-compact" id="collapseSelectedPanel" aria-label="收起已选题目" title="收起已选题目">
                 <i class="ri-arrow-left-double-line"></i><span>收起</span>
@@ -58,10 +60,10 @@
           </div>
           <footer class="ai-selected-footer">
             <button type="button" class="ai-selected-create" id="createQuestionList" disabled>
-              <i class="ri-file-add-line"></i><span id="createQuestionListLabel">请先添加题目</span>
+              <i class="ri-file-add-line"></i><span id="createQuestionListLabel">创建题单</span>
             </button>
             <button type="button" class="ai-selected-ai-entry" id="openAiCreate">
-              <i class="ri-sparkling-2-line"></i><span id="openAiCreateLabel">用 AI 生成题单</span>
+              <i class="ri-sparkling-2-line"></i><span id="openAiCreateLabel">AI 生成</span>
             </button>
           </footer>
         </div>
@@ -150,6 +152,6 @@
     </div>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./detail-ai.js?v=20260811special"></script>
+    <script src="./detail-ai.js?v=20260811full"></script>
   </body>
 </html>

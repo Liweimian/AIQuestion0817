@@ -3,15 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="飞象 AI 题库 · 本地优质题单广场" />
-    <title>飞象 AI 题库 · 题单广场</title>
+    <meta name="description" content="飞象AI题库 · 本地优质题单广场" />
+    <title>飞象AI题库</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260811special" />
+    <link rel="stylesheet" href="./styles.css?v=20260811homev3k" />
   </head>
   <body>
     <main class="page">
       <section class="discovery site-header" aria-label="题库首页导航">
+        <a class="brand-mark" href="./index.html" aria-label="飞象AI题库首页">
+          <span class="brand-mark-glyph" aria-hidden="true"><i class="ri-sparkling-2-fill"></i></span>
+          <span class="brand-mark-text">飞象AI题库</span>
+        </a>
         <div class="context-identity" aria-label="当前资源范围">
           <i class="ri-map-pin-2-line"></i>
           <span>深圳市龙岗区</span>
@@ -29,45 +33,6 @@
           <i class="ri-stack-line"></i><span>按章节、知识点选题</span><i class="ri-arrow-right-s-line"></i>
         </a>
       </section>
-
-      <div class="home-entry-row">
-        <div class="ai-starter-shell">
-          <form id="aiStarter" class="ai-starter" aria-label="AI 生成题单">
-            <span class="ai-starter-badge" aria-hidden="true"><i class="ri-sparkling-2-line"></i><span>AI</span></span>
-            <input id="aiStarterInput" class="ai-starter-input" placeholder="描述你想要的题单，例如：七上有理数易错题，15 题，中等难度" autocomplete="off" />
-            <button id="aiStarterAdd" class="ai-starter-icon" type="button" aria-label="添加材料"><i class="ri-add-line"></i></button>
-            <button id="aiStarterVoice" class="ai-voice-button" type="button" aria-label="语音输入"><i class="ri-mic-line"></i></button>
-            <button id="aiStarterSubmit" class="ai-starter-submit" type="submit" aria-label="生成题单"><i class="ri-arrow-up-line"></i></button>
-          </form>
-          <div id="aiStarterHints" class="ai-input-hints" hidden>
-            <p class="ai-input-hint-example">试试这样说：帮我组一份七年级有理数随堂练习，15 分钟，基础为主，加入 2 道易错题</p>
-            <div class="ai-input-hint-tags" role="list">
-              <button type="button" data-ai-hint="找题">找题</button>
-              <button type="button" data-ai-hint="找卷">找卷</button>
-              <button type="button" data-ai-hint="AI 组卷">AI 组卷</button>
-              <button type="button" data-ai-hint="AI 组练习">AI 组练习</button>
-              <button type="button" data-ai-hint="AI 改编">AI 改编</button>
-              <button type="button" data-ai-hint="AI 命题">AI 命题</button>
-              <button type="button" data-ai-hint="AI 录题">AI 录题</button>
-            </div>
-          </div>
-        </div>
-
-        <aside class="bank-stats-card" aria-label="题库概览">
-          <span class="bank-stats-item">
-            <strong id="statTopicTotal">—</strong>
-            <small>题单总量</small>
-          </span>
-          <button class="bank-stats-item is-new" type="button" data-stat-jump aria-label="查看最新入库的题单">
-            <strong id="statWeeklyNew">—</strong>
-            <small>7 天新增题单 <i class="ri-arrow-right-s-line"></i></small>
-          </button>
-          <span class="bank-stats-item">
-            <strong id="statQuestionTotal">—</strong>
-            <small>题目总量</small>
-          </span>
-        </aside>
-      </div>
 
       <div id="emptyState" class="empty-state" hidden>
         <div>
@@ -94,12 +59,13 @@
           <button type="button" data-ai-hint="AI 录题">AI 录题</button>
         </div>
       </div>
-      <form id="aiDock" class="ai-dock" aria-label="AI 生成题单" aria-hidden="true" hidden>
-      <button id="aiAdd" class="ai-dock-icon" type="button" aria-label="添加材料"><i class="ri-add-line"></i></button>
-      <input id="aiQuickInput" class="ai-quick-input" placeholder="描述你想要的题单，例如：七上有理数易错题，15 题，中等难度" autocomplete="off" />
-      <button id="aiVoice" class="ai-voice-button" type="button" aria-label="语音输入"><i class="ri-mic-line"></i></button>
-      <button id="openAi" class="ai-dock-action" type="submit" aria-label="生成题单"><i class="ri-arrow-up-line"></i></button>
-    </form>
+      <form id="aiDock" class="ai-dock" aria-label="AI 生成题单">
+        <span class="ai-starter-badge" aria-hidden="true"><i class="ri-sparkling-2-line"></i><span>AI</span></span>
+        <input id="aiQuickInput" class="ai-quick-input" placeholder="描述你想要的题单，例如：七上有理数易错题，15 题，中等难度" autocomplete="off" />
+        <button id="aiAdd" class="ai-dock-icon" type="button" aria-label="添加材料"><i class="ri-add-line"></i></button>
+        <button id="aiVoice" class="ai-voice-button" type="button" aria-label="语音输入"><i class="ri-mic-line"></i></button>
+        <button id="openAi" class="ai-dock-action" type="submit" aria-label="生成题单"><i class="ri-arrow-up-line"></i></button>
+      </form>
     </div>
 
     <div id="aiMask" class="modal-mask" hidden>
@@ -141,6 +107,6 @@
     </div>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./main.js?v=20260811special"></script>
+    <script src="./main.js?v=20260811homev3k"></script>
   </body>
 </html>

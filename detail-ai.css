@@ -46,6 +46,21 @@
   transition: grid-template-columns .24s ease;
 }
 
+.ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed),
+.ai-workspace.workbook-mode.selected-panel-enlarged:not(.selected-panel-collapsed),
+.ai-workspace.home-view.selected-panel-enlarged:not(.selected-panel-collapsed) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) .ai-main-column {
+  display: none;
+}
+
+.ai-workspace.selected-panel-enlarged:not(.selected-panel-collapsed) .ai-selected-panel {
+  width: 100%;
+  border-right: 0;
+}
+
 .ai-workspace.selected-panel-collapsed {
   grid-template-columns: 64px minmax(0, 1fr);
 }
@@ -695,27 +710,32 @@
 
 .ai-selected-footer {
   flex: none;
-  display: grid;
-  gap: 6px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   padding: 10px 12px 12px;
   border-top: 1px solid var(--ai-border);
   background: #fff;
 }
 
 .ai-selected-ai-entry {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 100%;
-  min-height: 32px;
-  padding: 0 12px;
+  gap: 5px;
+  width: auto;
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
   color: var(--green-800);
   font-size: 12px;
   font-weight: 650;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
+  border: 1px solid #d4e4db;
+  border-radius: 6px;
+  background: #fff;
   cursor: pointer;
   transition: color .15s, background .15s, border-color .15s;
 }
@@ -726,10 +746,11 @@
 }
 
 .ai-selected-ai-entry.is-primary {
-  min-height: 38px;
+  min-height: 30px;
   color: #fff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
+  border-color: transparent;
   background: var(--green-800);
 }
 
@@ -737,26 +758,27 @@
   background: var(--green-900);
 }
 
-/* 已选为 0 时主行动交给 AI，手动按钮降级为次要提示 */
+/* 已选为 0 时主行动交给 AI，手动按钮仍保持小按钮同行 */
 .ai-selected-footer .ai-selected-create:disabled {
   order: 2;
-  min-height: 32px;
+  min-height: 30px;
   font-size: 12px;
 }
 
 .ai-selected-create {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 100%;
-  min-height: 38px;
-  padding: 0 12px;
+  gap: 5px;
+  width: auto;
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
   color: #fff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--green-800);
   cursor: pointer;
   transition: background .15s, color .15s;
@@ -996,6 +1018,9 @@
   align-items: center;
   gap: 6px;
   flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 62%;
 }
 
 .ai-section-head-actions > button:not(.panel-action-btn) {
@@ -1347,6 +1372,45 @@
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
+}
+
+.ai-selected-preview.is-enlarged {
+  gap: 0;
+}
+
+.ai-selected-preview.is-enlarged .ai-selected-enlarged-item {
+  margin: 0 -4px;
+  padding: 12px 10px 10px;
+  border: 0;
+  border-bottom: 1px solid #edf3f0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.ai-selected-preview.is-enlarged .ai-selected-enlarged-item:hover,
+.ai-selected-preview.is-enlarged .ai-selected-enlarged-item:focus-within {
+  z-index: 2;
+  border-radius: 10px;
+  border-bottom-color: transparent;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(45, 106, 79, .1);
+}
+
+.ai-selected-preview.is-enlarged .q-stem {
+  font-size: 13px;
+}
+
+.ai-selected-preview.is-enlarged .q-options {
+  font-size: 13px;
+}
+
+.ai-selected-preview.is-enlarged .q-card-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ai-selected-preview.is-enlarged .q-knowledge-foot {
+  font-size: 11px;
 }
 
 .question-item.focus-flash {
@@ -1896,6 +1960,7 @@ body.is-question-dragging .question-item {
 }
 
 .question-card-board.show-answers .question-item .q-answer-panel,
+.ai-selected-preview.show-answers .question-item .q-answer-panel,
 .question-item.answer-open .q-answer-panel {
   display: block;
 }
@@ -2568,6 +2633,11 @@ body.is-question-dragging .question-item {
     transform: translateX(-100%);
     box-shadow: 16px 0 34px rgba(20, 40, 31, .12);
     transition: transform .22s ease;
+  }
+
+  .ai-workspace.selected-panel-enlarged .ai-selected-panel {
+    width: 100%;
+    max-width: none;
   }
 
   .ai-workspace.mobile-selected-open .ai-selected-panel {
