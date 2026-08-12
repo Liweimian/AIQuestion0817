@@ -1347,14 +1347,7 @@ function bindContentEvents(root = document) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }));
   root.querySelectorAll("[data-stat-jump]").forEach(button => button.addEventListener("click", () => {
-    const albums = document.querySelector(".home-mod-albums");
-    if (albums) {
-      albums.scrollIntoView({ behavior: "smooth", block: "start" });
-      showToast("本周新增资源已更新到专辑与试卷");
-      return;
-    }
-    setMainFilter("paper");
-    showToast("已切换到最新试卷");
+    location.href = "./school.html";
   }));
   root.querySelectorAll(".paper-sidebar-group-toggle").forEach(button => button.addEventListener("click", () => {
     const group = button.closest(".paper-sidebar-group");
