@@ -16,22 +16,22 @@
           <span class="brand-mark-glyph" aria-hidden="true"><i class="ri-sparkling-2-fill"></i></span>
           <span class="brand-mark-text">飞象AI题库</span>
         </a>
-        <div class="context-identity" aria-label="当前资源范围">
+        <div id="filterChips" class="filter-chips category-tabs" role="tablist" aria-label="题单分类">
+          <button class="active" data-filter="all" role="tab" aria-selected="true"><i class="ri-layout-grid-line"></i><span>首页</span></button>
+          <button data-filter="chapter" role="tab" aria-selected="false"><i class="ri-book-open-line"></i><span>同步练习</span></button>
+          <button data-filter="paper" role="tab" aria-selected="false"><i class="ri-file-list-3-line"></i><span>试卷</span></button>
+          <button data-filter="special" role="tab" aria-selected="false"><i class="ri-focus-3-line"></i><span>专项练习</span></button>
+          <button data-filter="workbook" role="tab" aria-selected="false"><i class="ri-book-shelf-line"></i><span>专辑</span></button>
+          <a class="school-library-entry" href="./school.html">
+            <span>章节/知识点选题</span>
+          </a>
+        </div>
+        <div class="context-identity" aria-label="当前教师信息">
           <i class="ri-map-pin-2-line"></i>
           <span>深圳市龙岗区</span>
           <i class="context-divider"></i>
           <span>七年级数学</span>
         </div>
-        <div id="filterChips" class="filter-chips category-tabs" role="tablist" aria-label="题单分类">
-          <button class="active" data-filter="all" role="tab" aria-selected="true"><i class="ri-layout-grid-line"></i><span>首页</span></button>
-          <button data-filter="chapter" role="tab" aria-selected="false"><i class="ri-book-open-line"></i><span>同步练习</span></button>
-          <button data-filter="special" role="tab" aria-selected="false"><i class="ri-focus-3-line"></i><span>专项练习</span></button>
-          <button data-filter="paper" role="tab" aria-selected="false"><i class="ri-file-list-3-line"></i><span>试卷</span></button>
-          <button data-filter="workbook" role="tab" aria-selected="false"><i class="ri-book-shelf-line"></i><span>专辑</span></button>
-        </div>
-        <a class="school-library-entry" href="./school.html">
-          <i class="ri-stack-line"></i><span>按章节、知识点选题</span><i class="ri-arrow-right-s-line"></i>
-        </a>
       </section>
 
       <div id="emptyState" class="empty-state" hidden>

@@ -13,20 +13,31 @@
   <body>
     <main class="page school-page">
       <section class="discovery site-header school-header" aria-label="题库导航">
-        <div class="context-identity" aria-label="当前位置">
-          <a class="school-back-link" href="./index.html" aria-label="返回题库首页"><i class="ri-arrow-left-line"></i></a>
-          <span>首页</span>
-          <i class="context-divider"></i>
-          <span>题库</span>
-          <i class="context-divider"></i>
-          <span>七年级数学</span>
-        </div>
-        <div class="school-header-actions">
-          <button class="school-ai-entry" id="aiEntry" type="button"><i class="ri-sparkling-2-line"></i><span>AI</span> 生成题目</button>
-        </div>
+        <a class="brand-mark" href="./index.html" aria-label="飞象AI题库首页"><span class="brand-mark-glyph" aria-hidden="true"><i class="ri-sparkling-2-fill"></i></span><span class="brand-mark-text">飞象AI题库</span></a>
+        <nav class="filter-chips category-tabs" aria-label="题库分类">
+          <a href="./index.html"><span>首页</span></a>
+          <a href="./index.html?filter=chapter"><span>同步练习</span></a>
+          <a href="./index.html?filter=paper"><span>试卷</span></a>
+          <a href="./index.html?filter=special"><span>专项练习</span></a>
+          <a href="./index.html?filter=workbook"><span>专辑</span></a>
+          <a class="school-library-entry active" href="./school.html" aria-current="page"><span>章节/知识点选题</span></a>
+        </nav>
+        <div class="context-identity" aria-label="当前教师信息"><i class="ri-map-pin-2-line"></i><span>深圳市龙岗区</span><i class="context-divider"></i><span>七年级数学</span></div>
       </section>
 
       <section class="question-bank-shell" aria-label="题库工作区">
+        <aside class="selected-question-panel" id="selectedQuestionPanel" aria-label="已选题目">
+          <button class="selected-panel-expand" id="selectedPanelExpand" type="button" aria-label="展开已选题目">
+            <i class="ri-checkbox-multiple-line"></i>
+            <span class="selected-panel-expand-count" id="selectedPanelExpandCount">2</span>
+            <span>已选题目</span>
+          </button>
+          <div class="selected-panel-main">
+            <header class="selected-panel-head"><div><strong>已选题目</strong><span>已选 <b id="selectedPanelCount">2</b> 题</span></div><div><button type="button" id="selectedPanelEnlarge">放大查看</button><button type="button" id="selectedPanelClear">清空</button><button class="selected-panel-collapse" type="button" id="selectedPanelCollapse"><i class="ri-arrow-left-double-line"></i> 收起</button></div></header>
+            <div class="selected-panel-body"><h3><span id="selectedPanelTitleCount">2</span>道选择</h3><div id="selectedPanelList" class="selected-panel-list"></div></div>
+            <footer class="selected-panel-foot"><button type="button" id="selectedPanelCreate"><i class="ri-add-box-line"></i>创建题单(<span>2</span>)</button><button type="button" id="selectedPanelAi"><i class="ri-sparkling-2-line"></i>AI 补充(<span>2</span>)</button></footer>
+          </div>
+        </aside>
         <aside class="bank-sidebar">
           <div class="bank-side-tabs" role="tablist" aria-label="题库导航方式">
             <button class="active" type="button" role="tab" aria-selected="true" data-side-view="chapters">教材章节</button>
@@ -50,11 +61,12 @@
               <label class="filter-pill"><span>练习册系列</span><select id="seriesFilter" aria-label="按练习册系列筛选"><option value="all">全部</option><option>全品作业本</option><option>多维导学案</option></select><i class="ri-arrow-down-s-line"></i></label>
               <button class="filter-more" type="button" id="filterMore"><i class="ri-equalizer-3-line"></i> 其他</button>
             </div>
-            <div class="bank-toolbar-right">
-              <label class="question-search"><i class="ri-search-line"></i><input id="questionSearch" type="search" placeholder="请输入关键词" aria-label="搜索题目或知识点" /></label>
-              <button class="image-search" type="button" id="imageSearch"><i class="ri-camera-line"></i> 图片搜题</button>
-            </div>
           </header>
+
+          <div class="bank-search-row">
+            <label class="question-search"><i class="ri-search-line"></i><input id="questionSearch" type="search" placeholder="请输入关键词" aria-label="搜索题目或知识点" /></label>
+            <button class="image-search" type="button" id="imageSearch"><i class="ri-camera-line"></i> 图片搜题</button>
+          </div>
 
           <div class="question-heading">
             <div class="question-view-tabs" role="tablist" aria-label="题目排序">
@@ -72,18 +84,6 @@
           </div>
         </section>
 
-        <aside id="questionBasket" class="question-basket-rail" aria-label="已选题目">
-          <div class="basket-rail-head">
-            <button class="basket-toggle" id="basketCollapse" type="button" aria-label="收起题目篮"><i class="ri-arrow-left-s-line"></i></button>
-            <strong>已选题目：<span id="selectedCount">0</span></strong>
-          </div>
-          <p class="basket-rail-tip">从左侧题库继续添加题目</p>
-          <div class="basket-rail-actions">
-            <button type="button" data-basket-action="preview"><i class="ri-eye-line"></i>查看题目篮</button>
-            <button class="basket-primary" type="button" data-basket-action="group"><i class="ri-file-edit-line"></i>去组题</button>
-            <button class="basket-accent" type="button" data-basket-action="paper"><i class="ri-file-list-3-line"></i>去组卷</button>
-          </div>
-        </aside>
       </section>
     </main>
 

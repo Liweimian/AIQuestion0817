@@ -7085,3 +7085,17 @@ body.has-ai-dock .page {
     width: calc(100vw - 24px);
   }
 }
+
+/* Header navigation: brand / resource tabs / teacher context */
+.site-header { grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:28px; }
+.site-header .category-tabs { display:flex; align-self:stretch; align-items:center; justify-content:flex-start; gap:4px !important; overflow-x:auto; scrollbar-width:none; }
+.site-header .category-tabs::-webkit-scrollbar { display:none; }
+.site-header .category-tabs button,
+.site-header .category-tabs .school-library-entry { position:relative; min-height:42px; display:inline-flex; align-items:center; gap:5px; padding:0 12px !important; color:#647169; font-size:13px; font-weight:650; white-space:nowrap; border:0; border-radius:8px; background:transparent; box-shadow:none; }
+.site-header .category-tabs button:hover,
+.site-header .category-tabs .school-library-entry:hover { color:#245b43; background:#f0f5f1; }
+.site-header .category-tabs button.active { color:#204e3a; background:#eaf2ed; }
+.site-header .category-tabs button.active::after { content:""; position:absolute; left:12px; right:12px; bottom:2px; height:2px; border-radius:2px; background:#347158; }
+.site-header .category-tabs i { font-size:14px; }
+.site-header .category-tabs .school-library-entry { margin:0; border-left:0; border-radius:8px; }
+.site-header .context-identity { grid-column:3; justify-self:end; align-self:center; padding:7px 10px; border-radius:8px; background:#f1f5f2; white-space:nowrap; }

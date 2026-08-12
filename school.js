@@ -58,8 +58,12 @@ const questions = [
 let sideView = "chapters";
 let activeNav = "all";
 let sortMode = "recommended";
-const selectedQuestions = new Set();
+const selectedQuestions = new Set(["q1", "q2"]);
 const savedQuestions = new Set();
+const selectedPreviewTitles = {
+  q1: "下列图形中，是轴对称图形的是（　　）。",
+  q2: "如果向东走 3 米记作 +3 米，那么向西走 5 米应记作（　　）。"
+};
 
 const bankNav = document.querySelector("#bankNav");
 const questionList = document.querySelector("#questionList");
@@ -137,7 +141,22 @@ function renderQuestions() {
 }
 
 function renderBasket() {
-  document.querySelector("#selectedCount").textContent = selectedQuestions.size;
+  const selectedCount = document.querySelector("#selectedCount");
+  if (selectedCount) selectedCount.textContent = selectedQuestions.size;
+  const count = selectedQuestions.size;
+  ["#selectedPanelCount", "#selectedPanelTitleCount", "#selectedPanelExpandCount"].forEach(selector => {
+    const node = document.querySelector(selector);
+    if (node) node.textContent = count;
+  });
+  const expandCount = document.querySelector("#selectedPanelExpandCount");
+  if (expandCount) expandCount.hidden = count === 0;
+  document.querySelectorAll(".selected-panel-foot span").forEach(node => { node.textContent = count; });
+  const list = document.querySelector("#selectedPanelList");
+  if (list) list.innerHTML = [...selectedQuestions].map(id => {
+    const question = questions.find(item => item.id === id);
+    if (!question) return "";
+    return `<article class="selected-preview-card" data-selected-id="${id}"><header><strong>${question.type}</strong><button type="button" data-selected-remove="${id}">移出</button></header><p>${selectedPreviewTitles[id] || question.title}</p></article>`;
+  }).join("") || `<div class="selected-panel-empty">暂未选择题目</div>`;
 }
 
 function renderAll() {
@@ -208,8 +227,27 @@ document.querySelectorAll("[data-basket-action]").forEach(button => button.addEv
   showToast(messages[button.dataset.basketAction]);
 }));
 
-document.querySelector("#basketCollapse").addEventListener("click", () => document.querySelector("#questionBasket").classList.toggle("collapsed"));
-document.querySelector("#aiEntry").addEventListener("click", () => showToast("AI 生成题目入口已保留在顶部"));
+document.querySelector("#basketCollapse")?.addEventListener("click", () => document.querySelector("#questionBasket")?.classList.toggle("collapsed"));
+document.querySelector("#selectedPanelList")?.addEventListener("click", event => {
+  const button = event.target.closest("[data-selected-remove]");
+  if (!button) return;
+  selectedQuestions.delete(button.dataset.selectedRemove);
+  renderQuestions();
+  renderBasket();
+});
+document.querySelector("#selectedPanelClear")?.addEventListener("click", () => { selectedQuestions.clear(); renderQuestions(); renderBasket(); });
+document.querySelector("#selectedPanelCollapse")?.addEventListener("click", () => {
+  const shell = document.querySelector(".question-bank-shell");
+  shell?.classList.add("selected-panel-collapsed");
+  shell?.classList.remove("selected-panel-enlarged");
+});
+document.querySelector("#selectedPanelExpand")?.addEventListener("click", () => {
+  document.querySelector(".question-bank-shell")?.classList.remove("selected-panel-collapsed");
+});
+document.querySelector("#selectedPanelEnlarge")?.addEventListener("click", () => document.querySelector(".question-bank-shell")?.classList.toggle("selected-panel-enlarged"));
+document.querySelector("#selectedPanelCreate")?.addEventListener("click", () => showToast(`正在创建包含 ${selectedQuestions.size} 题的题单`));
+document.querySelector("#selectedPanelAi")?.addEventListener("click", () => showToast(`正在基于 ${selectedQuestions.size} 道已选题进行 AI 补充`));
+document.querySelector("#aiEntry")?.addEventListener("click", () => showToast("AI 生成题目入口已保留在顶部"));
 document.querySelector("#scopePicker").addEventListener("click", () => showToast("教材范围可在此切换"));
 document.querySelector("#filterMore")?.addEventListener("click", () => showToast("更多筛选条件即将开放"));
 document.querySelector("#imageSearch")?.addEventListener("click", () => showToast("图片搜题功能即将开放"));
