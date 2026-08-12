@@ -112,8 +112,8 @@ function requestParentOpenTopic(topicId, context, query, extra = {}) {
   }, "*");
 }
 
-function requestParentOpenFilter(filter) {
-  window.parent.postMessage({ type: "aiq-open-filter", filter }, "*");
+function requestParentOpenFilter(filter, extra = {}) {
+  window.parent.postMessage({ type: "aiq-open-filter", filter, ...extra }, "*");
 }
 
 window.addEventListener("message", event => {
@@ -121,6 +121,7 @@ window.addEventListener("message", event => {
   if (!data || typeof data !== "object") return;
   if (data.type === "aiq-set-filter" && typeof data.filter === "string") {
     if (document.querySelector(`#filterChips [data-filter="${data.filter}"]`) || data.filter === "all") {
+      prepareFilterOpen(data.filter, data);
       setMainFilter(data.filter === "all" ? "all" : data.filter);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -374,7 +375,7 @@ function homepagePracticeModule() {
           <article class="practice-compile home-panel">
             <header class="mod-head mod-head-compact">
               <span class="mod-kicker"><i class="ri-folder-chart-line"></i>同步章节真题汇编</span>
-              <button class="mod-link" type="button" data-open-filter="workbook">全部 <i class="ri-arrow-right-s-line"></i></button>
+              <button class="mod-link" type="button" data-open-filter="chapter" data-open-origin="zhenti">全部 <i class="ri-arrow-right-s-line"></i></button>
             </header>
             <div class="compile-list">
               <button class="compile-row" data-topic="t4"><em>01</em><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：正方体的展开与折叠（深圳版）</b><small>图形初步认识 · 高频考点整理</small></span><strong class="compile-qcount"><b>24</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
@@ -881,7 +882,10 @@ function applySpecialFilters(options = {}) {
 }
 
 function chapterSyncTopics() {
-  return topics.filter(topic => ["chapter", "school", "workbook"].includes(topic.tag));
+  return topics.filter(topic =>
+    ["chapter", "school", "workbook"].includes(topic.tag)
+    || matchesResourceOrigin(topic, "zhenti")
+  );
 }
 
 function chapterSectionEntry(sectionId) {
@@ -1296,11 +1300,14 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-open-filter]").forEach(button => button.addEventListener("click", event => {
     event.stopPropagation();
     const filter = button.dataset.openFilter;
+    const origin = button.dataset.openOrigin || "";
+    const openOptions = origin ? { origin } : {};
+    prepareFilterOpen(filter, openOptions);
     if (isEmbedded) {
-      requestParentOpenFilter(filter);
+      requestParentOpenFilter(filter, openOptions);
       return;
     }
-    setMainFilter(filter);
+    setMainFilter(filter, openOptions);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }));
   root.querySelectorAll("[data-series]").forEach(button => button.addEventListener("click", event => { event.stopPropagation(); openSeries(button.dataset.series); }));
@@ -1389,6 +1396,14 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-chapter-search]").forEach(input => input.addEventListener("input", () => applyChapterFilters({ query: input.value })));
 }
 
+function prepareFilterOpen(filter, options = {}) {
+  if (filter === "chapter" && options.origin) {
+    chapterFilterState.origin = options.origin;
+    chapterFilterState.section = "all";
+    chapterFilterState.query = "";
+  }
+}
+
 function setMainFilter(filter, options = {}) {
   const previousFilter = currentFilter;
   currentFilter = filter;
@@ -1397,6 +1412,9 @@ function setMainFilter(filter, options = {}) {
     albumFilterState.view = "album";
     albumFilterState.origin = "all";
     albumFilterState.query = "";
+  }
+  if (filter === "chapter" && options.origin) {
+    prepareFilterOpen(filter, options);
   }
   document.body.classList.toggle("is-paper-view", filter === "paper");
   document.body.classList.toggle("is-special-view", filter === "special");
@@ -1514,9 +1532,12 @@ if (isEmbedded) {
   });
 }
 
-const initFilter = new URLSearchParams(location.search).get("filter");
+const initParams = new URLSearchParams(location.search);
+const initFilter = initParams.get("filter");
+const initOrigin = initParams.get("origin");
 if (initFilter && document.querySelector(`#filterChips [data-filter="${initFilter}"]`)) {
-  setMainFilter(initFilter);
+  prepareFilterOpen(initFilter, initOrigin ? { origin: initOrigin } : {});
+  setMainFilter(initFilter, initOrigin ? { origin: initOrigin } : {});
 } else {
   render();
 }

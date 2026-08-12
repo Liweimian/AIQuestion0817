@@ -1894,10 +1894,18 @@ function ensureBrowseTabs() {
   }
 }
 
-function syncHomeFrameFilter(filter) {
+let pendingBrowseOrigin = "";
+
+function syncHomeFrameFilter(filter, options = {}) {
   const frame = document.querySelector("#homeFrame");
   if (!frame?.contentWindow || frame.dataset.loaded !== "1") return;
-  frame.contentWindow.postMessage({ type: "aiq-set-filter", filter: filter || "all" }, "*");
+  const payload = { type: "aiq-set-filter", filter: filter || "all" };
+  const origin = options.origin || pendingBrowseOrigin || frame.dataset.origin || "";
+  if (origin) payload.origin = origin;
+  frame.dataset.origin = origin;
+  if (!origin) delete frame.dataset.origin;
+  pendingBrowseOrigin = "";
+  frame.contentWindow.postMessage(payload, "*");
 }
 
 // 首页 / 分类浏览共用 iframe；分类 tab 紧挨在「首页」后
@@ -1915,14 +1923,18 @@ function applyHomeView() {
     const srcFilter = browseFilter || "all";
     const url = new URL(HOME_FRAME_SRC, location.href);
     if (srcFilter && srcFilter !== "all") url.searchParams.set("filter", srcFilter);
+    if (pendingBrowseOrigin) url.searchParams.set("origin", pendingBrowseOrigin);
     frame.src = `${url.pathname}${url.search}`;
     frame.dataset.loaded = "1";
     frame.dataset.filter = srcFilter;
+    if (pendingBrowseOrigin) frame.dataset.origin = pendingBrowseOrigin;
+    pendingBrowseOrigin = "";
   } else if (shellActive && frame?.dataset.loaded === "1") {
     const nextFilter = browseFilter || "all";
-    if (frame.dataset.filter !== nextFilter) {
+    const nextOrigin = pendingBrowseOrigin || frame.dataset.origin || "";
+    if (frame.dataset.filter !== nextFilter || (pendingBrowseOrigin && frame.dataset.origin !== pendingBrowseOrigin)) {
       frame.dataset.filter = nextFilter;
-      syncHomeFrameFilter(nextFilter);
+      syncHomeFrameFilter(nextFilter, { origin: nextOrigin });
     }
   }
   if (shellActive) {
@@ -1952,13 +1964,14 @@ function setHomeView(active) {
   renderAll();
 }
 
-function openBrowseTab(filter) {
+function openBrowseTab(filter, options = {}) {
   const meta = getBrowseMeta(filter);
   if (!meta) return;
   ensureBrowseTabs();
   if (!workspace.browseTabs.includes(filter)) workspace.browseTabs.push(filter);
   workspace.homeActive = false;
   workspace.activeBrowseFilter = filter;
+  pendingBrowseOrigin = options.origin || "";
   saveWorkspace();
   renderAll();
   showToast(`已打开「${meta.label}」`);
@@ -1993,7 +2006,7 @@ function bindHomeFrameBridge() {
     if (!data || typeof data !== "object") return;
 
     if (data.type === "aiq-open-filter") {
-      openBrowseTab(String(data.filter || ""));
+      openBrowseTab(String(data.filter || ""), { origin: data.origin || "" });
       return;
     }
 
