@@ -2,7 +2,7 @@ const paperCatalog = {
   t2: {
     title: "2026 深圳南山区初一上期末数学真题",
     shortTitle: "南山区期末卷",
-    focus: "本地命题风格与阶段难度参考",
+    focus: "深圳市南山区七年级上学期期末数学真题",
     reason: "深圳区级真题",
     region: "南山区",
     grade: "七年级上册",
@@ -14,7 +14,7 @@ const paperCatalog = {
   t14: {
     title: "2026 深圳福田区初一下期中数学真题",
     shortTitle: "福田区期中卷",
-    focus: "深圳真实阶段性考试，适合校准教学进度与难度",
+    focus: "深圳市福田区七年级下学期期中数学真题",
     reason: "深圳区级真题",
     region: "福田区",
     grade: "七年级下册",
@@ -26,7 +26,7 @@ const paperCatalog = {
   t25: {
     title: "2026 深圳罗湖区初一下期末数学真题",
     shortTitle: "罗湖区期末卷",
-    focus: "深圳真实阶段性考试，反映本地命题风格",
+    focus: "深圳市罗湖区七年级下学期期末数学真题",
     reason: "深圳区级真题",
     region: "罗湖区",
     grade: "七年级下册",
@@ -105,7 +105,7 @@ const MAX_OPEN_TABS = 6;
 const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811aibar";
 const QUESTION_DRAG_MIME = "application/x-aiq-questions";
 const BROWSE_FILTER_META = {
-  chapter: { filter: "chapter", label: "同步练习", icon: "ri-book-open-line" },
+  chapter: { filter: "chapter", label: "同步教学", icon: "ri-book-open-line" },
   special: { filter: "special", label: "专项练习", icon: "ri-focus-3-line" },
   paper: { filter: "paper", label: "试卷", icon: "ri-file-list-3-line" },
   workbook: { filter: "workbook", label: "专辑", icon: "ri-book-shelf-line" }
@@ -242,7 +242,7 @@ function tabContextLabel(tab) {
   const ctx = tab?.context || contextName;
   if (ctx === "series") return "练习册";
   if (ctx === "special") return "专项练习";
-  if (ctx === "chapter") return "同步练习";
+  if (ctx === "chapter") return "同步教学";
   return "试卷";
 }
 
@@ -453,12 +453,12 @@ function resolveTopicMeta(topicId, tabContext = contextName, overrides = {}) {
   } else if (paperCatalog[baseId]) {
     meta = { ...paperCatalog[baseId] };
   } else {
-    const fallbackTitle = params.get("title") || (tabContext === "special" ? "专项题单" : tabContext === "chapter" ? "同步练习" : "未命名试卷");
+    const fallbackTitle = params.get("title") || (tabContext === "special" ? "专项题单" : tabContext === "chapter" ? "同步教学" : "未命名试卷");
     meta = {
       title: fallbackTitle,
       shortTitle: shortenTabTitle(params.get("shortTitle") || fallbackTitle),
       focus: params.get("focus") || "",
-      reason: params.get("reason") || (tabContext === "special" ? "专项练习" : tabContext === "chapter" ? "同步练习" : "试卷"),
+      reason: params.get("reason") || (tabContext === "special" ? "专项练习" : tabContext === "chapter" ? "同步教学" : "试卷"),
       region: "深圳",
       grade: "七年级",
       examType: tabContext === "special" ? "专项" : tabContext === "chapter" ? "同步" : "试卷",

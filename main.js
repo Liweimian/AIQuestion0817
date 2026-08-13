@@ -1,18 +1,18 @@
 const topics = [
   { id:"t1", title:"龙岗易错二练：有理数符号与运算", focus:"错因诊断、针对变式、二次过关", reason:"龙岗易错二练", questions:15, minutes:20, difficulty:"中等", source:"龙岗区易错专题", usage:386, tag:"special", tone:"sage" },
-  { id:"t2", title:"2026 深圳南山区初一上期末数学真题", focus:"本地命题风格与阶段难度参考", reason:"深圳区级真题", highlight:"精品", questions:22, minutes:40, difficulty:"中等", source:"南山区初一上期末真题", usage:1206, tag:"paper", tone:"cream" },
+  { id:"t2", title:"2025-2026学年广东省深圳市南山区七年级（上）期末统考数学试卷", focus:"深圳市南山区七年级上学期期末数学真题", reason:"深圳区级真题", highlight:"区级真题", questions:22, minutes:40, difficulty:"中等", source:"南山区初一上期末真题", usage:1206, tag:"paper", tone:"cream" },
   { id:"t3", title:"深圳情境数学：代数式建模专项题单", focus:"深圳真实情境改编，考点不变、题面更新", reason:"深圳情境题", highlight:"名师推荐", questions:12, minutes:25, difficulty:"中等", source:"深圳情境题专题", usage:842, tag:"special", tone:"lilac" },
-  { id:"t4", title:"2024—2026 深圳期末真题汇编：轴对称", focus:"把分散真题整理成可直接使用的课内专题", reason:"真题汇编", highlight:"精品", questions:24, minutes:35, difficulty:"较难", source:"深圳初一下期末真题", usage:1532, tag:"paper", tone:"mist" },
-  { id:"t5", title:"2025—2026 深圳期末真题汇编：全等三角形", focus:"按考点重组近两年深圳区级真题", reason:"真题汇编", highlight:"精品", questions:18, minutes:30, difficulty:"中等", source:"深圳初一下期末真题", usage:613, tag:"special", tone:"sage" },
-  { id:"t6", title:"初一期末高频易错周测题单", focus:"名校周测，适合分层选题与命题参考", reason:"名校资源", highlight:"精品", questions:18, minutes:30, difficulty:"较难", source:"深圳外国语学校龙岗学校", usage:1089, tag:"paper", tone:"cream" },
+  { id:"t4", title:"2024—2026 深圳期末真题汇编：轴对称", focus:"把分散真题整理成可直接使用的课内专题", reason:"真题汇编", highlight:"精品", questions:24, minutes:35, difficulty:"较难", source:"深圳初一下期末真题", usage:1532, tag:"compilation", legacy:true, tone:"mist" },
+  { id:"t5", title:"2025—2026 深圳期末真题汇编：全等三角形", focus:"按考点重组近两年深圳区级真题", reason:"真题汇编", highlight:"精品", questions:18, minutes:30, difficulty:"中等", source:"深圳初一下期末真题", usage:613, tag:"compilation", legacy:true, tone:"sage" },
+  { id:"t6", title:"初一期末高频易错周测题单", focus:"期末高频易错题与周测题单", reason:"周测题单", highlight:"精品", questions:18, minutes:30, difficulty:"较难", source:"深圳外国语学校龙岗学校", usage:1089, tag:"special", tone:"cream" },
   { id:"t7", title:"整式运算高频易错巩固题单", focus:"整式运算常见错误归纳", reason:"热门系列", questions:14, minutes:20, difficulty:"中等", source:"全品学练考", usage:522, tag:"workbook", tone:"lilac" },
   { id:"t8", title:"七上正负数与数轴：概念理解过关题单", focus:"理解实际意义，准确判断", reason:"七上第1章", questions:16, minutes:20, difficulty:"简单", source:"区教研精选", usage:762, tag:"chapter", tone:"sage" },
-  { id:"t9", title:"有理数运算基础过关与易错自测", focus:"贴近教材知识链与能力层级", reason:"本地教辅", highlight:"精品", questions:20, minutes:25, difficulty:"中等", source:"多维导学案", usage:1143, tag:"workbook", tone:"cream" },
+  { id:"t9", title:"有理数运算基础过关：含易错自测", focus:"贴近教材知识链与能力层级", reason:"本地教辅", highlight:"精品", questions:20, minutes:25, difficulty:"中等", source:"多维导学案", usage:1143, tag:"workbook", tone:"cream" },
   { id:"t10", title:"整式加减高频易错：去括号与合并同类项", focus:"合并同类项与化简", reason:"七上第3章", questions:18, minutes:20, difficulty:"简单", source:"龙岗区教研室", usage:908, tag:"chapter", tone:"lilac" },
   { id:"t11", title:"一元一次方程应用：审题建模专项", focus:"顺序解题方法与实际应用", reason:"本校老师共建", questions:22, minutes:25, difficulty:"中等", source:"启航实验学校数学组", author:{ name:"李老师", school:"启航实验学校", tone:"amber" }, usage:1221, tag:"school", tone:"mist" },
   { id:"t12", title:"几何初步：图形语言与概念辨析", focus:"直线、射线和线段", reason:"七上第4章", questions:14, minutes:15, difficulty:"简单", source:"龙岗区实验学校", author:{ name:"赵老师", school:"龙岗区实验学校", tone:"mint" }, usage:669, tag:"school", tone:"sage" },
   { id:"t13", title:"有理数混合运算：方法进阶与提速", focus:"综合运算与技巧提升", reason:"七上第5章", questions:20, minutes:25, difficulty:"中等", source:"区教研精选", usage:1015, tag:"chapter", tone:"cream" },
-  { id:"t14", title:"2026 深圳福田区初一下期中数学真题", focus:"深圳真实阶段性考试，适合校准教学进度与难度", reason:"深圳区级真题", highlight:"最新", questions:20, minutes:35, difficulty:"较难", source:"福田区初一下期中真题", usage:984, tag:"paper", tone:"sage" },
+  { id:"t14", title:"2025-2026学年广东省深圳市福田区七年级（下）期中统考数学试卷", focus:"深圳市福田区七年级下学期期中数学真题", reason:"深圳区级真题", highlight:"新上", questions:20, minutes:35, difficulty:"较难", source:"福田区初一下期中真题", usage:984, tag:"paper", tone:"sage" },
   { id:"t15", title:"坂田片区七上课堂小测：整式加减", focus:"课堂检测，及时巩固", reason:"课堂小测", highlight:"最新", questions:12, minutes:15, difficulty:"简单", source:"坂田片区教研", author:{ name:"黄老师", school:"坂田实验学校", tone:"amber" }, usage:512, tag:"chapter", tone:"cream" },
   { id:"t16", title:"月考前查漏补缺：七上核心考点精选", focus:"月考精选，重点突破", reason:"月考精选", questions:18, minutes:25, difficulty:"中等", source:"龙岗区实验学校", author:{ name:"赵老师", school:"龙岗区实验学校", tone:"mint" }, usage:1266, tag:"school", tone:"lilac" },
   { id:"t17", title:"七上易错题二次过关：概念到变式", focus:"教研共建，优质共享", reason:"教研共建", highlight:"最新", questions:16, minutes:20, difficulty:"中等", source:"平湖片区教研", author:{ name:"刘老师", school:"平湖外国语学校", tone:"violet" }, usage:698, tag:"school", tone:"mist" },
@@ -23,22 +23,22 @@ const topics = [
   { id:"t22", title:"有理数课堂诊断：概念掌握过关题单", focus:"当堂检测概念掌握情况", reason:"课堂小测", questions:8, minutes:5, difficulty:"简单", source:"龙城初级中学", author:{ name:"周老师", school:"龙城初级中学", tone:"rose" }, usage:728, tag:"chapter", tone:"sage" },
   { id:"t23", title:"一元一次方程移项与符号易错专练", focus:"集中突破移项与符号错误", reason:"高频易错", questions:14, minutes:18, difficulty:"中等", source:"区教研精选", usage:1186, tag:"chapter", tone:"cream" },
   { id:"t24", title:"线段与角：易混概念辨析与规范表达", focus:"易混概念判断与规范表达", reason:"概念辨析", questions:12, minutes:15, difficulty:"简单", source:"龙岗区实验学校", usage:635, tag:"chapter", tone:"lilac" },
-  { id:"t25", title:"2026 深圳罗湖区初一下期末数学真题", focus:"深圳真实阶段性考试，反映本地命题风格", reason:"深圳区级真题", highlight:"最新", questions:20, minutes:30, difficulty:"中等", source:"罗湖区初一下期末真题", usage:1458, tag:"paper", tone:"mist" },
+  { id:"t25", title:"2025-2026学年广东省深圳市罗湖区七年级（下）期末统考数学试卷", focus:"深圳市罗湖区七年级下学期期末数学真题", reason:"深圳区级真题", highlight:"新上", questions:20, minutes:30, difficulty:"中等", source:"罗湖区初一下期末真题", usage:1458, tag:"paper", tone:"mist" },
   { id:"t26", title:"整式运算同步精练：基础到综合", focus:"同步巩固整式化简方法", reason:"热门系列", questions:18, minutes:25, difficulty:"中等", source:"原创新课堂", usage:884, tag:"workbook", tone:"sage" },
-  { id:"t27", title:"期末选择题高频考法：审题与快速提分", focus:"高频选择题与排除方法", reason:"本周热门", questions:16, minutes:20, difficulty:"中等", source:"龙岗区教研室", usage:1328, tag:"paper", tone:"cream" },
+  { id:"t27", title:"期末选择题高频考法：审题与快速提分", focus:"高频选择题与排除方法", reason:"选择题专题", questions:16, minutes:20, difficulty:"中等", source:"龙岗区教研室", usage:1328, tag:"special", tone:"cream" },
   { id:"t28", title:"数学阅读理解：真实情境信息提取", focus:"从真实情境中提取数量关系", reason:"情境专项", questions:10, minutes:22, difficulty:"较难", source:"区教研精选", usage:576, tag:"special", tone:"lilac" },
   { id:"t29", title:"周末分层作业 A：基础巩固与补弱", focus:"面向基础薄弱学生巩固", reason:"基础巩固", questions:15, minutes:20, difficulty:"简单", source:"启航实验学校数学组", author:{ name:"陈老师", school:"启航实验学校", tone:"blue" }, usage:168, tag:"school", tone:"mist" },
   { id:"t30", title:"周末分层作业 B：综合应用与提升", focus:"基础巩固后的综合应用", reason:"综合应用", questions:18, minutes:28, difficulty:"中等", source:"启航实验学校数学组", author:{ name:"陈老师", school:"启航实验学校", tone:"blue" }, usage:152, tag:"school", tone:"sage" },
   { id:"t31", title:"代数式建模：真实情境列式专项", focus:"由情境列式并解释代数式", reason:"方法专项", questions:13, minutes:18, difficulty:"中等", source:"平湖片区教研", usage:692, tag:"special", tone:"cream" },
   { id:"t32", title:"几何语言：符号转换与规范书写专项", focus:"训练符号语言与文字表达", reason:"规范表达专项", questions:12, minutes:20, difficulty:"中等", source:"龙岗区教研室", usage:804, tag:"special", tone:"lilac" },
-  { id:"t33", title:"期中压轴题：关键步骤分层拆解", focus:"按关键步骤拆解综合题", reason:"名校共建", questions:9, minutes:30, difficulty:"较难", source:"龙岗区四中联考", usage:1036, tag:"paper", tone:"mist" },
+  { id:"t33", title:"期中压轴题：关键步骤分层拆解", focus:"按关键步骤拆解综合题", reason:"联考题源汇编", questions:9, minutes:30, difficulty:"较难", source:"龙岗区四中联考", usage:1036, tag:"compilation", tone:"mist" },
   { id:"t34", title:"一元一次方程：典型题型与变式突破", focus:"典型方程题型与变式训练", reason:"热门系列", questions:20, minutes:30, difficulty:"中等", source:"多维导学案", usage:916, tag:"workbook", tone:"sage" },
   { id:"t35", title:"月考前查漏补缺：本月高频易错", focus:"快速覆盖本月教学重点", reason:"查漏补缺", highlight:"最新", questions:14, minutes:20, difficulty:"中等", source:"坂田片区教研", usage:1274, tag:"chapter", tone:"cream" },
   { id:"t36", title:"七上有理数方法：公开课配套小测", focus:"从概念辨析到方法迁移的课堂练习", reason:"名校公开交流", highlight:"精品", questions:12, minutes:18, difficulty:"中等", source:"深圳中学龙岗学校", usage:1682, tag:"school", tone:"sage" },
   { id:"t37", title:"期中压轴题：关键步骤与分层选题", focus:"按关键步骤拆分综合题，适合分层使用", reason:"名校教研共建", highlight:"精品", questions:10, minutes:28, difficulty:"较难", source:"龙岗区实验学校", usage:1436, tag:"school", tone:"cream" },
   { id:"t38", title:"数学阅读与真实情境建模题单", focus:"从真实语境中提取数量关系与条件", reason:"名校公开交流", highlight:"精品", questions:14, minutes:25, difficulty:"中等", source:"龙岗区外国语学校", usage:1298, tag:"school", tone:"lilac" },
   { id:"t39", title:"几何语言规范与推理进阶题单", focus:"强化图形语言、推理步骤与规范书写", reason:"名校教研共建", highlight:"精品", questions:16, minutes:24, difficulty:"中等", source:"龙城初级中学", usage:1184, tag:"school", tone:"mist" },
-  { id:"t40", title:"有理数概念：数轴、相反数与绝对值过关", focus:"概念辨析、数轴表示与相反数", reason:"同步巩固", questions:16, minutes:20, difficulty:"简单", source:"多维导学案", usage:968, tag:"workbook", tone:"sage" },
+  { id:"t40", title:"有理数概念课时过关：数轴、相反数与绝对值", focus:"概念辨析、数轴表示与相反数", reason:"同步巩固", questions:16, minutes:20, difficulty:"简单", source:"多维导学案", usage:968, tag:"workbook", tone:"sage" },
   { id:"t41", title:"有理数单元检测：运算、应用与探究", focus:"覆盖运算法则、混合运算与实际应用", reason:"单元检测", highlight:"精品", questions:22, minutes:35, difficulty:"中等", source:"多维导学案", usage:1046, tag:"workbook", tone:"mist" },
   { id:"t42", title:"整式加减课时精练：去括号与合并同类项", focus:"合并同类项与去括号课时训练", reason:"热门系列", questions:14, minutes:18, difficulty:"简单", source:"全品学练考", usage:786, tag:"workbook", tone:"cream" },
   { id:"t43", title:"一元一次方程同步检测：解法与应用", focus:"从解方程到实际问题的阶段检测", reason:"热门系列", questions:20, minutes:30, difficulty:"中等", source:"全品学练考", usage:852, tag:"workbook", tone:"lilac" },
@@ -49,7 +49,21 @@ const topics = [
   { id:"t48", title:"整式加减同步方法：易错点与变式", focus:"围绕课时重点进行方法归纳", reason:"热门系列", questions:15, minutes:20, difficulty:"中等", source:"原创新课堂", usage:812, tag:"workbook", tone:"sage" },
   { id:"t49", title:"几何初步同步方法：图形语言与推理", focus:"直线、射线、线段与角的规范表达", reason:"热门系列", questions:16, minutes:22, difficulty:"中等", source:"原创新课堂", usage:744, tag:"workbook", tone:"cream" },
   { id:"t50", title:"一元一次方程题型突破：解法到应用", focus:"分类掌握方程典型题型和变式", reason:"热门系列", questions:18, minutes:28, difficulty:"中等", source:"多维导学案", usage:936, tag:"workbook", tone:"lilac" },
-  { id:"t51", title:"几何语言专题：读图、转换与规范表达", focus:"训练几何语言转换与推理书写", reason:"热门系列", questions:14, minutes:24, difficulty:"中等", source:"多维导学案", usage:868, tag:"workbook", tone:"mist" }
+  { id:"t51", title:"几何语言专题：读图、转换与规范表达", focus:"训练几何语言转换与推理书写", reason:"热门系列", questions:14, minutes:24, difficulty:"中等", source:"多维导学案", usage:868, tag:"workbook", tone:"mist" },
+  { id:"t52", title:"2024—2026 深圳初一下期末真题汇编：图形的轴对称", focus:"近三年深圳各区真题去重汇编，覆盖核心考法", reason:"本地真题汇编", highlight:"最新", questions:28, minutes:40, difficulty:"中等", source:"深圳各区期末真题", usage:1528, tag:"compilation", tone:"mist" },
+  { id:"t53", title:"2025—2026 深圳初一下期末真题汇编：全等三角形", focus:"按考点和难度梯度重组本地期末真题", reason:"本地真题汇编", highlight:"最新", questions:24, minutes:38, difficulty:"中等", source:"深圳各区期末真题", usage:1316, tag:"compilation", tone:"sage" },
+  { id:"t54", title:"龙岗区七上期中真题汇编：有理数高频题（2023—2025）", focus:"汇集区统考与重点校高频题，解析已经复核", reason:"地区真题汇编", highlight:"精品", questions:32, minutes:45, difficulty:"中等", source:"龙岗区教研精选", usage:1842, tag:"compilation", tone:"cream" },
+  { id:"t55", title:"深圳重点校七年级上学期期末压轴题汇编", focus:"精选重点校压轴与探究题，按解法模型归类", reason:"名校汇编", highlight:"名师推荐", questions:18, minutes:45, difficulty:"较难", source:"深圳重点校公开试卷", usage:1238, tag:"compilation", tone:"lilac" },
+  { id:"t56", title:"深圳各区近三年真题汇编：一元一次方程", focus:"按题型、场景和易错点完成去重编排", reason:"年度汇编", highlight:"精品", questions:30, minutes:42, difficulty:"中等", source:"深圳区级真题库", usage:1464, tag:"compilation", tone:"sage" },
+  { id:"t57", title:"深圳七年级数学真实情境题真题汇编", focus:"保留本地真实语境，集中训练信息提取与建模", reason:"情境题汇编", highlight:"最新", questions:20, minutes:35, difficulty:"较难", source:"深圳本地真题库", usage:986, tag:"compilation", tone:"mist" },
+  { id:"t58", title:"深圳中学初一上期末周测模拟卷", focus:"期末周测模拟与高频考法", reason:"周测模拟", highlight:"名校题源", questions:22, minutes:40, difficulty:"较难", source:"深圳中学教研精选", usage:1168, tag:"special", tone:"cream" },
+  { id:"t59", title:"2025-2026学年广东省深圳市龙岗区七年级（上）10月月考数学试卷", focus:"深圳市龙岗区七年级上学期 10 月月考数学试卷", reason:"龙岗区月考", highlight:"新上", questions:20, minutes:40, difficulty:"中等", source:"龙岗区七上 10 月月考", usage:754, tag:"paper", tone:"sage" },
+  { id:"t60", title:"七上有理数单元测验卷", focus:"概念、运算、应用与探究的单元测验", reason:"单元测验", highlight:"精品", questions:24, minutes:45, difficulty:"中等", source:"龙岗区初中数学教研组", usage:1026, tag:"special", tone:"lilac" },
+  { id:"t61", title:"深圳七年级数与式中考衔接诊断卷", focus:"初一核心知识与中考命题方式衔接", reason:"中考衔接", questions:18, minutes:35, difficulty:"较难", source:"深圳初中数学衔接专题", usage:892, tag:"special", tone:"mist" },
+  { id:"t62", title:"2025-2026学年广东省深圳中学七年级（下）期中数学试卷", focus:"深圳中学七年级下学期期中数学试卷", reason:"学校真实考试", questions:22, minutes:90, difficulty:"较难", source:"深圳中学公开试卷", usage:1684, tag:"paper", tone:"cream" },
+  { id:"t63", title:"2025-2026学年广东省深圳实验学校中学部七年级（下）期中数学试卷", focus:"深圳实验学校中学部七年级下学期期中数学试卷", reason:"学校真实考试", questions:24, minutes:90, difficulty:"中等", source:"深圳实验学校中学部公开试卷", usage:1326, tag:"paper", tone:"sage" },
+  { id:"t64", title:"2025-2026学年广东省深圳市宝安区七年级（下）期中统考数学试卷", focus:"深圳市宝安区七年级下学期期中数学试卷", reason:"深圳区级真题", questions:22, minutes:90, difficulty:"中等", source:"宝安区七年级期中真题", usage:1108, tag:"paper", tone:"mist" },
+  { id:"t65", title:"2025-2026学年广东省深圳市育才中学教育集团七年级（下）期中联考数学试卷", focus:"育才中学教育集团七年级下学期期中数学试卷", reason:"集团校联考", questions:23, minutes:90, difficulty:"中等", source:"育才中学教育集团公开试卷", usage:896, tag:"paper", tone:"lilac" }
 ];
 const workbookAlbums = [
   { id: "duowei", name: "多维导学案", subtitle: "课时练 + 单元检测", source: "多维导学案" },
@@ -122,7 +136,7 @@ window.addEventListener("message", event => {
   if (data.type === "aiq-set-filter" && typeof data.filter === "string") {
     if (document.querySelector(`#filterChips [data-filter="${data.filter}"]`) || data.filter === "all") {
       prepareFilterOpen(data.filter, data);
-      setMainFilter(data.filter === "all" ? "all" : data.filter);
+      setMainFilter(data.filter === "all" ? "all" : data.filter, data);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
@@ -131,40 +145,52 @@ window.addEventListener("message", event => {
 const byId = Object.fromEntries(topics.map(topic => [topic.id, topic]));
 const toneMap = { sage:"var(--sage)", cream:"var(--cream)", lilac:"var(--lilac)", mist:"var(--mist)" };
 const aiPlaceholder = "描述你想要的题单，例如：七上有理数易错题，15 题，中等难度";
-const bankStats = { topicTotal: 28460, weeklyNew: 320, questionTotal: 6000000 };
+const bankStats = { paperTotal: 28460, weeklyNewPapers: 320 };
 let currentFilter = "all";
 let currentQuery = "";
+let homepageSearchScope = "all";
+const homepagePaperTypeSelections = new Set();
 let aiDockObserver = null;
 let aiModalOpen = false;
 let hasUserScrolled = false;
 let filterManuallyExpanded = false;
 const feedFilterState = { type:"all", difficulty:"all", source:"all", feature:"all", sort:"default" };
 const paperFilterState = {
-  examType: "final",
+  examType: "all",
   year: "all",
   grade: "all",
+  authority: "all",
   source: "all",
   sort: "latest",
   query: ""
 };
 const paperExamTypes = {
-  final: { label: "期末", match: topic => /期末/.test(topic.title) },
-  midterm: { label: "期中", match: topic => /期中/.test(topic.title) },
-  monthly: { label: "月考", match: topic => /月考/.test(topic.title) },
-  unit: { label: "单元测试", match: topic => /单元|周测/.test(topic.title) },
-  other: { label: "其他", match: topic => topic.tag === "paper" && !/期末|期中|月考|单元|周测|中考|小升初|模拟/.test(topic.title) },
-  "zhongkao-real": { label: "真题", match: topic => /中考|小升初|真题汇编/.test(topic.title) },
-  "zhongkao-mock": { label: "模拟", match: topic => /模拟/.test(topic.title) }
+  all: { label: "全部试卷", match: () => true },
+  real: { label: "真题", match: topic => homepagePaperItems[topic.id]?.examType === "real" || (!homepagePaperItems[topic.id] && /中考/.test(topic.title) && /真题|试卷/.test(topic.title) && !/模拟|预测|仿真/.test(topic.title)) },
+  mock: { label: "模拟", match: topic => homepagePaperItems[topic.id]?.examType === "mock" || (!homepagePaperItems[topic.id] && /中考/.test(topic.title) && /模拟|预测|仿真/.test(topic.title)) },
+  opening: { label: "开学考试", match: topic => homepagePaperItems[topic.id]?.examType === "opening" || (!homepagePaperItems[topic.id] && /开学考|开学考试|开学摸底|入学摸底/.test(topic.title)) },
+  final: { label: "期末", match: topic => homepagePaperItems[topic.id]?.examType === "final" || (!homepagePaperItems[topic.id] && /期末/.test(topic.title)) },
+  midterm: { label: "期中", match: topic => homepagePaperItems[topic.id]?.examType === "midterm" || (!homepagePaperItems[topic.id] && /期中/.test(topic.title)) },
+  monthly: { label: "月考", match: topic => homepagePaperItems[topic.id]?.examType === "monthly" || (!homepagePaperItems[topic.id] && /月考/.test(topic.title)) },
+  unit: { label: "单元测试", match: topic => homepagePaperItems[topic.id]?.examType === "unit" || (!homepagePaperItems[topic.id] && /单元测试|单元检测|单元测验|章末检测/.test(topic.title)) },
+  sync: { label: "同步练习", match: topic => homepagePaperItems[topic.id]?.examType === "sync" || (!homepagePaperItems[topic.id] && /同步练习卷|同步测试卷|课时检测/.test(topic.title)) },
+  other: { label: "其他", match: topic => homepagePaperItems[topic.id]?.examType === "other" || (!homepagePaperItems[topic.id] && topic.tag === "paper" && !/开学|期末|期中|月考|单元测试|单元检测|单元测验|章末检测|中考|模拟|预测|仿真|同步练习卷|同步测试卷|课时检测/.test(topic.title)) }
 };
+
+function normalizePaperExamType(examType) {
+  if (examType === "zhongkao-real") return "real";
+  if (examType === "zhongkao-mock") return "mock";
+  return examType;
+}
 const paperYearOptions = ["all", "2026", "2025", "2024", "2023", "earlier"];
 const paperGradeOptions = [
   { id: "all", label: "全部" },
-  { id: "g9-2", label: "九年级下", match: /九年级下|初三下/ },
-  { id: "g9-1", label: "九年级上", match: /九年级上|初三上/ },
-  { id: "g8-2", label: "八年级下", match: /八年级下|初二下/ },
-  { id: "g8-1", label: "八年级上", match: /八年级上|初二上/ },
-  { id: "g7-2", label: "七年级下", match: /七年级下|初一下/ },
-  { id: "g7-1", label: "七年级上", match: /七年级上|初一上/ }
+  { id: "g9-2", label: "九年级下", match: /九年级(?:（下）|\(下\)|下)|初三下/ },
+  { id: "g9-1", label: "九年级上", match: /九年级(?:（上）|\(上\)|上)|初三上/ },
+  { id: "g8-2", label: "八年级下", match: /八年级(?:（下）|\(下\)|下)|初二下/ },
+  { id: "g8-1", label: "八年级上", match: /八年级(?:（上）|\(上\)|上)|初二上/ },
+  { id: "g7-2", label: "七年级下", match: /七年级(?:（下）|\(下\)|下)|初一下/ },
+  { id: "g7-1", label: "七年级上", match: /七年级(?:（上）|\(上\)|上)|初一上/ }
 ];
 const paperSourceOptions = [
   { id: "all", label: "全部" },
@@ -173,6 +199,22 @@ const paperSourceOptions = [
   { id: "school", label: "本校私有库", match: topic => Boolean(topic.author) }
 ];
 const specialFilterState = { category: "all", difficulty: "all", origin: "all", query: "" };
+const compilationFilterState = { category: "all", signal: "all", query: "" };
+const compilationCategories = [
+  { id: "all", label: "全部汇编", match: () => true },
+  { id: "region", label: "地区真题汇编", match: topic => /深圳|龙岗|各区|地区/.test(`${topic.title} ${topic.source} ${topic.reason}`) },
+  { id: "annual", label: "年度汇编", match: topic => /近三年|202[3-6]|年度/.test(`${topic.title} ${topic.reason}`) },
+  { id: "school", label: "名校汇编", match: topic => /名校|重点校/.test(`${topic.title} ${topic.source} ${topic.reason}`) },
+  { id: "topic", label: "专题汇编", match: topic => /轴对称|三角形|方程|有理数|情境|考点|题型/.test(`${topic.title} ${topic.focus}`) },
+  { id: "multi", label: "多卷精选", match: topic => /各区|统考|高频|去重|多份/.test(`${topic.title} ${topic.focus} ${topic.source}`) }
+];
+const compilationSignals = [
+  { id: "all", label: "全部汇编", match: () => true },
+  { id: "local", label: "深圳本地", match: topic => /深圳|龙岗/.test(`${topic.title} ${topic.source}`) },
+  { id: "recent", label: "近三年", match: topic => /近三年|202[3-6]/.test(topic.title) },
+  { id: "dedup", label: "已去重", match: topic => /去重/.test(`${topic.focus} ${topic.reason}`) },
+  { id: "verified", label: "解析已校验", match: topic => /校验|复核/.test(`${topic.focus} ${topic.reason}`) }
+];
 const specialKnowledgeModules = [
   { id: "numbers", label: "数与式", match: topic => /有理数|整式|代数|数与式/.test(`${topic.title} ${topic.focus}`) },
   { id: "equations", label: "方程（组）与不等式（组）", match: topic => /方程|不等式/.test(`${topic.title} ${topic.focus}`) },
@@ -231,7 +273,9 @@ const toast = document.querySelector("#toast");
 
 function primaryTag(topic) {
   if (topic.highlight) return topic.highlight;
-  if (topic.title.includes("真题")) return "真题汇编";
+  if (homepagePaperItems[topic.id]?.examType === "real") return "中考真题";
+  if (homepagePaperItems[topic.id]?.examType === "mock") return "中考模拟";
+  if (topic.tag === "compilation" && topic.title.includes("真题")) return "真题汇编";
   if (topic.title.includes("易错")) return "高频易错";
   if (topic.author?.school && /深圳中学|龙岗区实验|龙岗区外国语|龙城初级|深圳外国语/.test(topic.author.school)) return "名校资源";
   if (topic.tag === "school") return "本地精选";
@@ -242,13 +286,16 @@ function primaryTag(topic) {
 
 function topicTags(topic) {
   const tags = [];
-  if (/期中/.test(topic.title)) tags.push("期中");
+  const paperTypeLabels = { real:"真题", mock:"模拟", opening:"开学考试", midterm:"期中", final:"期末", monthly:"月考", unit:"单元测试", sync:"同步练习", other:"其他" };
+  const paperType = homepagePaperItems[topic.id]?.examType;
+  if (paperType && paperTypeLabels[paperType]) tags.push(paperTypeLabels[paperType]);
+  else if (/中考/.test(topic.title) && /真题/.test(topic.title) && !/模拟|预测|仿真/.test(topic.title)) tags.push("真题");
+  else if (/期中/.test(topic.title)) tags.push("期中");
   else if (/期末/.test(topic.title)) tags.push("期末");
   else if (/月考/.test(topic.title)) tags.push("月考");
-  if (/真题/.test(topic.title) || topic.tag === "paper") tags.push("真题");
   if (/压轴|提高|培优/.test(`${topic.title} ${topic.focus}`)) tags.push("压轴题");
   if (/教研|学校|校/.test(`${topic.source} ${topic.author?.school || ""}`)) tags.push("飞象教研");
-  if (!tags.length) tags.push(topic.tag === "special" ? "专题练习" : "同步练习");
+  if (!tags.length) tags.push(topic.tag === "special" ? "专项练习" : "同步练习");
   return [...new Set(tags)].slice(0, 1);
 }
 
@@ -284,10 +331,16 @@ function topicCard(topic, options = "default") {
   const context = typeof options === "string" ? "feed" : options.context || "feed";
   const omitIntro = shouldOmitPaperIntro(topic, context);
   const examClass = omitIntro ? " exam-paper-card" : "";
+  const paperMeta = context === "paper" ? homepagePaperItems[topic.id] : null;
+  const paperPresentation = paperMeta ? getHomepagePaperPresentation(paperMeta) : null;
+  const paperPublishedText = paperMeta?.publishedAt ? paperMeta.publishedAt.replaceAll("-", "/") : "";
+  const paperSignal = context === "paper"
+    ? `<span class="card-reason paper-source-signal ${paperPresentation?.className || "is-local"}">${paperPresentation?.label || "学校试卷"}</span>${paperMeta?.peerMatched ? '<span class="card-tag-list"><em class="paper-peer-signal">同类校</em></span>' : ""}`
+    : "";
   return `
     <article class="topic-card${variant === "featured" ? " featured-topic-card" : ""}${examClass}" data-topic="${topic.id}" data-source-name="${topic.source}" tabindex="0" role="button" aria-label="查看${topic.title}" style="--tone:${toneMap[topic.tone] || "var(--sage)"}">
       <div class="card-cover">
-        <div class="card-signals"><span class="card-reason">${primaryTag(topic)}</span><span class="card-tag-list">${topicTags(topic).map(tag => `<em>${tag}</em>`).join("")}</span></div>
+        <div class="card-signals">${paperSignal || `<span class="card-reason">${primaryTag(topic)}</span><span class="card-tag-list">${topicTags(topic).map(tag => `<em>${tag}</em>`).join("")}</span>`}</div>
         <h3>${topic.title}</h3>
         ${omitIntro ? "" : `<p class="topic-brief">${topicBrief(topic)}</p>`}
         ${variant === "featured" ? `<p class="featured-topic-focus">${topic.focus}</p>` : ""}
@@ -296,7 +349,7 @@ function topicCard(topic, options = "default") {
         <div class="card-meta"><span>${topic.questions} 题</span>${omitIntro ? "" : `<span>${topic.difficulty}</span>`}</div>
         <div class="card-footer">
           ${sourceMarkup(topic)}
-          <span class="card-usage">${topic.usage.toLocaleString()} 人使用</span>
+          <span class="card-usage">${topic.usage.toLocaleString()} 人使用${paperPublishedText ? `<span class="card-published">${paperPublishedText}</span>` : ""}</span>
           <button class="bookmark" data-bookmark aria-label="收藏题单"><i class="ri-bookmark-line"></i></button>
         </div>
       </div>
@@ -340,190 +393,422 @@ const syncBookLessons = {
   ]
 };
 
-function homepagePracticeModule() {
+function homepageEntryOptions(filter, entry) {
+  const optionsByFilter = {
+    paper: {
+      "真题": { examType: "real" },
+      "模拟": { examType: "mock" },
+      "周测": { examType: "unit", query: "周测" },
+      "月考": { examType: "monthly" },
+      "期中": { examType: "midterm" },
+      "期末": { examType: "final" },
+      "单元测验": { examType: "unit", query: "单元" },
+      "中考衔接": { examType: "all", query: "中考衔接" },
+      "阶段测评": { examType: "all" },
+      "基于整卷改编": { examType: "all" }
+    },
+    workbook: {
+      "本地教辅": { view: "topic", query: "本地教辅", keepAlbumState: true },
+      "热门教辅": { view: "topic", query: "热门系列", keepAlbumState: true },
+      "同步训练": { view: "topic", query: "同步", keepAlbumState: true },
+      "导学案": { view: "topic", query: "导学案", keepAlbumState: true },
+      "分层作业": { view: "topic", query: "基础到综合", keepAlbumState: true },
+      "复习训练": { view: "topic", query: "进阶", keepAlbumState: true },
+      "同步备课": { view: "topic", query: "同步", keepAlbumState: true },
+      "课后巩固": { view: "topic", query: "过关", keepAlbumState: true }
+    },
+    compilation: {
+      "地区真题汇编": { category: "region" },
+      "年度汇编": { category: "annual" },
+      "名校汇编": { category: "school" },
+      "专题汇编": { category: "topic" },
+      "多卷精选": { category: "multi" },
+      "单元复习": { category: "topic" }
+    },
+    special: {
+      "知识点专项": { category: "all" },
+      "题型专项": { category: "geo-model" },
+      "易错专项": { category: "all", query: "易错" },
+      "情境题": { category: "all", query: "情境" },
+      "思维提升": { category: "hard-breakthrough" },
+      "巩固复习": { category: "all", query: "中考衔接" },
+      "易错诊断": { category: "all", query: "易错" },
+      "专项突破": { category: "hard-breakthrough" }
+    }
+  };
+  const defaultsByFilter = {
+    paper: { examType: "all", year: "all", grade: "all", authority: "all", source: "all", sort: "latest", query: "" },
+    workbook: { origin: "all", query: "", keepAlbumState: true },
+    compilation: { signal: "all", query: "" },
+    special: { difficulty: "all", origin: "all", query: "" }
+  };
+  return entry
+    ? { ...(defaultsByFilter[filter] || {}), ...(optionsByFilter[filter]?.[entry] || {}) }
+    : {};
+}
+
+const homepagePaperItems = {
+  // DEMO 日期用于演示「本地新上」排序；正式环境由资源服务返回平台首次上线时间。
+  t2: { id:"t2", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"440305", publishedAt:"2026-08-11" },
+  t14: { id:"t14", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"440304", publishedAt:"2026-08-06" },
+  t25: { id:"t25", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"440303", publishedAt:"2026-08-07" },
+  t59: { id:"t59", authority:"local", examType:"monthly", sourceVerified:true, districtCode:"440307", publishedAt:"2026-08-13" },
+  t62: { id:"t62", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-12" },
+  t63: { id:"t63", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, peerMatched:true, publishedAt:"2026-08-09" },
+  t64: { id:"t64", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"440306", publishedAt:"2026-08-08" },
+  t65: { id:"t65", authority:"group", examType:"midterm", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-10" }
+};
+
+// DEMO 运营白名单：正式环境按城市、学年和租户配置，不从标题或使用量推断。
+const strongDistrictPolicy = {
+  label: "强区",
+  schoolYear: "2025-2026",
+  districtCodes: new Set(["440305", "440304"])
+};
+
+function isStrongDistrictPaper(item) {
+  return Boolean(item?.sourceVerified && item.districtCode && strongDistrictPolicy.districtCodes.has(item.districtCode));
+}
+
+const homepagePaperAuthorityLabels = {
+  school: "名校",
+  district: "区统考",
+  districtPaper: "区级试卷",
+  group: "集团联考",
+  local: "本区试卷"
+};
+
+const homepagePaperSourceClasses = {
+  school: "is-school",
+  district: "is-district",
+  districtPaper: "is-district-paper",
+  group: "is-group",
+  local: "is-local"
+};
+
+function getHomepagePaperPresentation(item) {
+  if (!item?.sourceVerified) return { label:"学校试卷", className:"is-local" };
+  if (item.authority === "school" && !item.famousSchoolVerified) return { label:"学校原卷", className:"is-local" };
+  return {
+    label: homepagePaperAuthorityLabels[item.authority] || "学校试卷",
+    className: homepagePaperSourceClasses[item.authority] || "is-local"
+  };
+}
+
+function getHomepagePaperFilters(item) {
+  if (!item) return [];
+  return [
+    item.authority === "school" && item.famousSchoolVerified ? "school" : item.authority,
+    isStrongDistrictPaper(item) ? "strong" : "",
+    item.peerMatched ? "peer" : ""
+  ].filter(Boolean);
+}
+
+const paperAuthorityOptions = [
+  { id:"all", label:"全部" },
+  { id:"school", label:"名校", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.famousSchoolVerified },
+  { id:"strong", label:strongDistrictPolicy.label, match: topic => isStrongDistrictPaper(homepagePaperItems[topic.id]) },
+  { id:"district", label:"区统考", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "district" },
+  { id:"group", label:"集团联考", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "group" },
+  { id:"peer", label:"同类校", match: topic => Boolean(homepagePaperItems[topic.id]?.peerMatched) },
+  { id:"local", label:"本区试卷", match: topic => homepagePaperItems[topic.id]?.sourceVerified && homepagePaperItems[topic.id]?.authority === "local" }
+];
+
+const homepageSyncItems = {
+  t40: { type:"课时练", source:"多维导学案", level:"基础" },
+  t42: { type:"课时练", source:"全品学练考", level:"基础" },
+  t9: { type:"课后巩固", source:"多维导学案", level:"中等" },
+  t41: { type:"单元检测", source:"多维导学案", level:"中等" },
+  t54: { type:"章节真题", source:"龙岗区教研精选", level:"中等" },
+  t56: { type:"章节真题", source:"深圳区级真题库", level:"中等" }
+};
+
+const homepageFeaturedData = {
+  local: {
+    description: "优先展示深圳本地新上资源，按资源类型分区呈现",
+    papers: [
+      homepagePaperItems.t59,
+      homepagePaperItems.t62,
+      homepagePaperItems.t2,
+      homepagePaperItems.t65,
+      homepagePaperItems.t63,
+      homepagePaperItems.t64,
+      homepagePaperItems.t25,
+      homepagePaperItems.t14
+    ],
+    sync: ["t40", "t42"],
+    compilations: ["t54", "t56"]
+  },
+  adopted: {
+    description: "按平台使用数据排序，实际采用口径接入后替换",
+    papers: [
+      homepagePaperItems.t25,
+      homepagePaperItems.t2,
+      homepagePaperItems.t14,
+      homepagePaperItems.t59,
+      homepagePaperItems.t62,
+      homepagePaperItems.t63,
+      homepagePaperItems.t64,
+      homepagePaperItems.t65
+    ],
+    sync: ["t9", "t41"],
+    compilations: ["t54", "t56"]
+  }
+};
+
+const homepagePaperTypeOptions = [
+  { id:"real", label:"真题" },
+  { id:"mock", label:"模拟" },
+  { id:"opening", label:"开学考试" },
+  { id:"midterm", label:"期中" },
+  { id:"final", label:"期末" },
+  { id:"monthly", label:"月考" },
+  { id:"unit", label:"单元测试" },
+  { id:"sync", label:"同步练习" },
+  { id:"other", label:"其它" }
+];
+
+function getHomepagePaperTypeIds(item) {
+  if (!item) return [];
+  return [item.examType || "other"];
+}
+
+function matchesHomepagePaperTypeSelections(typeIds) {
+  const selected = [...homepagePaperTypeSelections][0] || "all";
+  return selected === "all" || typeIds.includes(selected);
+}
+
+function getHomepagePaperTypeFacts(item) {
+  const type = homepagePaperTypeOptions.find(option => option.id === (item?.examType || "other"));
+  return type ? [{ label:type.label, className:["real", "mock"].includes(type.id) ? "is-paper-nature" : "is-paper-stage" }] : [];
+}
+
+function homepagePaperCard(item, options = {}) {
+  const topic = byId[item.id];
+  if (!topic) return "";
+  const presentation = getHomepagePaperPresentation(item);
+  const secondaryFact = item.peerMatched
+    ? { label:"同类校", className:"is-peer" }
+    : isStrongDistrictPaper(item)
+      ? { label:strongDistrictPolicy.label, className:"is-strong" }
+      : null;
+  const facts = [
+    { ...presentation },
+    ...(secondaryFact ? [secondaryFact] : []),
+    ...getHomepagePaperTypeFacts(item)
+  ];
+  const filters = getHomepagePaperFilters(item);
+  const typeIds = getHomepagePaperTypeIds(item);
+  const publishedText = item.publishedAt ? item.publishedAt.replaceAll("-", "/") : "";
+  const showUsage = options.lane !== "local";
   return `
-    <section class="home-mod home-mod-practice" aria-label="同步练习与同步章节真题汇编">
-      <div class="practice-split">
-        <article class="practice-book home-panel">
-          <header class="mod-head mod-head-compact">
-            <span class="mod-kicker"><i class="ri-book-open-line"></i>同步练习</span>
-            <button class="mod-link" type="button" data-open-filter="chapter">全部 <i class="ri-arrow-right-s-line"></i></button>
+    <button class="home-paper-card ${options.compact ? "is-compact" : ""}" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
+      <span class="home-paper-copy">
+        <span class="home-featured-resource-title"><b>${topic.title}</b></span>
+        <span class="home-paper-meta-row"><span class="home-paper-facts">${facts.map(fact => `<em class="${fact.className}">${fact.label}</em>`).join("")}</span><small>${showUsage ? `<span><i class="ri-user-line"></i>${topic.usage.toLocaleString()} 人使用</span>` : ""}${publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}</small></span>
+      </span>
+      <i class="ri-arrow-right-s-line home-card-arrow"></i>
+    </button>`;
+}
+
+function homepageCompactResource(topicId, options = {}) {
+  const topic = byId[topicId];
+  if (!topic) return "";
+  const display = homepageSyncItems[topicId] || { type:options.type || "同步练习", source:topic.source, level:topic.difficulty };
+  const detail = `${topic.questions}题 · ${topic.minutes}分钟 · ${display.level || topic.difficulty}`;
+  const brandInTitle = ["多维导学案", "全品学练考"].includes(display.source);
+  const displayTitle = brandInTitle ? `[${display.source}]${topic.title}` : topic.title;
+  return `
+    <button class="home-compact-resource ${display.type === "章节真题" ? "is-compilation" : ""}" type="button" data-topic="${topic.id}" data-context="${options.context || "series"}">
+      <span class="home-compact-copy"><span class="home-featured-resource-title"><b>${displayTitle}</b></span><span class="home-compact-meta"><span>${brandInTitle ? "" : `<em class="home-compact-source">${display.source}</em>`}<em class="home-compact-task">${display.type}</em><i>${detail}</i></span><small><i class="ri-user-line"></i>${topic.usage.toLocaleString()} 人使用</small></span></span>
+      <i class="ri-arrow-right-s-line"></i>
+    </button>`;
+}
+
+function homepagePaperLane(mode, title, papers) {
+  const laneIcon = mode === "local" ? "ri-sparkling-2-fill" : "ri-fire-fill";
+  return `
+    <section class="home-paper-lane is-${mode}" data-paper-lane="${mode}" aria-labelledby="paper-lane-title-${mode}">
+      <header><h3 id="paper-lane-title-${mode}"><i class="${laneIcon}"></i>${title}</h3></header>
+      <div class="home-paper-lane-list">${papers.map(item => homepagePaperCard(item, { lane:mode })).join("")}</div>
+      <div class="home-paper-lane-empty" hidden>当前筛选下暂无资源</div>
+    </section>`;
+}
+
+function homepageFeaturedPanel() {
+  const localPapers = [...homepageFeaturedData.local.papers]
+    .sort((a, b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
+  const adoptedPapers = [...homepageFeaturedData.adopted.papers]
+    .sort((a, b) => (byId[b.id]?.usage || 0) - (byId[a.id]?.usage || 0));
+  const syncData = homepageFeaturedData.local;
+  const typeTabs = [{ id:"all", label:"全部" }, ...homepagePaperTypeOptions];
+  return `
+    <div class="home-featured-panel" data-featured-panel="combined">
+      <div class="home-featured-layout" data-featured-layout>
+        <section class="home-featured-paper">
+          <header class="home-featured-subhead home-paper-shared-head">
+            <div class="home-paper-title-line">
+              <span><i class="ri-file-list-3-line"></i>试卷</span>
+            </div>
+            <div class="home-paper-head-actions">
+              <div class="home-featured-stats" aria-label="题库资源规模">
+                <span><strong id="statPaperTotal">28,460</strong><small>套试卷</small></span>
+                <span><small>近7天新上</small><strong id="statWeeklyNewPapers">320</strong><small>套试卷</small></span>
+              </div>
+              <button type="button" data-open-filter="paper">查看全部 <i class="ri-arrow-right-line"></i></button>
+            </div>
+            <div class="home-paper-type-filters" role="tablist" aria-label="试卷类型筛选">
+              ${typeTabs.map(option => `<button type="button" class="${option.id === "all" ? "active" : ""}" data-featured-paper-type="${option.id}" role="tab" aria-selected="${option.id === "all"}"><span>${option.label}</span></button>`).join("")}
+            </div>
           </header>
-          <div class="book-resource">
-            <div class="book-detail">
-              <div class="book-series-tabs" role="tablist" aria-label="同步练习系列">
-                <button class="active" type="button" role="tab" aria-selected="true" data-book-tab="duowei"><span class="book-tab-icon" aria-hidden="true"><i class="ri-book-open-line"></i></span>多维导学案</button>
-                <button type="button" role="tab" aria-selected="false" data-book-tab="quanpin">全品学练考</button>
-              </div>
-              <div class="book-tab-panel active" data-book-panel="duowei" role="tabpanel">
-                ${bookLessonGrid(syncBookLessons.duowei)}
-              </div>
-              <div class="book-tab-panel" data-book-panel="quanpin" role="tabpanel" hidden>
-                ${bookLessonGrid(syncBookLessons.quanpin)}
-              </div>
-            </div>
+          <div class="home-paper-dual-columns">
+            ${homepagePaperLane("local", "本地新上", localPapers)}
+            ${homepagePaperLane("adopted", "高采用", adoptedPapers)}
           </div>
-        </article>
-        <div class="practice-right-col">
-          <aside class="bank-stats-bar" aria-label="题库概览">
-            <span class="bank-stats-item"><strong id="statTopicTotal">—</strong><small>题单总量</small></span>
-            <button class="bank-stats-item is-new" type="button" data-stat-jump aria-label="查看最新入库的题单">
-              <strong id="statWeeklyNew">—</strong><small>7 天新增 <i class="ri-arrow-right-s-line"></i></small>
-            </button>
-            <span class="bank-stats-item"><strong id="statQuestionTotal">—</strong><small>题目总量</small></span>
-          </aside>
-          <article class="practice-compile home-panel">
-            <header class="mod-head mod-head-compact">
-              <span class="mod-kicker"><i class="ri-folder-chart-line"></i>同步章节真题汇编</span>
-              <button class="mod-link" type="button" data-open-filter="chapter" data-open-origin="zhenti">全部 <i class="ri-arrow-right-s-line"></i></button>
-            </header>
-            <div class="compile-list">
-              <button class="compile-row" data-topic="t4"><em>01</em><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：正方体的展开与折叠（深圳版）</b><small>图形初步认识 · 高频考点整理</small></span><strong class="compile-qcount"><b>24</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
-              <button class="compile-row" data-topic="t23"><em>02</em><span><b>2023—2025 深圳各区初一（上）期末数学汇编：立体图形的识别与分类（深圳版）</b><small>各区期末真题 · 分类训练</small></span><strong class="compile-qcount"><b>26</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
-              <button class="compile-row" data-topic="t1"><em>03</em><span><b>2023—2025 深圳重点校初一（上）期中数学汇编：点、线、面、体（深圳版）</b><small>易错题分类 · 重点校真题</small></span><strong class="compile-qcount"><b>28</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
-              <button class="compile-row" data-topic="t10"><em>04</em><span><b>2023—2025 深圳各区初一（上）期中数学汇编：几何直观与空间观念（深圳版）</b><small>核心题型 · 重点校期中汇编</small></span><strong class="compile-qcount"><b>22</b><small>题</small></strong><i class="ri-arrow-right-s-line"></i></button>
+          <button class="home-paper-mobile-more" type="button" data-open-filter="paper">查看全部试卷 <i class="ri-arrow-right-line"></i></button>
+        </section>
+        <div class="home-featured-side">
+          <section class="home-featured-sync home-featured-learning">
+            <header><div><span><i class="ri-book-open-line"></i>同步教学</span></div><button type="button" data-open-filter="workbook">查看全部</button></header>
+            <div>
+              ${syncData.sync.map(id => homepageCompactResource(id, { type:"同步练习", context:"series" })).join("")}
+              ${syncData.compilations.map(id => homepageCompactResource(id, { type:"真题汇编", context:"paper" })).join("")}
             </div>
-          </article>
+          </section>
         </div>
       </div>
+    </div>`;
+}
+
+function homepageFeaturedResources() {
+  return `
+    <section class="home-section home-featured-section" aria-label="本地资源">
+      <div class="home-mobile-scope" aria-label="当前教学范围"><i class="ri-map-pin-2-line"></i><span>龙岗区 · 七年级数学 · 人教版上册</span></div>
+      ${homepageFeaturedPanel()}
     </section>`;
 }
 
-function paperBadge(tag) {
-  if (tag === "最新") return "";
-  if (tag === "深圳热门" || tag === "用的人多") {
-    return `<span class="paper-mark is-hot" aria-label="${tag}"><i class="ri-fire-fill"></i></span>`;
-  }
-  if (tag === "高采用") {
-    return `<span class="paper-mark is-adopt" aria-label="高采用"><i class="ri-thumb-up-fill"></i><em>采用</em></span>`;
-  }
-  if (tag === "期中" || tag === "期末") {
-    return `<em class="paper-mark is-exam">${tag}</em>`;
-  }
-  return `<em class="paper-mark">${tag}</em>`;
+function homepageSectionHeading(options) {
+  return `
+    <header class="home-resource-section-heading">
+      <span class="home-resource-section-icon"><i class="${options.icon}"></i></span>
+      <div><h2>${options.title}</h2></div>
+      <button type="button" data-open-filter="${options.filter}" ${options.entry ? `data-resource-entry="${options.entry}"` : ""}>${options.cta || "查看全部"} <i class="ri-arrow-right-line"></i></button>
+    </header>`;
 }
 
-function paperRibbon(tags) {
-  return "";
+function homepageResourceTile(topicId, options = {}) {
+  const topic = byId[topicId];
+  if (!topic) return "";
+  return `
+    <button class="home-resource-tile" type="button" data-topic="${topic.id}" data-context="${options.context || "special"}">
+      <span class="home-resource-tile-label">${options.label || "专题"}</span>
+      <b>${topic.title}</b>
+      <p>${topic.focus}</p>
+      <small>${topic.source}<i></i>${topic.questions} 题<i></i>${topic.usage.toLocaleString()} 次使用</small>
+    </button>`;
 }
 
-function homepagePaperModule() {
-  const papers = [
-    { kind: "peer", label: "同类校", title: "龙岗区实验学校七年级（上）期中数学试卷", views: "8,642", downloads: "1,206", usage: "3,286", questions: "22 题", tags: ["期中", "深圳热门", "高采用"], topic: "t39" },
-    { kind: "regional", label: "区统考", title: "福田区七年级（上）期中数学试卷", views: "5,462", downloads: "932", usage: "2,180", questions: "20 题", tags: ["期中", "最新", "深圳热门"], topic: "t14" },
-    { kind: "group", label: "集团联考", title: "龙华区实验教育集团七年级（上）期中数学试卷", views: "4,108", downloads: "756", usage: "1,642", questions: "20 题", tags: ["期中", "高采用", "用的人多"], topic: "t37" },
-    { kind: "famous", label: "名校试卷", title: "深圳中学七年级（上）期中数学试卷", views: "6,735", downloads: "1,184", usage: "2,860", questions: "22 题", tags: ["期中", "深圳热门", "高采用"], topic: "t36" },
-    { kind: "peer", label: "同类校", title: "深圳外国语学校龙岗学校七年级（上）期末数学试卷", views: "3,286", downloads: "684", usage: "1,089", questions: "18 题", tags: ["期末", "高采用"], topic: "t6" },
-    { kind: "regional", label: "区统考", title: "罗湖区七年级（上）期末数学试卷", views: "5,120", downloads: "890", usage: "1,458", questions: "20 题", tags: ["期末", "深圳热门", "最新"], topic: "t25" },
-    { kind: "group", label: "集团联考", title: "龙岗区四中联考七年级（上）期中数学试卷", views: "3,980", downloads: "612", usage: "1,036", questions: "20 题", tags: ["期中", "高采用"], topic: "t33" },
-    { kind: "famous", label: "名校试卷", title: "南山区七年级（上）期末数学试卷", views: "4,860", downloads: "978", usage: "1,206", questions: "22 题", tags: ["期末", "深圳热门", "高采用"], topic: "t2" }
+function homepageSyncResourceSection() {
+  return `
+    <section class="home-resource-section home-sync-resource-section">
+      ${homepageSectionHeading({ icon:"ri-book-open-line", eyebrow:"跟教材进度走", title:"同步资源", description:"同步练习＋按章节整理的真题汇编", filter:"workbook" })}
+      <div class="home-sync-resource-grid">
+        <article><header><b>同步练习</b><button type="button" data-open-filter="workbook" data-resource-entry="同步训练">按教辅查看</button></header>${["t40", "t42", "t48"].map(id => homepageCompactResource(id, { type:"同步练习", context:"series" })).join("")}</article>
+        <article><header><b>章节真题汇编</b><button type="button" data-open-filter="compilation" data-resource-entry="专题汇编">按章节查看</button></header>${["t54", "t56", "t57"].map(id => homepageCompactResource(id, { type:"真题汇编", context:"paper" })).join("")}</article>
+      </div>
+    </section>`;
+}
+
+function homepagePaperResourceSection() {
+  const paperItems = [homepagePaperItems.t59, homepagePaperItems.t2, homepagePaperItems.t14, homepagePaperItems.t25];
+  return `
+    <section class="home-resource-section home-paper-resource-section">
+      ${homepageSectionHeading({ icon:"ri-file-list-3-line", title:"试卷", filter:"paper" })}
+      <div class="home-paper-entry-chips">
+        <span>考试阶段</span>
+        ${["真题", "月考", "期中", "期末"].map(label => `<button type="button" data-open-filter="paper" data-resource-entry="${label}">${label}</button>`).join("")}
+        <i></i><span>来源标签</span>
+        <button type="button" disabled title="接入可核验的考试组织数据后开放">区统考</button>
+        <button type="button" disabled title="接入可核验的考试组织数据后开放">集团联考</button>
+        <button type="button" disabled title="学校名单与同类校规则完善后开放">名校</button>
+        <button type="button" disabled title="学校名单与同类校规则完善后开放">同类校</button>
+      </div>
+      <div class="home-paper-resource-grid">${paperItems.map(item => homepagePaperCard(item, { compact:true })).join("")}</div>
+    </section>`;
+}
+
+function homepageSpecialResourceSection() {
+  const specialItems = [
+    { id:"t18", number:"01", tags:["阶段复习", "培优提高"], title:"数与式综合：有理数、整式与方程", level:"中等—提高" },
+    { id:"t3", number:"02", tags:["情境应用", "建模"], title:"深圳真实情境：代数式建模专项", level:"中等" },
+    { id:"t32", number:"03", tags:["方法突破", "规范表达"], title:"几何语言转换与规范表达", level:"基础—中等" },
+    { id:"t1", number:"04", tags:["易错补弱", "二次过关"], title:"有理数符号与运算易错二练", level:"中等" },
+    { id:"t28", number:"05", tags:["阅读理解", "情境应用"], title:"数学阅读理解：情境信息提取", level:"较难" }
   ];
   return `
-    <section class="home-mod home-mod-papers" aria-label="试卷">
-      <header class="mod-head mod-head-compact">
-        <span class="mod-kicker"><i class="ri-file-list-3-line"></i>试卷</span>
-        <button class="mod-link" type="button" data-open-filter="paper">更多试卷 <i class="ri-arrow-right-s-line"></i></button>
-      </header>
-      <div class="paper-board">
-        ${papers.map(item => `
-          <button class="paper-card is-${item.kind}${item.tags.includes("最新") ? " has-ribbon" : ""}" type="button" data-topic="${item.topic}">
-            ${paperRibbon(item.tags)}
-            <div class="paper-card-head">
-              <span class="paper-card-kind">${item.label}</span>
-              <span class="paper-card-category">${item.tags.find(tag => tag === "期中" || tag === "期末") || "阶段测试"}</span>
-              <span class="paper-card-badges" aria-label="资源标识">
-                ${item.tags.includes("最新") ? '<span class="paper-mark is-new" aria-label="最新">NEW</span>' : ''}
-                ${item.tags.some(tag => tag === "深圳热门" || tag === "用的人多") ? '<span class="paper-mark is-hot" aria-label="热门"><i class="ri-fire-fill"></i></span>' : ''}
-                ${item.tags.includes("高采用") ? '<span class="paper-mark is-adopt" aria-label="高采用"><i class="ri-thumb-up-fill"></i></span>' : ''}
-              </span>
-            </div>
-            <p class="paper-card-title">${item.title}</p>
-            <div class="paper-card-foot paper-card-stats">
-              <span><strong>${item.questions}</strong></span>
-              <span><small><i class="ri-heart-3-line" aria-label="收藏量"></i></small><strong>${item.usage}</strong></span>
-              <span><small><i class="ri-download-2-line" aria-label="下载量"></i></small><strong>${item.downloads}</strong></span>
-            </div>
-          </button>
-        `).join("")}
+    <section class="home-resource-section home-special-resource-section">
+      ${homepageSectionHeading({ icon:"ri-focus-3-line", title:"专项练习", filter:"special", cta:"更多专项" })}
+      <div class="home-special-resource-grid">
+        ${specialItems.map(item => {
+          const topic = byId[item.id];
+          if (!topic) return "";
+          return `<button class="home-special-card" type="button" data-topic="${topic.id}" data-context="special">
+            <span class="home-special-card-top"><em>${item.number}</em><span>${item.tags.map(tag => `<i>${tag}</i>`).join("")}</span></span>
+            <b>${item.title}</b>
+            <small>${topic.questions} 题 <i></i> ${topic.minutes} 分钟 <i></i> ${item.level}</small>
+          </button>`;
+        }).join("")}
       </div>
     </section>`;
 }
 
-function homepageSpecialModule() {
-  const items = [
-    { id: "t18", tags: ["跨单元", "阶段复习"], title: "数与式综合：有理数、整式与方程", meta: "22 题 · 中等—提高", short: "数与式综合" },
-    { id: "t3", tags: ["深圳情境", "建模"], title: "真实情境中的代数式建模", meta: "12 题 · 中等", short: "代数式建模" },
-    { id: "t32", tags: ["方法", "规范表达"], title: "几何语言转换与规范表达", meta: "12 题 · 基础—中等", short: "几何语言转换" },
-    { id: "t1", tags: ["易错二练", "二次过关"], title: "有理数符号与运算易错二练", meta: "15 题 · 中等", short: "有理数易错" },
-    { id: "t28", tags: ["阅读理解", "情境"], title: "数学阅读理解：情境信息提取", meta: "10 题 · 较难", short: "数学阅读" }
-  ];
+function homepageAlbumResourceSection() {
+  const albumPresentation = {
+    duowei: { tone:"forest", badge:"课时配套", bodyTitle:"成套编排", points:["课时练", "单元检测"] },
+    quanpin: { tone:"ochre", badge:"同步精练", bodyTitle:"分层练习", points:["课时巩固", "单元练习"] },
+    yuanchuang: { tone:"indigo", badge:"课堂同步", bodyTitle:"梯度训练", points:["课时训练", "题型梯度"] },
+    tiyou: { tone:"teal", badge:"能力提优", bodyTitle:"能力进阶", points:["题型突破", "进阶训练"] },
+    yicuo: { tone:"pine", badge:"易错巩固", bodyTitle:"错因到过关", points:["错因拆解", "同类变式 · 二次过关"] }
+  };
   return `
-    <section class="home-mod home-mod-specials" aria-label="专题">
-      <header class="mod-head mod-head-compact">
-        <span class="mod-kicker"><i class="ri-focus-3-line"></i>专题</span>
-        <button class="mod-link" type="button" data-open-filter="special">更多专题 <i class="ri-arrow-right-s-line"></i></button>
-      </header>
-      <div class="special-rail">
-        ${items.map((item, index) => `
-          <button class="special-chip" type="button" data-topic="${item.id}" data-context="special" data-lesson-title="${item.title}" data-short-title="${item.short}">
-            <span class="special-chip-index">${String(index + 1).padStart(2, "0")}</span>
-            <span class="special-chip-body">
-              <span class="special-chip-tags">${item.tags.map(tag => `<em>${tag}</em>`).join("")}</span>
-              <b>${item.title}</b>
-              <small>${item.meta}</small>
+    <section class="home-resource-section home-album-resource-section">
+      ${homepageSectionHeading({ icon:"ri-book-2-line", title:"专辑", filter:"workbook", cta:"进入专辑库" })}
+      <div class="home-album-resource-grid">
+        ${workbookAlbums.map(album => {
+          const albumTopics = topics.filter(topic => topic.tag === "workbook" && topic.source === album.source);
+          const totalUsage = albumTopics.reduce((sum, topic) => sum + topic.usage, 0);
+          const display = albumPresentation[album.id] || { tone:"forest", badge:"同步教辅", bodyTitle:"成套同步资源", points:["按教学进度编排", "可直接用于日常训练"] };
+          return `<button type="button" class="home-album-cover-card is-${display.tone}" data-album-jump="${album.source}">
+            <span class="home-album-cover">
+              <em><i class="ri-book-2-line"></i>${display.badge}</em>
+              <strong>${album.name}</strong>
+              <small>${album.subtitle}</small>
             </span>
-          </button>
-        `).join("")}
+            <span class="home-album-details">
+              <b>${display.bodyTitle}</b>
+              <span class="home-album-points">${display.points.map(point => `<i>${point}</i>`).join("")}</span>
+              <span class="home-album-footer"><small>${albumTopics.length} 份 · 累计 ${totalUsage.toLocaleString()} 次使用</small><em>打开专辑 <i class="ri-arrow-right-line"></i></em></span>
+            </span>
+          </button>`;
+        }).join("")}
       </div>
     </section>`;
 }
 
-function homepageAlbumModule() {
-  const albums = workbookAlbums.map((album, index) => {
-    const count = topics.filter(topic => topic.source === album.source).length;
-    const tones = ["sage", "cream", "lilac", "mist", "sage"];
-    const details = [
-      ["课时练成套编排", "覆盖基础到综合", "导学案可直接布置"],
-      ["课前热身精练", "课中巩固分层", "课后作业配套"],
-      ["完整课时结构", "题型梯度清晰", "本地高质量资源"],
-      ["能力层级清晰", "重点题型突破", "适合日常教学进度"],
-      ["高频错因拆解", "同类变式训练", "二次过关巩固"]
-    ];
-    return { ...album, count, tone: tones[index % tones.length], details: details[index], downloads: (2108 + index * 367).toLocaleString() };
-  });
-  return `
-    <section class="home-mod home-mod-albums" aria-label="专辑">
-      <header class="mod-head mod-head-compact">
-        <span class="mod-kicker"><i class="ri-book-shelf-line"></i>专辑</span>
-        <button class="mod-link" type="button" data-open-filter="workbook">进入专辑库 <i class="ri-arrow-right-s-line"></i></button>
-      </header>
-      <div class="album-shelf">
-        ${albums.map((album, index) => `
-          <button class="album-cover tone-${album.tone}" type="button" data-album-jump="${album.source}">
-            <span class="album-cover-hero">
-              <small><i class="ri-book-2-line"></i>${index === 3 ? "本地教辅" : "热门教辅"}</small>
-              <b>${album.name}</b>
-              <em>${album.subtitle}</em>
-            </span>
-            <span class="album-cover-body">
-              <strong>${album.details[0]}</strong>
-              <span class="album-feature-list">${album.details.slice(1).map(item => `<i>• ${item}</i>`).join("")}</span>
-              <span class="album-cover-foot"><em>${album.count + 12} 份</em><em>${album.downloads} 下载</em><b>打开专辑 <i class="ri-arrow-right-line"></i></b></span>
-            </span>
-          </button>
-        `).join("")}
-      </div>
-    </section>`;
+function homepageResourceSections() {
+  return `<div class="home-resource-sections" aria-label="按资源类型查找">
+    ${homepageSpecialResourceSection()}
+    ${homepageAlbumResourceSection()}
+  </div>`;
 }
 
 function homepageSeriesSection() {
   return `
-    <div class="home-first-screen">
-      ${homepagePracticeModule()}
-      ${homepagePaperModule()}
-      ${homepageSpecialModule()}
-    </div>
-    ${homepageAlbumModule()}`;
+    <div class="workspace-home">
+      ${homepageFeaturedResources()}
+      ${homepageResourceSections()}
+    </div>`;
 }
 
 const feedTopicIds = ["t36","t37","t4","t6","t25","t41","t9","t18","t1","t16","t14","t35","t11","t23","t40","t3","t38","t39","t21","t2","t27","t10","t17","t33","t5","t8","t13","t15","t19","t20","t22","t24","t26","t28","t29","t30","t31","t32","t34","t42","t43","t44","t45","t46","t47","t48","t49","t50","t51"];
@@ -556,7 +841,7 @@ function filterButton(key, value, label, active = false) {
 }
 
 const filterSummaryLabels = {
-  type: { all:"全部", sync:"同步练习", special:"专项练习", paper:"试卷" },
+  type: { all:"全部", sync:"同步教学", special:"专项练习", paper:"试卷" },
   difficulty: { all:"不限", 简单:"基础", 中等:"中等", 较难:"提高" },
   source: { all:"全部", local:"本地资源", famous:"名校资源", school:"本校共享", series:"系列题单" },
   feature: { all:"全部", 精品:"精品", 名师推荐:"名师推荐", 真题汇编:"真题汇编", 最新:"最新" },
@@ -593,6 +878,37 @@ function homepageFeed() {
   return homepageSeriesSection();
 }
 
+function homepageSearchResults(query, scope = "all") {
+  const keyword = query.trim().toLowerCase();
+  const tagMatch = topic => scope === "all"
+    || topic.tag === scope;
+  return topics
+    .filter(topic => !topic.legacy)
+    .filter(tagMatch)
+    .filter(topic => `${topic.title} ${topic.focus} ${topic.reason} ${topic.source}`.toLowerCase().includes(keyword))
+    .sort((a, b) => {
+      const localDelta = Number(/深圳|龙岗/.test(`${b.title} ${b.source}`)) - Number(/深圳|龙岗/.test(`${a.title} ${a.source}`));
+      return localDelta || b.usage - a.usage;
+    });
+}
+
+function homepageSearchView(query) {
+  const list = homepageSearchResults(query, homepageSearchScope);
+  const scopeLabels = { all:"全部整套", paper:"试卷", workbook:"练习册", compilation:"汇编套题", special:"专项套题" };
+  return `
+    <section class="home-search-results-view" aria-labelledby="homeSearchResultTitle">
+      <header>
+        <button type="button" data-home-search-clear><i class="ri-arrow-left-line"></i>返回资源首页</button>
+        <div><p>${scopeLabels[homepageSearchScope] || "全部整套"} · 已按本地匹配度排序</p><h1 id="homeSearchResultTitle">“${query.replace(/[<>]/g, "")}”的搜索结果</h1></div>
+        <span>共 <strong>${list.length}</strong> 套</span>
+      </header>
+      <div class="resource-card-grid home-search-result-grid">${list.map(topic => topicCard(topic, { context: topic.tag === "workbook" ? "series" : topic.tag === "special" ? "special" : topic.tag === "chapter" ? "chapter" : "paper" })).join("")}</div>
+      <div class="home-search-empty" ${list.length ? "hidden" : ""}>
+        <i class="ri-file-search-line"></i><b>暂时没有完全匹配的整套资源</b><span>换个关键词，或进入题库按章节、知识点选题。</span><a href="./school.html">去题库组题</a>
+      </div>
+    </section>`;
+}
+
 function paperTopics() {
   return topics.filter(topic => topic.tag === "paper");
 }
@@ -615,6 +931,12 @@ function paperMatchesSource(topic, source) {
   return option?.match?.(topic) ?? true;
 }
 
+function paperMatchesAuthority(topic, authority) {
+  if (authority === "all") return true;
+  const option = paperAuthorityOptions.find(item => item.id === authority);
+  return option?.match?.(topic) ?? false;
+}
+
 function paperMatchesExamType(topic, examType) {
   const matcher = paperExamTypes[examType]?.match;
   return matcher ? matcher(topic) : true;
@@ -626,6 +948,7 @@ function filteredPaperTopics() {
     paperMatchesExamType(topic, paperFilterState.examType)
     && paperMatchesYear(topic, paperFilterState.year)
     && paperMatchesGrade(topic, paperFilterState.grade)
+    && paperMatchesAuthority(topic, paperFilterState.authority)
     && paperMatchesSource(topic, paperFilterState.source)
     && (!keyword || `${topic.title} ${topic.source} ${topic.focus}`.toLowerCase().includes(keyword))
   );
@@ -633,8 +956,9 @@ function filteredPaperTopics() {
     list = [...list].sort((a, b) => b.usage - a.usage);
   } else {
     list = [...list].sort((a, b) => {
-      const latestDelta = (b.highlight === "最新" ? 1 : 0) - (a.highlight === "最新" ? 1 : 0);
-      return latestDelta || b.id.localeCompare(a.id);
+      const publishedDelta = String(homepagePaperItems[b.id]?.publishedAt || "").localeCompare(String(homepagePaperItems[a.id]?.publishedAt || ""));
+      const latestDelta = (/^(?:最新|新上)$/.test(b.highlight || "") ? 1 : 0) - (/^(?:最新|新上)$/.test(a.highlight || "") ? 1 : 0);
+      return publishedDelta || latestDelta || b.id.localeCompare(a.id);
     });
   }
   return list;
@@ -658,7 +982,7 @@ function paperFilterTagGroup(name, options, activeValue, dataAttr) {
 
 function paperCategoryView() {
   const list = filteredPaperTopics();
-  const isZhongkao = ["zhongkao-real", "zhongkao-mock"].includes(paperFilterState.examType);
+  const isZhongkao = ["real", "mock"].includes(normalizePaperExamType(paperFilterState.examType));
   return `
     <section class="category-detail paper-category-view">
       <div class="resource-browser paper-browser">
@@ -668,17 +992,17 @@ function paperCategoryView() {
               <i class="ri-${isZhongkao ? "arrow-right" : "arrow-down-s"}-line"></i><span>同步试卷</span>
             </button>
             <div class="paper-sidebar-items" ${isZhongkao ? "hidden" : ""}>
-              ${["final", "midterm", "monthly", "unit", "other"].map(type => `
+              ${["all", "opening", "midterm", "final", "monthly", "unit", "sync", "other"].map(type => `
                 <button type="button" class="${paperFilterState.examType === type ? "active" : ""}" data-paper-type="${type}">${paperExamTypes[type].label}</button>
               `).join("")}
             </div>
           </div>
           <div class="paper-sidebar-group ${isZhongkao ? "open" : ""}">
             <button class="paper-sidebar-group-toggle" type="button" aria-expanded="${isZhongkao}">
-              <i class="ri-${isZhongkao ? "arrow-down-s" : "arrow-right"}-line"></i><span>小升初</span>
+              <i class="ri-${isZhongkao ? "arrow-down-s" : "arrow-right"}-line"></i><span>中考</span>
             </button>
             <div class="paper-sidebar-items" ${isZhongkao ? "" : "hidden"}>
-              ${["zhongkao-real", "zhongkao-mock"].map(type => `
+              ${["real", "mock"].map(type => `
                 <button type="button" class="${paperFilterState.examType === type ? "active" : ""}" data-paper-type="${type}">${paperExamTypes[type].label}</button>
               `).join("")}
             </div>
@@ -692,7 +1016,8 @@ function paperCategoryView() {
               <button class="paper-filter-select" type="button"><span>深圳市龙岗区</span><i class="ri-arrow-down-s-line"></i></button>
             </div>
             ${paperFilterTagGroup("年级", paperGradeOptions, paperFilterState.grade, "data-paper-grade")}
-            ${paperFilterTagGroup("来源", paperSourceOptions, paperFilterState.source, "data-paper-source")}
+            ${paperFilterTagGroup("题源", paperAuthorityOptions, paperFilterState.authority, "data-paper-authority")}
+            ${paperFilterTagGroup("资源库", paperSourceOptions, paperFilterState.source, "data-paper-source")}
             <label class="paper-filter-search">
               <span class="paper-filter-label">搜索</span>
               <div class="paper-search-field">
@@ -704,7 +1029,7 @@ function paperCategoryView() {
           <div class="paper-list-toolbar">
             <div class="paper-list-tabs" role="tablist" aria-label="试卷排序">
               <button type="button" class="${paperFilterState.sort === "latest" ? "active" : ""}" data-paper-sort="latest" role="tab">最新</button>
-              <button type="button" class="${paperFilterState.sort === "recommend" ? "active" : ""}" data-paper-sort="recommend" role="tab">推荐</button>
+              <button type="button" class="${paperFilterState.sort === "recommend" ? "active" : ""}" data-paper-sort="recommend" role="tab">高采用</button>
             </div>
             <span class="paper-list-count" data-paper-result-count>试卷 共 ${list.length.toLocaleString()} 份</span>
           </div>
@@ -716,9 +1041,10 @@ function paperCategoryView() {
 }
 
 function applyPaperFilters(options = {}) {
-  if (options.examType) paperFilterState.examType = options.examType;
+  if (options.examType) paperFilterState.examType = normalizePaperExamType(options.examType);
   if (options.year) paperFilterState.year = options.year;
   if (options.grade) paperFilterState.grade = options.grade;
+  if (options.authority) paperFilterState.authority = options.authority;
   if (options.source) paperFilterState.source = options.source;
   if (options.sort) paperFilterState.sort = options.sort;
   if (typeof options.query === "string") paperFilterState.query = options.query;
@@ -735,6 +1061,9 @@ function applyPaperFilters(options = {}) {
   });
   panel.querySelectorAll("[data-paper-grade]").forEach(button => {
     button.classList.toggle("active", button.dataset.paperGrade === paperFilterState.grade);
+  });
+  panel.querySelectorAll("[data-paper-authority]").forEach(button => {
+    button.classList.toggle("active", button.dataset.paperAuthority === paperFilterState.authority);
   });
   panel.querySelectorAll("[data-paper-source]").forEach(button => {
     button.classList.toggle("active", button.dataset.paperSource === paperFilterState.source);
@@ -753,7 +1082,7 @@ function applyPaperFilters(options = {}) {
   const empty = panel.querySelector(".paper-empty");
   if (empty) empty.hidden = list.length > 0;
 
-  const isZhongkao = ["zhongkao-real", "zhongkao-mock"].includes(paperFilterState.examType);
+  const isZhongkao = ["real", "mock"].includes(normalizePaperExamType(paperFilterState.examType));
   panel.querySelectorAll(".paper-sidebar-group").forEach((group, index) => {
     const open = index === 0 ? !isZhongkao : isZhongkao;
     group.classList.toggle("open", open);
@@ -983,7 +1312,7 @@ function chapterCategoryView() {
           </div>
           <div class="chapter-list-toolbar">
             <b>${chapterSectionLabel(chapterFilterState.section)}</b>
-            <span class="chapter-list-count" data-chapter-result-count>同步练习 共 ${list.length.toLocaleString()} 份</span>
+            <span class="chapter-list-count" data-chapter-result-count>同步教学 共 ${list.length.toLocaleString()} 份</span>
           </div>
           <div class="resource-card-grid chapter-result-grid">${list.map(topic => topicCard(topic, { context: "chapter" })).join("")}</div>
           <div class="chapter-empty" ${list.length ? "hidden" : ""}>没有找到匹配的题单，试试调整筛选条件。</div>
@@ -1037,22 +1366,98 @@ function applyChapterFilters(options = {}) {
     bindContentEvents(grid);
   }
   const count = panel.querySelector("[data-chapter-result-count]");
-  if (count) count.textContent = `同步练习 共 ${list.length.toLocaleString()} 份`;
+  if (count) count.textContent = `同步教学 共 ${list.length.toLocaleString()} 份`;
   const empty = panel.querySelector(".chapter-empty");
   if (empty) empty.hidden = list.length > 0;
 
   bindContentEvents(sidebar);
 }
 
+function compilationTopics() {
+  return topics.filter(topic => topic.tag === "compilation" && !topic.legacy);
+}
+
+function compilationCategoryLabel(category) {
+  return compilationCategories.find(item => item.id === category)?.label || "全部汇编";
+}
+
+function filteredCompilationTopics() {
+  const categoryMatch = compilationCategories.find(item => item.id === compilationFilterState.category)?.match || (() => true);
+  const signalMatch = compilationSignals.find(item => item.id === compilationFilterState.signal)?.match || (() => true);
+  const keyword = compilationFilterState.query.trim().toLowerCase();
+  return compilationTopics()
+    .filter(categoryMatch)
+    .filter(signalMatch)
+    .filter(topic => !keyword || `${topic.title} ${topic.source} ${topic.focus} ${topic.reason}`.toLowerCase().includes(keyword))
+    .sort((a, b) => b.usage - a.usage);
+}
+
+function compilationCategoryView() {
+  const list = filteredCompilationTopics();
+  return `
+    <section class="category-detail compilation-category-view">
+      <div class="resource-browser compilation-browser">
+        <nav class="resource-tree compilation-sidebar" aria-label="汇编方式">
+          ${compilationCategories.map(item => `
+            <button type="button" class="${compilationFilterState.category === item.id ? "active" : ""}" data-compilation-category="${item.id}">
+              <b>${item.label}</b><small>${compilationTopics().filter(item.match).length} 份</small>
+            </button>`).join("")}
+        </nav>
+        <div class="resource-browser-content">
+          <div class="resource-browser-toolbar compilation-filter-toolbar">
+            <div class="resource-chip-group">
+              ${compilationSignals.map(item => `<button type="button" class="${compilationFilterState.signal === item.id ? "active" : ""}" data-compilation-signal="${item.id}">${item.label}</button>`).join("")}
+            </div>
+            <label class="compilation-search">
+              <i class="ri-search-line"></i>
+              <input data-compilation-search type="search" value="${compilationFilterState.query.replace(/"/g, "&quot;")}" placeholder="搜索地区、年份或考点" />
+            </label>
+          </div>
+          <header class="resource-result-heading"><b>${compilationCategoryLabel(compilationFilterState.category)}</b><em data-compilation-result-count>${list.length} 份汇编</em></header>
+          <div class="resource-card-grid result-grid compilation-result-grid">${list.map(topic => topicCard(topic, { context: "paper" })).join("")}</div>
+          <div class="compilation-empty" ${list.length ? "hidden" : ""}>没有找到匹配的汇编套题，试试调整筛选条件。</div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function applyCompilationFilters(options = {}) {
+  if (options.category) compilationFilterState.category = options.category;
+  if (options.signal) compilationFilterState.signal = options.signal;
+  if (typeof options.query === "string") compilationFilterState.query = options.query;
+
+  const panel = document.querySelector(".compilation-category-view");
+  if (!panel) return;
+  const list = filteredCompilationTopics();
+  panel.querySelectorAll("[data-compilation-category]").forEach(button => {
+    button.classList.toggle("active", button.dataset.compilationCategory === compilationFilterState.category);
+  });
+  panel.querySelectorAll("[data-compilation-signal]").forEach(button => {
+    button.classList.toggle("active", button.dataset.compilationSignal === compilationFilterState.signal);
+  });
+  const heading = panel.querySelector(".resource-result-heading b");
+  if (heading) heading.textContent = compilationCategoryLabel(compilationFilterState.category);
+  const count = panel.querySelector("[data-compilation-result-count]");
+  if (count) count.textContent = `${list.length} 份汇编`;
+  const grid = panel.querySelector(".compilation-result-grid");
+  if (grid) {
+    grid.innerHTML = list.map(topic => topicCard(topic, { context: "paper" })).join("");
+    bindContentEvents(grid);
+  }
+  const empty = panel.querySelector(".compilation-empty");
+  if (empty) empty.hidden = list.length > 0;
+}
+
 function categoryBrowserView(kind) {
   const config = {
-    chapter: { label:"同步练习", navLabel:"教材章节", nav:["正数与负数","有理数及其运算","整式的加减","一元一次方程","图形初步认识"], topics:["t8","t9","t10","t11","t12","t13"], chips:["全部同步", "课时练习", "单元检测", "易错巩固"], selector:"人教版七上" },
+    chapter: { label:"同步教学", navLabel:"教材章节", nav:["正数与负数","有理数及其运算","整式的加减","一元一次方程","图形初步认识"], topics:["t8","t9","t10","t11","t12","t13"], chips:["全部同步", "课时练习", "单元检测", "易错巩固"], selector:"人教版七上" },
     special: { label:"专项练习", navLabel:"知识领域", nav:["数与式","方程与不等式","函数","图形与几何","统计与概率"], topics:["t1","t3","t5","t23","t28","t31","t32"], chips:["全部专项", "易错巩固", "方法突破", "情境应用", "培优提高"], selector:"全部难度" },
     paper: { label:"试卷", navLabel:"考试类型", nav:["期末考试","期中考试","月考","单元测试","中考真题"], topics:["t2","t4","t6","t14","t25","t27","t33"], chips:["本地优先", "使用最多", "真题汇编"], selector:"深圳市 · 七年级数学" }
   }[kind];
   if (kind === "paper") return paperCategoryView();
   if (kind === "special") return specialCategoryView();
   if (kind === "chapter") return chapterCategoryView();
+  if (kind === "compilation") return compilationCategoryView();
   const list = config.topics.map(id => byId[id]).filter(Boolean);
   return `
     <section class="category-detail unified-category-view">
@@ -1063,7 +1468,7 @@ function categoryBrowserView(kind) {
         <div class="resource-browser-content">
           <div class="resource-browser-toolbar"><div class="resource-chip-group">${config.chips.map((chip, index) => `<button class="${index === 0 ? "active" : ""}">${chip}</button>`).join("")}</div><div class="resource-selector-group"><button>${config.selector} <i class="ri-arrow-down-s-line"></i></button></div></div>
           <header class="resource-result-heading"><b>${config.nav[0]}</b><em>${list.length} 份题单</em></header>
-          <div class="resource-card-grid result-grid">${list.map(topic => topicCard(topic, { context: kind })).join("")}</div>
+          <div class="resource-card-grid result-grid">${list.map(topic => topicCard(topic, { context: kind === "compilation" ? "paper" : kind })).join("")}</div>
         </div>
       </div>
     </section>`;
@@ -1110,7 +1515,7 @@ function workbookTopics() {
 function workbookTopicMatchesFilters(topic) {
   const keyword = albumFilterState.query.trim().toLowerCase();
   return matchesResourceOrigin(topic, albumFilterState.origin)
-    && (!keyword || `${topic.title} ${topic.source} ${topic.focus}`.toLowerCase().includes(keyword));
+    && (!keyword || `${topic.title} ${topic.source} ${topic.focus} ${topic.reason}`.toLowerCase().includes(keyword));
 }
 
 function filteredWorkbookTopics() {
@@ -1206,16 +1611,23 @@ function applyAlbumView(options = {}) {
 
 function render() {
   const defaultState = currentFilter === "all" && !currentQuery;
-  contentFeed.innerHTML = defaultState ? homepageFeed() : currentFilter === "workbook" ? seriesCategoryView() : categoryBrowserView(currentFilter);
+  const searchState = currentFilter === "all" && Boolean(currentQuery);
+  contentFeed.innerHTML = defaultState
+    ? homepageFeed()
+    : searchState
+      ? homepageSearchView(currentQuery)
+      : currentFilter === "workbook"
+        ? seriesCategoryView()
+        : categoryBrowserView(currentFilter);
   emptyState.hidden = true;
   contentFeed.hidden = false;
   bindContentEvents();
   setupFeed(defaultState);
-  setupAiDock(defaultState);
   renderBankStats();
   filterManuallyExpanded = false;
   setSquareFilterCollapsed(true);
   document.body.classList.toggle("is-home-view", defaultState);
+  setupAiDock(defaultState);
 }
 
 function setupFeed(isHomepage) {
@@ -1251,7 +1663,7 @@ function applyFeedFilters() {
     const aTopic = byId[a.dataset.topic];
     const bTopic = byId[b.dataset.topic];
     if (feedFilterState.sort === "usage") return bTopic.usage - aTopic.usage;
-    if (feedFilterState.sort === "latest") return (bTopic.highlight === "最新" ? 1 : 0) - (aTopic.highlight === "最新" ? 1 : 0) || Number(a.dataset.feedOrder) - Number(b.dataset.feedOrder);
+    if (feedFilterState.sort === "latest") return (/^(?:最新|新上)$/.test(bTopic.highlight || "") ? 1 : 0) - (/^(?:最新|新上)$/.test(aTopic.highlight || "") ? 1 : 0) || Number(a.dataset.feedOrder) - Number(b.dataset.feedOrder);
     return Number(a.dataset.feedOrder) - Number(b.dataset.feedOrder);
   });
   let visible = 0;
@@ -1262,7 +1674,87 @@ function applyFeedFilters() {
   if (resultCount) resultCount.textContent = `共 ${visible} 份`;
 }
 
+function applyHomepageFeaturedState(options = {}) {
+  if (options.selectPaperType) {
+    homepagePaperTypeSelections.clear();
+    if (options.selectPaperType !== "all") homepagePaperTypeSelections.add(options.selectPaperType);
+  }
+
+  const section = document.querySelector(".home-featured-section");
+  if (!section) return;
+
+  section.querySelectorAll("[data-featured-paper-type]").forEach(button => {
+    const type = button.dataset.featuredPaperType;
+    const active = type === "all" ? homepagePaperTypeSelections.size === 0 : homepagePaperTypeSelections.has(type);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+
+  section.querySelectorAll("[data-paper-lane]").forEach(lane => {
+    let matchedPapers = 0;
+    lane.querySelectorAll("[data-featured-paper-card]").forEach(card => {
+      const typeIds = (card.dataset.paperTypes || "").split(/\s+/).filter(Boolean);
+      const matched = matchesHomepagePaperTypeSelections(typeIds);
+      if (matched) matchedPapers += 1;
+      const visible = matched && matchedPapers <= 4;
+      card.hidden = !visible;
+      if (visible) card.dataset.visibleRank = String(matchedPapers);
+      else delete card.dataset.visibleRank;
+    });
+    const empty = lane.querySelector(".home-paper-lane-empty");
+    if (empty) empty.hidden = matchedPapers > 0;
+    lane.classList.toggle("is-empty", matchedPapers === 0);
+  });
+
+  const dualColumns = section.querySelector(".home-paper-dual-columns");
+  if (dualColumns) dualColumns.classList.toggle("is-mobile-collapsed", homepagePaperTypeSelections.size === 0);
+}
+
 function bindContentEvents(root = document) {
+  root.querySelectorAll("[data-home-ai-form]").forEach(form => form.addEventListener("submit", event => {
+    event.preventDefault();
+    const input = form.querySelector("[data-home-ai-input]");
+    const prompt = input?.value.trim() || "";
+    if (!prompt) {
+      input?.focus();
+      showToast("先描述一下想要什么题单");
+      return;
+    }
+    openAi(prompt);
+  }));
+  root.querySelectorAll("[data-home-ai-add]").forEach(button => button.addEventListener("click", () => showToast("可以添加试卷、图片或资料作为参考")));
+  root.querySelectorAll("[data-home-ai-voice]").forEach(button => button.addEventListener("click", () => {
+    button.classList.toggle("active");
+    showToast(button.classList.contains("active") ? "正在听，请说出题单要求" : "已停止语音输入");
+  }));
+  root.querySelectorAll("[data-home-search-form]").forEach(form => form.addEventListener("submit", event => {
+    event.preventDefault();
+    const input = form.querySelector("[data-home-search-input]");
+    const query = input?.value.trim() || "";
+    if (!query) {
+      input?.focus();
+      showToast("输入资源名称、地区、学校或知识点");
+      return;
+    }
+    homepageSearchScope = form.querySelector("[data-home-search-scope]")?.value || "all";
+    currentFilter = "all";
+    currentQuery = query;
+    document.querySelectorAll("[data-filter]").forEach(chip => {
+      const active = chip.dataset.filter === "all";
+      chip.classList.toggle("active", active);
+      if (active) chip.setAttribute("aria-current", "page");
+      else chip.removeAttribute("aria-current");
+    });
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }));
+  root.querySelectorAll("[data-home-search-clear]").forEach(button => button.addEventListener("click", () => {
+    homepageSearchScope = "all";
+    setMainFilter("all");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }));
+  root.querySelectorAll("[data-home-ai]").forEach(button => button.addEventListener("click", () => openAi()));
+  root.querySelectorAll("[data-featured-paper-type]").forEach(button => button.addEventListener("click", () => applyHomepageFeaturedState({ selectPaperType: button.dataset.featuredPaperType })));
   root.querySelectorAll("[data-book-tab]").forEach(button => button.addEventListener("click", () => {
     const tab = button.dataset.bookTab;
     const container = button.closest(".book-resource");
@@ -1301,7 +1793,16 @@ function bindContentEvents(root = document) {
     event.stopPropagation();
     const filter = button.dataset.openFilter;
     const origin = button.dataset.openOrigin || "";
-    const openOptions = origin ? { origin } : {};
+    const entry = button.dataset.resourceEntry || "";
+    const openOptions = { ...homepageEntryOptions(filter, entry), ...(origin ? { origin } : {}) };
+    if (filter === "paper" && button.closest(".home-featured-paper")) {
+      const selectedType = [...homepagePaperTypeSelections][0] || "all";
+      if (selectedType === "real") openOptions.examType = "real";
+      else if (selectedType === "mock") openOptions.query = "模拟";
+      else if (["midterm", "final", "monthly", "unit", "other"].includes(selectedType)) openOptions.examType = selectedType;
+      else if (selectedType === "opening") openOptions.query = "开学";
+      else if (selectedType === "sync") openOptions.query = "同步练习";
+    }
     prepareFilterOpen(filter, openOptions);
     if (isEmbedded) {
       requestParentOpenFilter(filter, openOptions);
@@ -1330,8 +1831,8 @@ function bindContentEvents(root = document) {
     applyFeedFilters();
     updateFilterSummary();
   }));
-  root.querySelectorAll(".resource-tree button").forEach(button => button.addEventListener("click", () => { const browser = button.closest(".resource-browser"); button.parentElement.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); browser.querySelector(".resource-result-heading b").textContent = button.dataset.resultTitle || button.querySelector("b").textContent; }));
-  root.querySelectorAll(".resource-chip-group button").forEach(button => button.addEventListener("click", () => { button.parentElement.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); }));
+  root.querySelectorAll(".resource-tree button:not([data-compilation-category])").forEach(button => button.addEventListener("click", () => { const browser = button.closest(".resource-browser"); button.parentElement.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); browser.querySelector(".resource-result-heading b").textContent = button.dataset.resultTitle || button.querySelector("b").textContent; }));
+  root.querySelectorAll(".resource-chip-group button:not([data-compilation-signal])").forEach(button => button.addEventListener("click", () => { button.parentElement.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); }));
   root.querySelectorAll(".resource-selector-group button").forEach(button => button.addEventListener("click", () => showToast(`正在调整${button.textContent.trim()}`)));
   root.querySelectorAll("[data-series-query]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.seriesQuery })));
   root.querySelectorAll("[data-album-view]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: button.dataset.albumView })));
@@ -1340,7 +1841,7 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-album-open]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.albumOpen })));
   root.querySelectorAll("[data-album-jump]").forEach(button => button.addEventListener("click", () => {
     if (isEmbedded) {
-      requestParentOpenFilter("workbook");
+      requestParentOpenFilter("workbook", { view:"topic", query:button.dataset.albumJump, keepAlbumState:true });
       return;
     }
     openSeries(button.dataset.albumJump);
@@ -1362,6 +1863,7 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-paper-type]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ examType: button.dataset.paperType })));
   root.querySelectorAll("[data-paper-year]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ year: button.dataset.paperYear })));
   root.querySelectorAll("[data-paper-grade]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ grade: button.dataset.paperGrade })));
+  root.querySelectorAll("[data-paper-authority]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ authority: button.dataset.paperAuthority })));
   root.querySelectorAll("[data-paper-source]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ source: button.dataset.paperSource })));
   root.querySelectorAll("[data-paper-sort]").forEach(button => button.addEventListener("click", () => applyPaperFilters({ sort: button.dataset.paperSort })));
   root.querySelectorAll("[data-paper-search]").forEach(input => input.addEventListener("input", () => applyPaperFilters({ query: input.value })));
@@ -1380,6 +1882,9 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-special-difficulty]").forEach(button => button.addEventListener("click", () => applySpecialFilters({ difficulty: button.dataset.specialDifficulty })));
   root.querySelectorAll("[data-special-origin]").forEach(button => button.addEventListener("click", () => applySpecialFilters({ origin: button.dataset.specialOrigin })));
   root.querySelectorAll("[data-special-search]").forEach(input => input.addEventListener("input", () => applySpecialFilters({ query: input.value })));
+  root.querySelectorAll("[data-compilation-category]").forEach(button => button.addEventListener("click", () => applyCompilationFilters({ category: button.dataset.compilationCategory })));
+  root.querySelectorAll("[data-compilation-signal]").forEach(button => button.addEventListener("click", () => applyCompilationFilters({ signal: button.dataset.compilationSignal })));
+  root.querySelectorAll("[data-compilation-search]").forEach(input => input.addEventListener("input", () => applyCompilationFilters({ query: input.value })));
   root.querySelectorAll(".chapter-textbook-select, .chapter-filter-select").forEach(button => button.addEventListener("click", () => showToast("教材与地区筛选即将开放")));
   root.querySelectorAll("[data-chapter-toggle]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ toggleChapter: button.dataset.chapterToggle })));
   root.querySelectorAll("[data-chapter-section]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ section: button.dataset.chapterSection })));
@@ -1387,9 +1892,35 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-chapter-origin]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ origin: button.dataset.chapterOrigin })));
   root.querySelectorAll("[data-chapter-source]").forEach(button => button.addEventListener("click", () => applyChapterFilters({ source: button.dataset.chapterSource })));
   root.querySelectorAll("[data-chapter-search]").forEach(input => input.addEventListener("input", () => applyChapterFilters({ query: input.value })));
+  if (root.querySelector(".home-featured-section")) applyHomepageFeaturedState();
 }
 
 function prepareFilterOpen(filter, options = {}) {
+  if (filter === "paper") {
+    if (options.examType) paperFilterState.examType = normalizePaperExamType(options.examType);
+    if (options.year) paperFilterState.year = options.year;
+    if (options.grade) paperFilterState.grade = options.grade;
+    if (options.authority) paperFilterState.authority = options.authority;
+    if (options.source) paperFilterState.source = options.source;
+    if (options.sort) paperFilterState.sort = options.sort;
+    if (typeof options.query === "string") paperFilterState.query = options.query;
+  }
+  if (filter === "workbook") {
+    if (options.view) albumFilterState.view = options.view;
+    if (options.origin) albumFilterState.origin = options.origin;
+    if (typeof options.query === "string") albumFilterState.query = options.query;
+  }
+  if (filter === "special") {
+    if (options.category) specialFilterState.category = options.category;
+    if (options.difficulty) specialFilterState.difficulty = options.difficulty;
+    if (options.origin) specialFilterState.origin = options.origin;
+    if (typeof options.query === "string") specialFilterState.query = options.query;
+  }
+  if (filter === "compilation") {
+    if (options.category) compilationFilterState.category = options.category;
+    if (options.signal) compilationFilterState.signal = options.signal;
+    if (typeof options.query === "string") compilationFilterState.query = options.query;
+  }
   if (filter === "chapter" && options.origin) {
     chapterFilterState.origin = options.origin;
     chapterFilterState.section = "all";
@@ -1409,11 +1940,20 @@ function setMainFilter(filter, options = {}) {
   if (filter === "chapter" && options.origin) {
     prepareFilterOpen(filter, options);
   }
+  if (["paper", "workbook", "special", "compilation"].includes(filter)) {
+    prepareFilterOpen(filter, options);
+  }
   document.body.classList.toggle("is-paper-view", filter === "paper");
   document.body.classList.toggle("is-special-view", filter === "special");
   document.body.classList.toggle("is-chapter-view", filter === "chapter");
   document.body.classList.toggle("is-album-view", filter === "workbook");
-  document.querySelectorAll("[data-filter]").forEach(chip => { const active = chip.dataset.filter === filter; chip.classList.toggle("active", active); chip.setAttribute("aria-selected", String(active)); });
+  document.body.classList.toggle("is-compilation-view", filter === "compilation");
+  document.querySelectorAll("[data-filter]").forEach(chip => {
+    const active = chip.dataset.filter === filter;
+    chip.classList.toggle("active", active);
+    if (active) chip.setAttribute("aria-current", "page");
+    else chip.removeAttribute("aria-current");
+  });
   render();
 }
 
@@ -1427,7 +1967,7 @@ function openTopic(id, options = {}) {
   const topic = byId[id];
   if (!topic && !options.title) return;
   const context = options.context
-    || (topic?.tag === "workbook" ? "series" : topic?.tag === "paper" ? "paper" : topic?.tag === "special" ? "special" : "chapter");
+    || (topic?.tag === "workbook" ? "series" : ["paper", "compilation"].includes(topic?.tag) ? "paper" : topic?.tag === "special" ? "special" : "chapter");
   const title = options.title || topic?.title || "";
   const shortTitle = options.shortTitle || title;
   const lessonKey = options.lessonKey || (options.title ? options.title : id);
@@ -1498,17 +2038,11 @@ function closeAi() {
 }
 function showToast(message) { toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 1700); }
 
-function formatStat(value) {
-  if (value < 10000) return value.toLocaleString();
-  const wan = value / 10000;
-  return `${Number(wan.toFixed(wan >= 100 ? 0 : 1))}W`;
-}
-
 function renderBankStats() {
-  const fields = { statTopicTotal: bankStats.topicTotal, statWeeklyNew: bankStats.weeklyNew, statQuestionTotal: bankStats.questionTotal };
+  const fields = { statPaperTotal: bankStats.paperTotal, statWeeklyNewPapers: bankStats.weeklyNewPapers };
   Object.entries(fields).forEach(([id, value]) => {
     const node = document.querySelector(`#${id}`);
-    if (node) node.textContent = formatStat(value);
+    if (node) node.textContent = value.toLocaleString("zh-CN");
   });
 }
 
@@ -1528,7 +2062,8 @@ if (isEmbedded) {
 const initParams = new URLSearchParams(location.search);
 const initFilter = initParams.get("filter");
 const initOrigin = initParams.get("origin");
-if (initFilter && document.querySelector(`#filterChips [data-filter="${initFilter}"]`)) {
+const supportedInitFilters = new Set(["chapter", "paper", "special", "workbook", "compilation"]);
+if (initFilter && supportedInitFilters.has(initFilter)) {
   prepareFilterOpen(initFilter, initOrigin ? { origin: initOrigin } : {});
   setMainFilter(initFilter, initOrigin ? { origin: initOrigin } : {});
 } else {
@@ -1547,6 +2082,10 @@ window.addEventListener("scroll", () => {
 
 document.querySelector("#filterChips").addEventListener("click", event => { const button = event.target.closest("[data-filter]"); if (button) setMainFilter(button.dataset.filter); });
 document.querySelector("#resetFilter").addEventListener("click", () => setMainFilter("all"));
+document.addEventListener("click", event => {
+  if (!event.target.closest("[data-context-selector]")) return;
+  showToast("教学范围切换将同步更新首页资源与组题条件");
+});
 
 function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
   const form = document.querySelector(formSelector);
