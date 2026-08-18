@@ -5,8 +5,8 @@
 body.index-page .site-header,
 body.index-page.is-home-view .site-header,
 body.index-page:not(.is-home-view) .site-header {
-  background: #e9eef8;
-  border-color: #d4dceb;
+  background: #f7f8fd;
+  border-color: #e2e6f3;
 }
 body.index-page .site-header .category-tabs .category-nav-divider,
 body.school-library-page .school-header .category-tabs .category-nav-divider {
@@ -1136,6 +1136,47 @@ body.index-page.is-home-view .home-resource-section-icon {
   height: 26px;
   font-size: 14px;
   border-radius: 7px;
+}
+
+/* Light-lilac palette: keep original purple, make first screen brighter */
+body.index-page.is-home-view .home-paper-columns .home-paper-lane,
+body.index-page.is-home-view .home-paper-columns .home-paper-lane + .home-paper-lane,
+body.index-page.is-home-view .home-special-card {
+  border-color: #e3e7f4;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(79, 88, 168, .05);
+}
+
+body.index-page.is-home-view .home-paper-columns .home-paper-lane + .home-paper-lane,
+body.index-page.is-home-view .home-paper-columns .home-paper-lane:last-child {
+  border-color: #e3e7f4;
+}
+
+body.index-page.is-home-view .home-special-card:hover {
+  border-color: #cfd6f0;
+  background: #fcfcff;
+}
+
+body.index-page.is-home-view .home-featured-workbook .home-resource-section-heading {
+  border-bottom-color: #eceef6;
+  background: #fbfcff;
+}
+
+body.index-page.is-home-view .home-workbook-panel {
+  background: #fbfcff;
+}
+
+body.index-page.is-home-view .home-featured-sync,
+body.index-page.is-home-view .home-special-resource-section,
+body.index-page.is-home-view .home-album-resource-section,
+body.index-page.is-home-view .home-featured-workbook {
+  border-color: #e4e8f4;
+  background: #fff;
+}
+
+body.index-page.is-home-view .home-featured-layout > .home-featured-sync > header.home-sync-shared-head {
+  border-bottom-color: #eceef6;
+  background: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {
