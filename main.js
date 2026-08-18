@@ -77,6 +77,8 @@ const workbookAlbums = [
   { id: "tiyou", name: "常用提优训练系列", subtitle: "能力进阶与培优", source: "常用提优训练系列" },
   { id: "yicuo", name: "易错方法系列", subtitle: "错因拆解与变式", source: "易错方法系列" }
 ];
+// 首页“练习册”模块：书架层固定展示四本（无需 tab）。
+const homepageWorkbookShelfIds = ["duowei", "quanpin", "yuanchuang", "tiyou"];
 const albumFilterState = { view: "album", origin: "all", query: "" };
 const resourceOriginText = topic => `${topic.title} ${topic.reason} ${topic.focus} ${topic.source}`;
 const resourceOriginOptions = [
@@ -805,6 +807,7 @@ function homepageFeaturedPanel() {
             ${paperLanes.map(lane => homepagePaperLane(lane.id, lane.label, lane.papers)).join("")}
           </div>
         </section>
+        ${homepageAlbumResourceSection(true)}
         <section class="home-featured-sync home-featured-learning" aria-labelledby="home-sync-practice-title">
           <header class="home-featured-subhead home-sync-shared-head"><div class="home-paper-title-line home-sync-title-line"><span id="home-sync-practice-title"><i class="ri-book-open-line"></i>同步练习</span></div><button type="button" data-open-filter="chapter">查看全部 <i class="ri-arrow-right-line"></i></button></header>
           <div>
@@ -899,42 +902,40 @@ function homepageSpecialResourceSection() {
     </section>`;
 }
 
-function homepageAlbumResourceSection() {
+function homepageAlbumResourceSection(inFeatured = false) {
   const albumPresentation = {
-    duowei: { tone:"forest", badge:"课时配套", bodyTitle:"成套编排", points:["课时练", "单元检测"] },
-    quanpin: { tone:"ochre", badge:"同步精练", bodyTitle:"分层练习", points:["课时巩固", "单元练习"] },
-    yuanchuang: { tone:"indigo", badge:"课堂同步", bodyTitle:"梯度训练", points:["课时训练", "题型梯度"] },
-    tiyou: { tone:"teal", badge:"能力提优", bodyTitle:"能力进阶", points:["题型突破", "进阶训练"] },
-    yicuo: { tone:"pine", badge:"易错巩固", bodyTitle:"错因到过关", points:["错因拆解", "同类变式 · 二次过关"] }
+    duowei: { tone:"indigo", spine:"同步", kind:"教材同步目录", scene:"课时练 + 单元检测" },
+    quanpin: { tone:"rose", spine:"同步", kind:"教材同步目录", scene:"分层巩固 + 单元练习" },
+    yuanchuang: { tone:"violet", spine:"同步", kind:"教材同步目录", scene:"课堂同步训练 + 题型梯度" },
+    tiyou: { tone:"slate", spine:"综合", kind:"独立目录", scene:"阶段复习 + 能力培优" }
   };
+
+  const renderWorkbookCards = albumIds => albumIds.map(albumId => {
+    const album = workbookAlbums.find(item => item.id === albumId);
+    if (!album) return "";
+
+    const albumTopics = topics.filter(topic => topic.tag === "workbook" && topic.source === album.source);
+    const totalUsage = albumTopics.reduce((sum, topic) => sum + topic.usage, 0);
+    const display = albumPresentation[album.id] || { tone:"indigo", spine:"练习册", kind:"练习册", scene:"" };
+
+    return `<button type="button" class="home-workbook-card is-${display.tone}" data-album-jump="${album.source}">
+      <span class="home-workbook-spine"><i class="ri-book-2-line"></i><em>${display.spine}</em></span>
+      <span class="home-workbook-copy"><small>${display.kind}</small><b>${album.name}</b><p>${display.scene}</p><em>整本 · ${albumTopics.length} 份练习 · ${totalUsage.toLocaleString()} 次使用</em></span>
+      <i class="ri-arrow-right-s-line"></i>
+    </button>`;
+  }).join("");
+
   return `
-    <section class="home-resource-section home-album-resource-section">
+    <section class="home-resource-section home-album-resource-section ${inFeatured ? "home-featured-workbook" : ""}">
       ${homepageSectionHeading({ icon:"ri-book-2-line", title:"练习册", filter:"workbook", cta:"进入练习册" })}
-      <div class="home-album-resource-grid">
-        ${workbookAlbums.map(album => {
-          const albumTopics = topics.filter(topic => topic.tag === "workbook" && topic.source === album.source);
-          const totalUsage = albumTopics.reduce((sum, topic) => sum + topic.usage, 0);
-          const display = albumPresentation[album.id] || { tone:"forest", badge:"同步教辅", bodyTitle:"成套同步资源", points:["按教学进度编排", "可直接用于日常训练"] };
-          return `<button type="button" class="home-album-cover-card is-${display.tone}" data-album-jump="${album.source}">
-            <span class="home-album-cover">
-              <em><i class="ri-book-2-line"></i>${display.badge}</em>
-              <strong>${album.name}</strong>
-              <small>${album.subtitle}</small>
-            </span>
-            <span class="home-album-details">
-              <b>${display.bodyTitle}</b>
-              <span class="home-album-points">${display.points.map(point => `<i>${point}</i>`).join("")}</span>
-              <span class="home-album-footer"><small>${albumTopics.length} 份 · 累计 ${totalUsage.toLocaleString()} 次使用</small><em>打开练习册 <i class="ri-arrow-right-line"></i></em></span>
-            </span>
-          </button>`;
-        }).join("")}
+      <div class="home-workbook-panel" data-home-workbook-shelf>
+        ${renderWorkbookCards(homepageWorkbookShelfIds)}
       </div>
     </section>`;
 }
 
 function homepageResourceSections() {
   return `<div class="home-resource-sections" aria-label="按资源类型查找">
-    ${homepageAlbumResourceSection()}
     ${homepageSpecialResourceSection()}
   </div>`;
 }

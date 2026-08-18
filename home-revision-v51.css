@@ -913,6 +913,243 @@ body.index-page.is-home-view .home-featured-layout > .home-featured-learning .ho
   }
 }
 
+/* Workbook shelf (练习册模块书架层) ------------------------------------ */
+body.index-page.is-home-view .home-featured-workbook {
+  border-color: #dfe5f3;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(51, 68, 122, .05);
+}
+
+body.index-page.is-home-view .home-featured-workbook .home-resource-section-heading {
+  min-height: 50px;
+  padding: 6px 14px;
+  border-bottom-color: #e9edf6;
+  background: #f9fbff;
+}
+
+body.index-page.is-home-view .home-featured-workbook .home-resource-section-icon {
+  color: #5b73d8;
+  background: #edf1ff;
+}
+
+body.index-page.is-home-view .home-workbook-panel {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 12px;
+  padding: 8px 14px 14px;
+  background: #f8faff;
+}
+
+body.index-page.is-home-view .home-workbook-panel::before {
+  display: none;
+}
+
+body.index-page.is-home-view .home-workbook-panel::after {
+  display: none;
+}
+
+body.index-page.is-home-view .home-workbook-card {
+  min-width: 0;
+  min-height: 108px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  color: inherit;
+  text-align: left;
+  border: 1px solid #e2e8f5;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(43, 59, 109, .04);
+}
+
+body.index-page.is-home-view .home-workbook-card:hover {
+  border-color: #c8d3f1;
+  background: #fcfdff;
+  box-shadow: 0 8px 18px rgba(43, 59, 109, .08);
+}
+
+body.index-page.is-home-view .home-workbook-spine {
+  width: 44px;
+  height: 72px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  overflow: hidden;
+  color: #fff;
+  border-radius: 6px;
+  background: linear-gradient(155deg, #586fcf, #8293e6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18);
+}
+
+body.index-page.is-home-view .home-workbook-card.is-rose .home-workbook-spine { background: linear-gradient(155deg, #a96f73, #d69a9e); }
+body.index-page.is-home-view .home-workbook-card.is-indigo .home-workbook-spine { background: linear-gradient(155deg, #3e4b7a, #6673a5); }
+body.index-page.is-home-view .home-workbook-card.is-violet .home-workbook-spine { background: linear-gradient(155deg, #6973ad, #9299d2); }
+body.index-page.is-home-view .home-workbook-card.is-slate .home-workbook-spine { background: linear-gradient(155deg, #394766, #657494); }
+
+body.index-page.is-home-view .home-workbook-spine > i { align-self: end; font-size: 16px; }
+
+body.index-page.is-home-view .home-workbook-spine > em {
+  width: 100%;
+  padding: 4px 0;
+  color: rgba(255, 255, 255, .88);
+  font-size: 7px;
+  font-style: normal;
+  text-align: center;
+  background: rgba(18, 27, 57, .12);
+}
+
+body.index-page.is-home-view .home-workbook-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+body.index-page.is-home-view .home-workbook-copy > small {
+  color: #6f7db1;
+  font-size: 7.5px;
+  font-weight: 700;
+}
+
+body.index-page.is-home-view .home-workbook-copy > b {
+  overflow: hidden;
+  color: #303b59;
+  font-size: 12px;
+  font-weight: 780;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.index-page.is-home-view .home-workbook-copy > p {
+  overflow: hidden;
+  margin: 0;
+  color: #7d879b;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.index-page.is-home-view .home-workbook-copy > em {
+  color: #969dac;
+  font-size: 7px;
+  font-style: normal;
+}
+
+body.index-page.is-home-view .home-workbook-card > i {
+  color: #9fa7b6;
+  font-size: 14px;
+}
+
+@media (max-width: 1000px) {
+  body.index-page.is-home-view .home-workbook-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Special cards: stronger "专题" identity ------------------------------ */
+body.index-page.is-home-view .home-special-resource-grid {
+  gap: 12px;
+  padding: 12px 14px 16px;
+}
+
+body.index-page.is-home-view .home-special-card {
+  position: relative;
+  min-height: 132px;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border: 1px solid #dbe4f5;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(238, 242, 255, .72), rgba(255, 255, 255, .98));
+  box-shadow: 0 6px 16px rgba(45, 61, 115, .06);
+}
+
+body.index-page.is-home-view .home-special-card::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 66px;
+  height: 66px;
+  border-radius: 999px 0 11px 0;
+  background: radial-gradient(circle at 30% 30%, rgba(124, 143, 230, .2), rgba(124, 143, 230, 0));
+  pointer-events: none;
+}
+
+body.index-page.is-home-view .home-special-card:hover {
+  transform: translateY(-3px);
+  border-color: #b9c8f0;
+  background: linear-gradient(180deg, rgba(240, 244, 255, .9), #fff);
+  box-shadow: 0 12px 24px rgba(58, 77, 142, .13);
+}
+
+body.index-page.is-home-view .home-special-card-top {
+  align-items: flex-start;
+  gap: 9px;
+}
+
+body.index-page.is-home-view .home-special-card-top > em {
+  min-width: 26px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  color: #5a71d4;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  border: 1px solid #cfdbf8;
+  border-radius: 6px;
+  background: #f3f6ff;
+}
+
+body.index-page.is-home-view .home-special-card-top > span {
+  gap: 5px;
+}
+
+body.index-page.is-home-view .home-special-card-top i {
+  padding: 3px 7px;
+  color: #4d63be;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 999px;
+  background: #ebf0ff;
+}
+
+body.index-page.is-home-view .home-special-card:nth-child(2n) .home-special-card-top i {
+  color: #8f5960;
+  background: #fceff1;
+}
+
+body.index-page.is-home-view .home-special-card b {
+  color: #25345d;
+  font-size: 13px;
+  font-weight: 780;
+  line-height: 1.45;
+}
+
+body.index-page.is-home-view .home-special-card > small {
+  width: 100%;
+  min-height: 24px;
+  justify-content: flex-start;
+  gap: 7px;
+  margin-top: auto;
+  padding: 4px 8px;
+  color: #6f7d9c;
+  font-size: 9px;
+  border-radius: 7px;
+  background: #f6f8fe;
+}
+
+body.index-page.is-home-view .home-special-card > small i {
+  width: 3px;
+  height: 3px;
+  background: #a8b3cd;
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.index-page.is-home-view .home-preference-resource,
   body.index-page.is-home-view .home-paper-lane-tabs button,
