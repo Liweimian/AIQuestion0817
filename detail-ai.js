@@ -105,10 +105,10 @@ const MAX_OPEN_TABS = 6;
 const HOME_FRAME_SRC = "./index.html?embed=1&v=20260811aibar";
 const QUESTION_DRAG_MIME = "application/x-aiq-questions";
 const BROWSE_FILTER_META = {
-  chapter: { filter: "chapter", label: "同步教学", icon: "ri-book-open-line" },
-  special: { filter: "special", label: "专项练习", icon: "ri-focus-3-line" },
+  chapter: { filter: "chapter", label: "同步练习", icon: "ri-book-open-line" },
+  special: { filter: "special", label: "专题", icon: "ri-focus-3-line" },
   paper: { filter: "paper", label: "试卷", icon: "ri-file-list-3-line" },
-  workbook: { filter: "workbook", label: "专辑", icon: "ri-book-shelf-line" }
+  workbook: { filter: "workbook", label: "练习册", icon: "ri-book-shelf-line" }
 };
 const mobileLayoutQuery = window.matchMedia("(max-width: 980px)");
 const expandedAnalysisIds = new Set();
@@ -241,8 +241,8 @@ function tabIsSpecial(tab) {
 function tabContextLabel(tab) {
   const ctx = tab?.context || contextName;
   if (ctx === "series") return "练习册";
-  if (ctx === "special") return "专项练习";
-  if (ctx === "chapter") return "同步教学";
+  if (ctx === "special") return "专题";
+  if (ctx === "chapter") return "同步练习";
   return "试卷";
 }
 
@@ -453,15 +453,15 @@ function resolveTopicMeta(topicId, tabContext = contextName, overrides = {}) {
   } else if (paperCatalog[baseId]) {
     meta = { ...paperCatalog[baseId] };
   } else {
-    const fallbackTitle = params.get("title") || (tabContext === "special" ? "专项题单" : tabContext === "chapter" ? "同步教学" : "未命名试卷");
+    const fallbackTitle = params.get("title") || (tabContext === "special" ? "专题题单" : tabContext === "chapter" ? "同步练习" : "未命名试卷");
     meta = {
       title: fallbackTitle,
       shortTitle: shortenTabTitle(params.get("shortTitle") || fallbackTitle),
       focus: params.get("focus") || "",
-      reason: params.get("reason") || (tabContext === "special" ? "专项练习" : tabContext === "chapter" ? "同步教学" : "试卷"),
+      reason: params.get("reason") || (tabContext === "special" ? "专题" : tabContext === "chapter" ? "同步练习" : "试卷"),
       region: "深圳",
       grade: "七年级",
-      examType: tabContext === "special" ? "专项" : tabContext === "chapter" ? "同步" : "试卷",
+      examType: tabContext === "special" ? "专题" : tabContext === "chapter" ? "同步" : "试卷",
       questionCount: Number(params.get("questions") || 0),
       difficulty: params.get("difficulty") || "中等",
       usage: Number(params.get("usage") || 0),
@@ -698,7 +698,7 @@ function buildPaperFacts(tab) {
   }
   if (tabIsSpecial(tab)) {
     return [
-      meta.reason || "专项练习",
+      meta.reason || "专题",
       meta.source,
       `${visibleCount} 题`,
       meta.difficulty ? `难度 ${meta.difficulty}` : "",
