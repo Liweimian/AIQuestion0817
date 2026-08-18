@@ -79,7 +79,48 @@ const workbookAlbums = [
 ];
 // 首页“练习册”模块：书架层固定展示四本（无需 tab）。
 const homepageWorkbookShelfIds = ["duowei", "quanpin", "yuanchuang", "tiyou"];
-const albumFilterState = { view: "album", origin: "all", query: "" };
+const albumFilterState = { view: "album", origin: "all", textbook: "all", year: "all", query: "" };
+const workbookTypeOptions = [
+  {
+    id: "sync",
+    label: "同步练习",
+    match: topic => /多维导学案|全品学练考|原创新课堂|同步|课时|单元/.test(resourceOriginText(topic))
+  },
+  {
+    id: "comprehensive",
+    label: "综合练习",
+    match: topic => /常用提优训练系列|易错方法系列|提优|综合|易错/.test(resourceOriginText(topic))
+  },
+  {
+    id: "textbook",
+    label: "教材练习",
+    match: topic => /教材|人教版|章节/.test(resourceOriginText(topic))
+  }
+];
+const workbookSeriesOptions = [
+  "学习探究诊断",
+  "新目标检测",
+  "综合应用创新题典中点",
+  "1课3练单元达标测试",
+  "北京真卷",
+  "好卷",
+  "考必胜",
+  "星级口算天天练"
+];
+const workbookTextbookOptions = [
+  { id: "all", label: "全部" },
+  { id: "renjiao-7-1", label: "人教版七年级上册" },
+  { id: "renjiao-7-2", label: "人教版七年级下册" },
+  { id: "beishida-5-2", label: "北师大版五年级下册" }
+];
+const workbookYearOptions = [
+  { id: "all", label: "全部" },
+  { id: "2026", label: "2026" },
+  { id: "2025", label: "2025" },
+  { id: "2024", label: "2024" },
+  { id: "2023", label: "2023" },
+  { id: "more", label: "更多" }
+];
 const resourceOriginText = topic => `${topic.title} ${topic.reason} ${topic.focus} ${topic.source}`;
 const resourceOriginOptions = [
   { id: "all", label: "全部" },
@@ -109,6 +150,12 @@ const curatedOriginOptions = resourceOriginOptions.filter(option => option.id !=
 function matchesResourceOrigin(topic, origin) {
   if (origin === "all") return true;
   const option = resourceOriginOptions.find(item => item.id === origin);
+  return option?.match?.(topic) ?? true;
+}
+
+function matchesWorkbookType(topic, type) {
+  if (type === "all") return true;
+  const option = workbookTypeOptions.find(item => item.id === type);
   return option?.match?.(topic) ?? true;
 }
 
@@ -1616,10 +1663,23 @@ function seriesCategoryView() {
   const albumView = albumFilterState.view === "album";
   const albums = filteredWorkbookAlbums();
   const list = filteredWorkbookTopics();
+  const allSeriesOptions = ["全部系列", ...workbookSeriesOptions];
   return `
     <section class="category-detail album-category-view">
       <div class="paper-filter-panel album-filter-panel">
-        ${paperFilterTagGroup("来自", curatedOriginOptions, albumFilterState.origin, "data-album-origin")}
+        ${paperFilterTagGroup("类型", [{ id: "all", label: "全部" }, ...workbookTypeOptions], albumFilterState.origin, "data-album-origin")}
+        ${paperFilterTagGroup("教材版本", workbookTextbookOptions, albumFilterState.textbook, "data-album-textbook")}
+        ${paperFilterTagGroup("年份", workbookYearOptions, albumFilterState.year, "data-album-year")}
+        <div class="paper-filter-row">
+          <span class="paper-filter-label">练习册系列</span>
+          <div class="paper-filter-tags">
+            ${allSeriesOptions.map(series => {
+              const value = series === "全部系列" ? "" : series;
+              const active = value ? albumFilterState.query === value : !albumFilterState.query.trim();
+              return `<button type="button" class="${active ? "active" : ""}" data-album-series="${value.replace(/"/g, "&quot;")}">${series}</button>`;
+            }).join("")}
+          </div>
+        </div>
         <label class="paper-filter-search album-filter-search">
           <span class="paper-filter-label">搜索</span>
           <div class="paper-search-field">
@@ -1652,7 +1712,7 @@ function workbookTopics() {
 
 function workbookTopicMatchesFilters(topic) {
   const keyword = albumFilterState.query.trim().toLowerCase();
-  return matchesResourceOrigin(topic, albumFilterState.origin)
+  return matchesWorkbookType(topic, albumFilterState.origin)
     && (!keyword || `${topic.title} ${topic.source} ${topic.focus} ${topic.reason}`.toLowerCase().includes(keyword));
 }
 
@@ -1701,9 +1761,17 @@ function albumCard(album) {
 function applyAlbumView(options = {}) {
   if (options.view) albumFilterState.view = options.view;
   if (options.origin) albumFilterState.origin = options.origin;
+  if (options.textbook) albumFilterState.textbook = options.textbook;
+  if (options.year) albumFilterState.year = options.year;
   if (typeof options.query === "string") albumFilterState.query = options.query;
-  if (!curatedOriginOptions.some(option => option.id === albumFilterState.origin)) {
+  if (![{ id: "all" }, ...workbookTypeOptions].some(option => option.id === albumFilterState.origin)) {
     albumFilterState.origin = "all";
+  }
+  if (!workbookTextbookOptions.some(option => option.id === albumFilterState.textbook)) {
+    albumFilterState.textbook = "all";
+  }
+  if (!workbookYearOptions.some(option => option.id === albumFilterState.year)) {
+    albumFilterState.year = "all";
   }
 
   const panel = document.querySelector(".album-category-view");
@@ -1720,6 +1788,17 @@ function applyAlbumView(options = {}) {
   });
   panel.querySelectorAll("[data-album-origin]").forEach(button => {
     button.classList.toggle("active", button.dataset.albumOrigin === albumFilterState.origin);
+  });
+  panel.querySelectorAll("[data-album-textbook]").forEach(button => {
+    button.classList.toggle("active", button.dataset.albumTextbook === albumFilterState.textbook);
+  });
+  panel.querySelectorAll("[data-album-year]").forEach(button => {
+    button.classList.toggle("active", button.dataset.albumYear === albumFilterState.year);
+  });
+  panel.querySelectorAll("[data-album-series]").forEach(button => {
+    const value = button.dataset.albumSeries || "";
+    const active = value ? albumFilterState.query === value : !albumFilterState.query.trim();
+    button.classList.toggle("active", active);
   });
   panel.querySelectorAll("[data-album-panel]").forEach(section => {
     section.hidden = section.dataset.albumPanel !== albumFilterState.view;
@@ -2004,6 +2083,9 @@ function bindContentEvents(root = document) {
   root.querySelectorAll("[data-series-query]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.seriesQuery })));
   root.querySelectorAll("[data-album-view]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: button.dataset.albumView })));
   root.querySelectorAll("[data-album-origin]").forEach(button => button.addEventListener("click", () => applyAlbumView({ origin: button.dataset.albumOrigin })));
+  root.querySelectorAll("[data-album-textbook]").forEach(button => button.addEventListener("click", () => applyAlbumView({ textbook: button.dataset.albumTextbook })));
+  root.querySelectorAll("[data-album-year]").forEach(button => button.addEventListener("click", () => applyAlbumView({ year: button.dataset.albumYear })));
+  root.querySelectorAll("[data-album-series]").forEach(button => button.addEventListener("click", () => applyAlbumView({ query: button.dataset.albumSeries || "" })));
   root.querySelectorAll("[data-album-search]").forEach(input => input.addEventListener("input", () => applyAlbumView({ query: input.value })));
   root.querySelectorAll("[data-album-open]").forEach(button => button.addEventListener("click", () => applyAlbumView({ view: "topic", query: button.dataset.albumOpen })));
   root.querySelectorAll("[data-album-jump]").forEach(button => button.addEventListener("click", () => {
@@ -2075,6 +2157,8 @@ function prepareFilterOpen(filter, options = {}) {
   if (filter === "workbook") {
     if (options.view) albumFilterState.view = options.view;
     if (options.origin) albumFilterState.origin = options.origin;
+    if (options.textbook) albumFilterState.textbook = options.textbook;
+    if (options.year) albumFilterState.year = options.year;
     if (typeof options.query === "string") albumFilterState.query = options.query;
   }
   if (filter === "special") {
@@ -2102,6 +2186,8 @@ function setMainFilter(filter, options = {}) {
   if (filter === "workbook" && previousFilter !== "workbook" && !options.keepAlbumState) {
     albumFilterState.view = "album";
     albumFilterState.origin = "all";
+    albumFilterState.textbook = "all";
+    albumFilterState.year = "all";
     albumFilterState.query = "";
   }
   if (filter === "chapter" && options.origin) {
