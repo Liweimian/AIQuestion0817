@@ -231,8 +231,7 @@ let homePreferenceOpener = null;
 let currentFilter = "all";
 let currentQuery = "";
 let homepageSearchScope = "all";
-const homepagePaperTypeSelections = new Set();
-let homepagePaperLaneMode = "latest";
+const homepagePaperLaneLimit = 5;
 let aiDockObserver = null;
 let aiModalOpen = false;
 let hasUserScrolled = false;
@@ -536,16 +535,16 @@ const homepagePaperItems = {
   t14: { id:"t14", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"440304", publishedAt:"2026-08-06" },
   t25: { id:"t25", authority:"district", examType:"final", sourceVerified:true, scopeVerified:true, districtCode:"440303", publishedAt:"2026-08-07" },
   t59: { id:"t59", authority:"local", examType:"monthly", sourceVerified:true, districtCode:"440307", publishedAt:"2026-08-13" },
-  t62: { id:"t62", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-12" },
-  t63: { id:"t63", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, peerMatched:true, publishedAt:"2026-08-09" },
+  t62: { id:"t62", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-12", uploader:{ name:"深中教研组", tone:"amber" } },
+  t63: { id:"t63", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, peerMatched:true, publishedAt:"2026-08-09", uploader:{ name:"实验教研组", tone:"blue" } },
   t64: { id:"t64", authority:"district", examType:"midterm", sourceVerified:true, scopeVerified:true, districtCode:"440306", publishedAt:"2026-08-08" },
-  t65: { id:"t65", authority:"group", examType:"midterm", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-10" },
-  t58: { id:"t58", authority:"school", examType:"mock", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-05" },
+  t65: { id:"t65", authority:"group", examType:"midterm", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-10", uploader:{ name:"育才教研组", tone:"violet" } },
+  t58: { id:"t58", authority:"school", examType:"mock", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-05", uploader:{ name:"深中数学组", tone:"amber" } },
   t66: { id:"t66", authority:"district", examType:"real", sourceVerified:true, scopeVerified:true, publishedAt:"2026-08-04" },
-  t67: { id:"t67", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-03" },
-  t68: { id:"t68", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-02" },
-  t69: { id:"t69", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-01" },
-  t70: { id:"t70", authority:"school", examType:"monthly", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-07-31" }
+  t67: { id:"t67", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-03", uploader:{ name:"深外教研组", tone:"rose" } },
+  t68: { id:"t68", authority:"school", examType:"midterm", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-02", uploader:{ name:"深高教研组", tone:"blue" } },
+  t69: { id:"t69", authority:"school", examType:"final", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-08-01", uploader:{ name:"红岭教研组", tone:"amber" } },
+  t70: { id:"t70", authority:"school", examType:"monthly", sourceVerified:true, famousSchoolVerified:true, publishedAt:"2026-07-31", uploader:{ name:"南外教研组", tone:"violet" } }
 };
 
 // DEMO 运营白名单：正式环境按城市、学年和租户配置，不从标题或使用量推断。
@@ -661,73 +660,6 @@ const homepageFeaturedData = {
   }
 };
 
-const homepagePreferenceCandidates = [
-  { id:"t40", type:"同步练习", context:"series", region:"龙岗区", source:"多维导学案", difficulty:"基础", truthTypes:[], quality:"认可教辅", reason:"您常用的练习册", icon:"ri-book-open-line" },
-  { id:"t62", type:"试卷", context:"paper", region:"深圳名校", source:"深圳中学公开试卷", difficulty:"提高", truthTypes:["期中·期末", "名校真题"], quality:"名校真题", reason:"您关注的深圳名校", icon:"ri-file-list-3-line" },
-  { id:"t54", type:"真题整理", context:"paper", region:"龙岗区", source:"本地真题", difficulty:"中等", truthTypes:["期中·期末", "区级真题"], quality:"教研精选", reason:"匹配当前教学章节", icon:"ri-file-copy-2-line" },
-  { id:"t42", type:"同步练习", context:"series", region:"龙岗区", source:"全品学练考", difficulty:"基础", truthTypes:[], quality:"认可教辅", reason:"同年级老师常用", icon:"ri-book-open-line" },
-  { id:"t59", type:"试卷", context:"paper", region:"龙岗区", source:"龙岗区月考", difficulty:"中等", truthTypes:[], quality:"近期新上", reason:"本区近期考试", icon:"ri-file-list-3-line" },
-  { id:"t56", type:"真题整理", context:"paper", region:"强区", source:"本地真题", difficulty:"中等", truthTypes:["区级真题"], quality:"近三年真题", reason:"覆盖您关注的区域", icon:"ri-file-copy-2-line" }
-];
-
-function getHomepagePreferenceRecommendations() {
-  const preferenceKeys = { region:"regions", source:"sources", type:"types", truthTypes:"truthTypes", difficulty:"difficulties" };
-  return homepagePreferenceCandidates
-    .map((item, order) => {
-      const score = Object.entries(preferenceKeys).reduce((sum, [itemKey, preferenceKey]) => {
-        const candidateValues = Array.isArray(item[itemKey]) ? item[itemKey] : [item[itemKey]];
-        const matched = candidateValues.some(value => value && homePreferences[preferenceKey]?.includes(value));
-        return sum + (matched ? (itemKey === "difficulty" ? 1 : 3) : 0);
-      }, 0);
-      return { ...item, score, order };
-    })
-    .sort((a, b) => b.score - a.score || a.order - b.order)
-    .slice(0, 4);
-}
-
-function homePreferenceSummary() {
-  const labels = [...homePreferences.regions.slice(0, 2)];
-  if (homePreferences.sources.length) labels.push(`${homePreferences.sources.length} 本常用教辅`);
-  return labels.length ? labels.join(" · ") : "按当前教学范围推荐";
-}
-
-function homepagePreferenceCard(item) {
-  const topic = byId[item.id];
-  if (!topic) return "";
-  return `
-    <button class="home-preference-resource" type="button" data-topic="${topic.id}" data-context="${item.context}">
-      <span class="home-preference-resource-top"><em class="is-${item.context}"><i class="${item.icon}"></i>${item.type}</em><small><i class="ri-shield-check-line"></i>${item.quality}</small></span>
-      <b>${topic.title}</b>
-      <span class="home-preference-resource-meta">${item.source}<i></i>${topic.questions}题<i></i>${item.difficulty}</span>
-      <span class="home-preference-reason"><i class="ri-sparkling-2-line"></i>${item.reason}</span>
-    </button>`;
-}
-
-function homepagePreferenceSection() {
-  const recommendations = getHomepagePreferenceRecommendations();
-  return `
-    <section class="home-preference-section" aria-labelledby="homePreferenceTitle">
-      <header class="home-preference-head">
-        <div class="home-preference-heading">
-          <span class="home-preference-heading-icon"><i class="ri-magic-line"></i></span>
-          <div>
-            <div class="home-preference-title-row"><h2 id="homePreferenceTitle">根据您的偏好推荐</h2><p>已从全库为您精选 ${recommendations.length} 份</p></div>
-            <div class="home-library-overview" aria-label="全库资源概览">
-              <span class="is-total"><small>全库资源</small><strong id="statLibraryTotal">${bankStats.libraryTotal.toLocaleString("zh-CN")}</strong><em>份</em></span>
-              <span><small>试卷</small><strong id="statPaperTotal">${bankStats.paperTotal.toLocaleString("zh-CN")}</strong><em>套</em></span>
-              <span><small>练习题单（含练习册/专题）</small><strong id="statPracticeTotal">${bankStats.practiceTotal.toLocaleString("zh-CN")}</strong><em>份</em></span>
-              <span class="is-new"><small>近7天新上</small><strong id="statWeeklyNewResources">${bankStats.weeklyNewResources.toLocaleString("zh-CN")}</strong><em>份</em></span>
-            </div>
-          </div>
-        </div>
-        <button class="home-preference-entry" type="button" data-open-preference>
-          <i class="ri-equalizer-3-line"></i><span><b>我的选题偏好</b><small>${homePreferenceSummary()}</small></span><i class="ri-arrow-right-s-line"></i>
-        </button>
-      </header>
-      <div class="home-preference-resource-grid">${recommendations.map(homepagePreferenceCard).join("")}</div>
-    </section>`;
-}
-
 const homepagePaperTypeOptions = [
   { id:"real", label:"真题" },
   { id:"mock", label:"模拟" },
@@ -754,14 +686,19 @@ function getHomepagePaperTypeIds(item) {
   return [...new Set([examType, inferredStage, /中考/.test(title) ? "zhongkao" : ""].filter(Boolean))];
 }
 
-function matchesHomepagePaperTypeSelections(typeIds) {
-  const selected = [...homepagePaperTypeSelections][0] || "all";
-  return selected === "all" || typeIds.includes(selected);
-}
-
 function getHomepagePaperTypeFacts(item) {
   const type = homepagePaperTypeOptions.find(option => option.id === (item?.examType || "other"));
   return type ? [{ label:type.label, className:["real", "mock"].includes(type.id) ? "is-paper-nature" : "is-paper-stage" }] : [];
+}
+
+function getHomepagePaperUploader(item, topic) {
+  const mapped = item?.uploader || topic?.author;
+  if (!mapped?.name) return null;
+  return {
+    name: mapped.name,
+    tone: mapped.tone || "",
+    initial: mapped.name.slice(0, 1)
+  };
 }
 
 function homepagePaperCard(item, options = {}) {
@@ -781,14 +718,20 @@ function homepagePaperCard(item, options = {}) {
   const filters = getHomepagePaperFilters(item);
   const typeIds = getHomepagePaperTypeIds(item);
   const publishedText = item.publishedAt ? item.publishedAt.replaceAll("-", "/") : "";
-  const showUsage = options.lane !== "latest";
+  const uploader = options.lane === "famous" ? getHomepagePaperUploader(item, topic) : null;
   return `
-    <button class="home-paper-card ${options.compact ? "is-compact" : ""}" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
+    <button class="home-paper-card" type="button" data-topic="${topic.id}" data-context="paper" data-featured-paper-card data-paper-filters="${filters.join(" ")}" data-paper-types="${typeIds.join(" ")}">
       <span class="home-paper-copy">
         <span class="home-featured-resource-title"><b>${topic.title}</b></span>
-        <span class="home-paper-meta-row"><span class="home-paper-facts">${facts.map(fact => `<em class="${fact.className}">${fact.label}</em>`).join("")}</span><small>${showUsage ? `<span><i class="ri-user-line"></i>${topic.usage.toLocaleString()} 人使用</span>` : ""}<span class="home-paper-question-count"><i class="ri-file-list-2-line"></i>${topic.questions}题</span>${publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}</small></span>
+        <span class="home-paper-meta-row">
+          <span class="home-paper-facts">${facts.map(fact => `<em class="${fact.className}">${fact.label}</em>`).join("")}</span>
+          <small>
+            ${uploader ? `<span class="home-paper-uploader"><span class="teacher-avatar ${uploader.tone}">${uploader.initial}</span>${uploader.name}</span>` : ""}
+            ${options.lane === "hot" ? `<span><i class="ri-user-line"></i>${topic.usage.toLocaleString()} 人使用</span>` : ""}
+            ${publishedText ? `<span class="home-paper-published"><i class="ri-time-line"></i>${publishedText}</span>` : ""}
+          </small>
+        </span>
       </span>
-      <i class="ri-arrow-right-s-line home-card-arrow"></i>
     </button>`;
 }
 
@@ -807,10 +750,16 @@ function homepageCompactResource(topicId, options = {}) {
 }
 
 function homepagePaperLane(mode, title, papers) {
+  const icons = { latest: "ri-time-line", hot: "ri-fire-line", famous: "ri-building-4-line" };
+  const visiblePapers = papers.slice(0, homepagePaperLaneLimit);
   return `
-    <section id="home-paper-panel-${mode}" class="home-paper-lane is-${mode}" data-paper-lane="${mode}" role="tabpanel" aria-labelledby="home-paper-tab-${mode}" ${homepagePaperLaneMode === mode ? "" : "hidden"}>
-      <div class="home-paper-lane-list">${papers.map(item => homepagePaperCard(item, { lane:mode })).join("")}</div>
-      <div class="home-paper-lane-empty" role="status" aria-live="polite" hidden>当前筛选下暂无资源</div>
+    <section class="home-paper-lane is-${mode}" data-paper-lane="${mode}" aria-label="${title}">
+      <header>
+        <h3><i class="${icons[mode] || "ri-file-list-3-line"}"></i>${title}</h3>
+        <button type="button" class="home-paper-lane-more" data-open-filter="paper">更多 <i class="ri-arrow-right-s-line"></i></button>
+      </header>
+      <div class="home-paper-lane-list">${visiblePapers.map(item => homepagePaperCard(item, { lane:mode })).join("")}</div>
+      <div class="home-paper-lane-empty" role="status" ${visiblePapers.length ? "hidden" : ""}>当前暂无资源</div>
     </section>`;
 }
 
@@ -822,35 +771,16 @@ function homepageFeaturedPanel() {
   const famousPapers = [...homepageFeaturedData.famous.papers]
     .sort((a, b) => (byId[b.id]?.usage || 0) - (byId[a.id]?.usage || 0));
   const paperLanes = [
-    { id:"latest", label:"最新", papers:latestPapers },
-    { id:"hot", label:"热门", papers:hotPapers },
-    { id:"famous", label:"名校", papers:famousPapers }
-  ];
-  const quickTypes = [
-    { id:"all", label:"全部" },
-    { id:"midterm", label:"期中" },
-    { id:"final", label:"期末" },
-    { id:"monthly", label:"月考" },
-    { id:"zhongkao", label:"中考" }
+    { id:"latest", label:"最新试卷", papers:latestPapers },
+    { id:"hot", label:"热门试卷", papers:hotPapers },
+    { id:"famous", label:"名校试卷", papers:famousPapers }
   ];
   const syncData = homepageFeaturedData.local;
   return `
     <div class="home-featured-panel" data-featured-panel="combined">
       <div class="home-featured-layout" data-featured-layout>
         <section class="home-featured-paper">
-          <header class="home-featured-subhead home-paper-shared-head">
-            <div class="home-paper-title-line">
-              <span><i class="ri-file-list-3-line"></i>试卷</span>
-            </div>
-            <div class="home-paper-lane-tabs" role="tablist" aria-label="试卷推荐方式">
-              ${paperLanes.map(lane => `<button id="home-paper-tab-${lane.id}" type="button" class="${homepagePaperLaneMode === lane.id ? "active" : ""}" data-featured-paper-lane="${lane.id}" role="tab" tabindex="${homepagePaperLaneMode === lane.id ? "0" : "-1"}" aria-selected="${homepagePaperLaneMode === lane.id}" aria-controls="home-paper-panel-${lane.id}"><span>${lane.label}</span></button>`).join("")}
-            </div>
-            <div class="home-paper-type-tabs" role="group" aria-label="按考试类型筛选">
-              ${quickTypes.map(type => `<button type="button" class="${(type.id === "all" && homepagePaperTypeSelections.size === 0) || homepagePaperTypeSelections.has(type.id) ? "active" : ""}" data-featured-paper-type="${type.id}" aria-pressed="${(type.id === "all" && homepagePaperTypeSelections.size === 0) || homepagePaperTypeSelections.has(type.id)}">${type.label}</button>`).join("")}
-              <i aria-hidden="true"></i><button type="button" class="home-paper-more" data-open-filter="paper">更多 <i class="ri-arrow-right-s-line"></i></button>
-            </div>
-          </header>
-          <div class="home-paper-dual-columns">
+          <div class="home-paper-columns">
             ${paperLanes.map(lane => homepagePaperLane(lane.id, lane.label, lane.papers)).join("")}
           </div>
         </section>
@@ -990,7 +920,6 @@ function homepageResourceSections() {
 function homepageSeriesSection() {
   return `
     <div class="workspace-home">
-      ${homepagePreferenceSection()}
       ${homepageFeaturedResources()}
       ${homepageResourceSections()}
     </div>`;
@@ -1891,55 +1820,18 @@ function applyFeedFilters() {
   if (resultCount) resultCount.textContent = `共 ${visible} 份`;
 }
 
-function applyHomepageFeaturedState(options = {}) {
-  if (["latest", "hot", "famous"].includes(options.selectPaperLane)) {
-    homepagePaperLaneMode = options.selectPaperLane;
-  }
-  if (options.selectPaperType) {
-    homepagePaperTypeSelections.clear();
-    if (options.selectPaperType !== "all") homepagePaperTypeSelections.add(options.selectPaperType);
-  }
-
+function applyHomepageFeaturedState() {
   const section = document.querySelector(".home-featured-section");
   if (!section) return;
-
-  section.querySelectorAll("[data-featured-paper-lane]").forEach(button => {
-    const active = button.dataset.featuredPaperLane === homepagePaperLaneMode;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-selected", String(active));
-    button.tabIndex = active ? 0 : -1;
-  });
-
-  section.querySelectorAll("[data-featured-paper-type]").forEach(button => {
-    const type = button.dataset.featuredPaperType;
-    const active = type === "all" ? homepagePaperTypeSelections.size === 0 : homepagePaperTypeSelections.has(type);
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
-
   section.querySelectorAll("[data-paper-lane]").forEach(lane => {
-    let matchedPapers = 0;
-    lane.querySelectorAll("[data-featured-paper-card]").forEach(card => {
-      const typeIds = (card.dataset.paperTypes || "").split(/\s+/).filter(Boolean);
-      const matched = matchesHomepagePaperTypeSelections(typeIds);
-      if (matched) matchedPapers += 1;
-      const visible = matched && matchedPapers <= 8;
-      card.hidden = !visible;
-      if (visible) card.dataset.visibleRank = String(matchedPapers);
-      else delete card.dataset.visibleRank;
-    });
+    const matchedPapers = lane.querySelectorAll("[data-featured-paper-card]").length;
     const empty = lane.querySelector(".home-paper-lane-empty");
     if (empty) empty.hidden = matchedPapers > 0;
     lane.classList.toggle("is-empty", matchedPapers === 0);
-    lane.hidden = lane.dataset.paperLane !== homepagePaperLaneMode;
   });
-
-  const dualColumns = section.querySelector(".home-paper-dual-columns");
-  if (dualColumns) dualColumns.classList.toggle("is-mobile-collapsed", homepagePaperTypeSelections.size === 0);
 }
 
 function bindContentEvents(root = document) {
-  root.querySelectorAll("[data-open-preference]").forEach(button => button.addEventListener("click", openHomePreference));
   root.querySelectorAll("[data-home-ai-form]").forEach(form => form.addEventListener("submit", event => {
     event.preventDefault();
     const input = form.querySelector("[data-home-ai-input]");
@@ -1983,23 +1875,6 @@ function bindContentEvents(root = document) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }));
   root.querySelectorAll("[data-home-ai]").forEach(button => button.addEventListener("click", () => openAi()));
-  const paperLaneButtons = [...root.querySelectorAll("[data-featured-paper-lane]")];
-  paperLaneButtons.forEach((button, index) => {
-    button.addEventListener("click", () => applyHomepageFeaturedState({ selectPaperLane: button.dataset.featuredPaperLane }));
-    button.addEventListener("keydown", event => {
-      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      const targetIndex = event.key === "Home"
-        ? 0
-        : event.key === "End"
-          ? paperLaneButtons.length - 1
-          : (index + (event.key === "ArrowRight" ? 1 : -1) + paperLaneButtons.length) % paperLaneButtons.length;
-      const target = paperLaneButtons[targetIndex];
-      target?.focus();
-      if (target) applyHomepageFeaturedState({ selectPaperLane: target.dataset.featuredPaperLane });
-    });
-  });
-  root.querySelectorAll("[data-featured-paper-type]").forEach(button => button.addEventListener("click", () => applyHomepageFeaturedState({ selectPaperType: button.dataset.featuredPaperType })));
   root.querySelectorAll("[data-book-tab]").forEach(button => button.addEventListener("click", () => {
     const tab = button.dataset.bookTab;
     const container = button.closest(".book-resource");
@@ -2040,15 +1915,6 @@ function bindContentEvents(root = document) {
     const origin = button.dataset.openOrigin || "";
     const entry = button.dataset.resourceEntry || "";
     const openOptions = { ...homepageEntryOptions(filter, entry), ...(origin ? { origin } : {}) };
-    if (filter === "paper" && button.closest(".home-featured-paper")) {
-      const selectedType = [...homepagePaperTypeSelections][0] || "all";
-      if (selectedType === "real") openOptions.examType = "real";
-      else if (selectedType === "mock") openOptions.query = "模拟";
-      else if (selectedType === "zhongkao") openOptions.query = "中考";
-      else if (["midterm", "final", "monthly", "unit", "other"].includes(selectedType)) openOptions.examType = selectedType;
-      else if (selectedType === "opening") openOptions.query = "开学";
-      else if (selectedType === "sync") openOptions.query = "同步练习";
-    }
     prepareFilterOpen(filter, openOptions);
     if (isEmbedded) {
       requestParentOpenFilter(filter, openOptions);
@@ -2324,8 +2190,7 @@ function saveHomePreference() {
     localStorage.setItem(HOME_PREFERENCE_KEY, JSON.stringify(homePreferences));
   } catch {}
   closeHomePreference();
-  if (currentFilter === "all" && !currentQuery) render();
-  showToast("选题偏好已保存，推荐内容已更新");
+  showToast("选题偏好已保存");
 }
 
 function showToast(message) { toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 1700); }
@@ -2379,10 +2244,7 @@ window.addEventListener("scroll", () => {
 
 document.querySelector("#filterChips").addEventListener("click", event => { const button = event.target.closest("[data-filter]"); if (button) setMainFilter(button.dataset.filter); });
 document.querySelector("#resetFilter").addEventListener("click", () => setMainFilter("all"));
-document.addEventListener("click", event => {
-  if (!event.target.closest("[data-context-selector]")) return;
-  showToast("教学范围切换将同步更新首页资源与组题条件");
-});
+document.querySelector("[data-open-preference]")?.addEventListener("click", openHomePreference);
 
 function bindAiForm(formSelector, inputSelector, addSelector, voiceSelector) {
   const form = document.querySelector(formSelector);
