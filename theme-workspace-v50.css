@@ -637,7 +637,9 @@ body.ai-detail-page .q-add-btn,
 body.ai-detail-page .q-chat-btn,
 body.ai-detail-page .ai-create-submit,
 body.ai-detail-page .ai-feature-btn,
-body.ai-detail-page .chat-action-chip {
+body.ai-detail-page .chat-action-chip,
+body.ai-detail-page .doc-tab-ai,
+body.ai-detail-page .ai-assistant-send {
   color: #fff;
   border-color: var(--ui-primary);
   background: linear-gradient(135deg, #5974ec, #7388f5);
@@ -650,7 +652,9 @@ body.ai-detail-page .ai-selected-create:hover,
 body.ai-detail-page .paper-action-primary:hover,
 body.ai-detail-page .q-add-btn:hover,
 body.ai-detail-page .q-chat-btn:hover,
-body.ai-detail-page .ai-create-submit:hover {
+body.ai-detail-page .ai-create-submit:hover,
+body.ai-detail-page .doc-tab-ai:hover,
+body.ai-detail-page .doc-tab-ai.is-open {
   background: linear-gradient(135deg, #526bd7, #6579e9);
 }
 
