@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
     <link rel="stylesheet" href="./detail.css" />
-    <link rel="stylesheet" href="./detail-ai.css?v=20260819canvas12" />
+    <link rel="stylesheet" href="./detail-ai.css?v=20260819canvas14" />
     <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260819workspace3" />
     <style id="ai-panel-legacy-toggle-hide">
       #aiPanelExpand.legacy-hidden,
@@ -22,14 +22,14 @@
     <header class="ai-detail-topbar">
       <a class="back-home" href="./index.html"><i class="ri-arrow-left-line"></i><span>题库首页</span></a>
       <button id="topbarExpandSelected" class="topbar-expand-selected" type="button" hidden>
-        <i class="ri-layout-masonry-line"></i><span>展开题单画布</span>
+        <i class="ri-layout-masonry-line"></i><span>展开组题画布</span>
       </button>
       <nav class="breadcrumb" aria-label="当前位置">
         <span id="breadcrumbContext">试卷</span>
         <i class="ri-arrow-right-s-line"></i>
         <strong id="breadcrumbLeaf">试卷详情</strong>
       </nav>
-      <button type="button" class="panel-action-btn panel-action-btn-compact" id="topbarCollapseCanvas" hidden aria-label="收起题单画布" title="收起题单画布">
+      <button type="button" class="panel-action-btn panel-action-btn-compact" id="topbarCollapseCanvas" hidden aria-label="收起组题画布" title="收起组题画布">
         <i class="ri-arrow-left-double-line"></i><span>收起</span>
       </button>
       <button type="button" class="doc-tab-ai" id="docTabAiAssistant" title="AI 找题 · 组卷 · 录题" aria-label="AI 助手" aria-expanded="false">
@@ -40,22 +40,22 @@
     </header>
 
     <div class="ai-workspace" id="aiWorkspace">
-      <aside class="ai-selected-panel" id="aiSelectedPanel" aria-label="题单画布">
-        <button class="ai-selected-expand" id="aiSelectedExpand" type="button" aria-label="展开题单画布">
+      <aside class="ai-selected-panel" id="aiSelectedPanel" aria-label="组题画布">
+        <button class="ai-selected-expand" id="aiSelectedExpand" type="button" aria-label="展开组题画布">
           <i class="ri-layout-masonry-line"></i>
           <span class="ai-selected-expand-count" id="aiSelectedExpandCount" hidden>0</span>
-          <span>题单画布</span>
+          <span>组题画布</span>
         </button>
         <div class="ai-selected-body">
           <header class="ai-section-head" id="selectedSectionHead">
             <div class="ai-section-head-main">
-              <strong id="canvasHeadTitle">题单画布</strong>
+              <strong id="canvasHeadTitle">组题画布</strong>
               <span class="ai-selected-hint" id="aiSelectedHint">勾选右侧题目，保存为今日题单</span>
             </div>
             <div class="ai-section-head-actions">
               <button type="button" id="toggleSelectedAnswers" hidden>显示答案</button>
               <button type="button" class="panel-action-btn panel-action-btn-compact" id="enlargeSelectedPanel" aria-pressed="false">编辑</button>
-              <button type="button" class="panel-action-btn panel-action-btn-compact" id="collapseSelectedPanel" aria-label="收起题单画布" title="收起题单画布">
+              <button type="button" class="panel-action-btn panel-action-btn-compact" id="collapseSelectedPanel" aria-label="收起组题画布" title="收起组题画布">
                 <i class="ri-arrow-left-double-line"></i><span>收起</span>
               </button>
             </div>
@@ -127,9 +127,6 @@
               </button>
               <button type="button" class="ai-selected-preview-btn ai-canvas-wide-btn" data-canvas-action="download" disabled hidden>
                 <i class="ri-download-2-line"></i><span>下载</span>
-              </button>
-              <button type="button" class="ai-selected-ai-entry ai-canvas-wide-btn" id="openAiCreate" hidden>
-                <i class="ri-sparkling-2-line"></i><span id="openAiCreateLabel">AI 生成</span>
               </button>
             </div>
           </footer>
@@ -222,7 +219,7 @@
       <div class="ai-create-mask" data-clear-canvas-close></div>
       <div class="ai-create-panel ai-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="clearCanvasTitle">
         <header class="ai-create-head">
-          <strong id="clearCanvasTitle"><i class="ri-error-warning-line"></i>清空题单画布？</strong>
+          <strong id="clearCanvasTitle"><i class="ri-error-warning-line"></i>清空组题画布？</strong>
           <button type="button" class="ai-create-close" data-clear-canvas-close aria-label="关闭"><i class="ri-close-line"></i></button>
         </header>
         <div class="ai-create-body">
@@ -273,6 +270,6 @@
     </div>
 
     <div id="toast" class="toast" role="status"></div>
-    <script src="./detail-ai.js?v=20260819canvas12"></script>
+    <script src="./detail-ai.js?v=20260819canvas14"></script>
   </body>
 </html>

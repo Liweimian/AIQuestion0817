@@ -3156,7 +3156,7 @@ body.is-question-dragging .question-item {
   }
 }
 
-/* ---- 题单画布：勾选 / 三态 / 分组镜像 ---- */
+/* ---- 组题画布：勾选 / 三态 / 分组镜像 ---- */
 
 .q-stem {
   display: flex;

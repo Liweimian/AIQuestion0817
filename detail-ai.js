@@ -843,7 +843,7 @@ function renderMeta(tab) {
   const context = document.querySelector("#breadcrumbContext");
   const leaf = document.querySelector("#breadcrumbLeaf");
   if (context) context.textContent = tabContextLabel(tab);
-  if (leaf) leaf.textContent = selectedPanelEnlarged ? "题单画布" : displayTitle;
+  if (leaf) leaf.textContent = selectedPanelEnlarged ? "组题画布" : displayTitle;
 }
 
 function renderWorkbookDirectory() {
@@ -962,7 +962,7 @@ function questionCardHtml(q, tab) {
   const selectLabel = selected ? "取消选用" : "选用";
   return `
     <article class="question-item ${skipped ? "is-skipped" : ""} ${selected ? "selected" : ""} ${picked ? "drag-picked" : ""} ${modified ? "modified" : ""} ${answerOpen ? "answer-open" : ""}"
-      data-q="${q.id}" data-topic-id="${escapeHtml(getBaseTopicId(tab.topicId))}" tabindex="0" aria-label="第 ${q.num} 题" draggable="${skipped ? "false" : "true"}" title="勾选或点「选用」加入左侧题单画布">
+      data-q="${q.id}" data-topic-id="${escapeHtml(getBaseTopicId(tab.topicId))}" tabindex="0" aria-label="第 ${q.num} 题" draggable="${skipped ? "false" : "true"}" title="勾选或点「选用」加入左侧组题画布">
       <div class="q-card-top">
         <div class="q-badges">${badges}</div>
         <p class="q-trail">初中 / 数学 / ${escapeHtml(type)} / ${escapeHtml(difficulty)} / ${meta.minutes} 分钟</p>
@@ -1077,8 +1077,6 @@ function renderSelectedFooter(count) {
   const titleNode = document.querySelector("#canvasHeadTitle");
   const hint = document.querySelector("#aiSelectedHint");
   const railBadge = document.querySelector("#aiSelectedExpandCount");
-  const aiEntry = document.querySelector("#openAiCreate");
-  const aiLabel = document.querySelector("#openAiCreateLabel");
   const stats = document.querySelector("#aiCanvasStats");
   const previewBtn = document.querySelector("#previewQuestionList");
   const previewLabel = document.querySelector("#previewQuestionListLabel");
@@ -1088,7 +1086,7 @@ function renderSelectedFooter(count) {
   const listTitle = getCanvasListTitle();
   if (button) button.disabled = count === 0;
   if (label) label.textContent = count ? `保存(${count})` : "保存";
-  if (titleNode) titleNode.textContent = count ? `题单画布-${listTitle}` : "题单画布";
+  if (titleNode) titleNode.textContent = count ? `组题画布-${listTitle}` : "组题画布";
   if (hint) {
     if (selectedPanelEnlarged) {
       hint.hidden = true;
@@ -1107,8 +1105,6 @@ function renderSelectedFooter(count) {
     railBadge.textContent = count > 99 ? "99+" : String(count);
     railBadge.hidden = count === 0;
   }
-  if (aiEntry) aiEntry.classList.toggle("is-primary", count === 0);
-  if (aiLabel) aiLabel.textContent = count ? `AI 补充(${count})` : "AI 生成";
   if (stats) {
     stats.hidden = true;
   }
@@ -1116,7 +1112,7 @@ function renderSelectedFooter(count) {
   if (previewLabel) previewLabel.textContent = "预览";
   if (scoreBtn) scoreBtn.disabled = count === 0;
   extraBtns.forEach(btn => {
-    btn.disabled = count === 0 && btn.id !== "openAiCreate";
+    btn.disabled = count === 0;
     btn.hidden = !selectedPanelEnlarged;
   });
   const clearBtn = document.querySelector("#clearSelectedQuestions");
@@ -1137,14 +1133,14 @@ function syncSelectedPanelChrome() {
     enlargeBtn.textContent = "编辑";
     enlargeBtn.hidden = selectedPanelEnlarged;
     enlargeBtn.setAttribute("aria-pressed", selectedPanelEnlarged ? "true" : "false");
-    enlargeBtn.title = "编辑题单画布";
+    enlargeBtn.title = "编辑组题画布";
   }
   const compactCollapse = document.querySelector("#collapseSelectedPanel");
   const topbarCollapse = document.querySelector("#topbarCollapseCanvas");
   if (compactCollapse) compactCollapse.hidden = selectedPanelEnlarged;
   if (topbarCollapse) topbarCollapse.hidden = !selectedPanelEnlarged;
   const leaf = document.querySelector("#breadcrumbLeaf");
-  if (selectedPanelEnlarged && leaf) leaf.textContent = "题单画布";
+  if (selectedPanelEnlarged && leaf) leaf.textContent = "组题画布";
   if (answerBtn) {
     answerBtn.hidden = true;
   }
@@ -1861,7 +1857,7 @@ function applyResponsiveChrome() {
     return;
   }
   closeMobileDrawers();
-  if (selectedBtn) selectedBtn.hidden = !rightPanelSectionState.selectedCollapsed;
+  if (selectedBtn) selectedBtn.hidden = true;
 }
 
 function applySelectedPanelState() {
@@ -2308,13 +2304,13 @@ function handleAiAssistantAbility(key) {
 
 function mockAiAssistantReply(text, fileName) {
   if (fileName) {
-    return `已收到附件「${fileName}」。我会按录题流程识别题目、拆分题干和选项，识别完成后可以把题目同步到题单画布。`;
+    return `已收到附件「${fileName}」。我会按录题流程识别题目、拆分题干和选项，识别完成后可以把题目同步到组题画布。`;
   }
   if (/找卷|试卷/.test(text) && !/组/.test(text)) {
-    return "正在帮你检索匹配的试卷。找到后可以在标签页打开，也可以把整卷题目选用进题单画布。";
+    return "正在帮你检索匹配的试卷。找到后可以在标签页打开，也可以把整卷题目选用进组题画布。";
   }
   if (/找题|帮我找/.test(text)) {
-    return "正在按知识点、题型和难度检索题目。找到后可以直接加入左侧题单画布。";
+    return "正在按知识点、题型和难度检索题目。找到后可以直接加入左侧组题画布。";
   }
   if (/组试卷|组卷/.test(text)) {
     return "可以按年级、题型和难度帮你组一套试卷。确认要求后，我会生成可预览、可打印的试卷草稿。";
@@ -2323,7 +2319,7 @@ function mockAiAssistantReply(text, fileName) {
     return "会按专项和题量帮你组一份题单，保存后会出现在标签栏，也能继续精编。";
   }
   if (/组题|出\d+道/.test(text)) {
-    return "收到组题需求。我会按知识点生成题目，并支持加入题单画布继续调整。";
+    return "收到组题需求。我会按知识点生成题目，并支持加入组题画布继续调整。";
   }
   if (/录题|上传/.test(text)) {
     return "可以把试卷图片、PDF 或 Word 发给我。点左侧附件按钮上传，我会帮你拆题入库。";
@@ -3131,7 +3127,7 @@ function clearAllSelectedQuestions() {
   clearSelectedQuestionsState();
   saveWorkspace();
   renderQuestionCards();
-  showToast("已清空题单画布");
+  showToast("已清空组题画布");
 }
 
 function toggleQuestionAnalysis(qId) {
