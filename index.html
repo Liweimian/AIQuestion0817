@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="飞象AI题库 · 教师整套资源与智能组题工作台" />
+    <title>飞象AI题库 · 教师资源工作台</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260813indexv47" />
+    <link rel="stylesheet" href="./theme-v47.css?v=20260818mistlilac2" />
+    <link rel="stylesheet" href="./theme-workspace-v50.css?v=20260813workspace2" />
+    <link rel="stylesheet" href="./home-revision-v51.css?v=20260818home32" />
+  </head>
+  <body class="index-page">
+    <main class="page">
+      <header class="discovery site-header" aria-label="题库首页导航">
+        <a class="brand-mark" href="./index.html" aria-label="飞象AI题库首页">
+          <span class="brand-mark-glyph" aria-hidden="true"><i class="ri-sparkling-2-fill"></i></span>
+          <span class="brand-mark-copy"><b>飞象AI题库</b><small>教师资源工作台</small></span>
+        </a>
+        <nav id="filterChips" class="filter-chips category-tabs" aria-label="主要功能">
+          <button type="button" class="active" data-filter="all" aria-current="page"><span>首页</span></button>
+          <button type="button" data-filter="chapter"><span>同步练习</span></button>
+          <button type="button" data-filter="workbook"><span>练习册</span></button>
+          <button type="button" data-filter="paper"><span>试卷</span></button>
+          <button type="button" data-filter="special"><span>专题</span></button>
+          <span class="category-nav-divider" aria-hidden="true"></span>
+          <a class="category-nav-link" href="./school.html"><span>单题组卷</span></a>
+        </nav>
+        <div class="header-tools">
+          <button class="context-identity" type="button" data-open-preference aria-label="我的选题偏好">
+            <i class="ri-equalizer-3-line"></i>
+            <span><b>我的选题偏好</b><small>深圳市龙岗区 · 七年级数学</small></span>
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+        </div>
+      </header>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <div>
+          <i class="ri-file-search-line"></i>
+          <h2>这个分类暂时没有题单</h2>
+          <p>先看看其他分类，新的本地资源也会持续更新。</p>
+          <button id="resetFilter">查看全部题单</button>
+        </div>
+      </div>
+
+      <div id="contentFeed"></div>
+    </main>
+
+    <div class="ai-dock-shell">
+      <div id="aiDockHints" class="ai-input-hints ai-dock-hints" hidden>
+        <p class="ai-input-hint-example">试试这样说：帮我组一份七年级有理数随堂练习，15 分钟，基础为主，加入 2 道易错题</p>
+        <div class="ai-input-hint-tags" role="list">
+          <button type="button" data-ai-hint="AI 组卷">AI 组卷</button>
+          <button type="button" data-ai-hint="AI 组练习">AI 组练习</button>
+          <button type="button" data-ai-hint="AI 改编">AI 改编</button>
+          <button type="button" data-ai-hint="AI 命题">AI 命题</button>
+          <button type="button" data-ai-hint="AI 录题">AI 录题</button>
+        </div>
+      </div>
+      <form id="aiDock" class="ai-dock" aria-label="AI 生成题单">
+        <span class="ai-starter-badge" aria-hidden="true"><i class="ri-sparkling-2-line"></i><span>AI</span></span>
+        <input id="aiQuickInput" class="ai-quick-input" placeholder="描述你想要的题单，例如：七上有理数易错题，15 题，中等难度" autocomplete="off" />
+        <button id="aiAdd" class="ai-dock-icon" type="button" aria-label="添加材料"><i class="ri-add-line"></i></button>
+        <button id="aiVoice" class="ai-voice-button" type="button" aria-label="语音输入"><i class="ri-mic-line"></i></button>
+        <button id="openAi" class="ai-dock-action" type="submit" aria-label="生成题单"><i class="ri-arrow-up-line"></i></button>
+      </form>
+    </div>
+
+    <div id="aiMask" class="modal-mask" hidden>
+      <section class="ai-modal" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle">
+        <button id="closeAi" class="icon-button modal-close" aria-label="关闭 AI 生成">
+          <i class="ri-close-line"></i>
+        </button>
+        <div id="aiForm">
+          <p class="modal-kicker"><i class="ri-sparkling-2-line"></i> AI 生成完整题单</p>
+          <h2 id="aiModalTitle">现成资源不合适，就按你的要求生成。</h2>
+          <p class="modal-copy">已自动带入七年级数学和本地教材信息，生成后仍可换题、增减题量和调整难度。</p>
+          <div class="context-tags"><span>七年级数学</span><span>人教版上册</span><span>深圳市龙岗区</span></div>
+          <label class="prompt-box">
+            <span>这次想练什么？</span>
+            <textarea>生成一份有理数易错题单，基础题为主，包含3道符号判断题。</textarea>
+          </label>
+          <div class="select-grid">
+            <label><span>使用场景</span><select><option>课后巩固</option><option>课堂练习</option><option>单元检测</option></select></label>
+            <label><span>整体难度</span><select><option>基础—中等</option><option>基础为主</option><option>中等—提高</option></select></label>
+          </div>
+          <button id="generateList" class="generate-button"><i class="ri-sparkling-2-line"></i><span>生成完整题单</span></button>
+        </div>
+        <div id="aiResult" hidden>
+          <p class="modal-kicker"><i class="ri-check-line"></i> 已生成，可继续调整</p>
+          <h2>七上有理数易错巩固题单</h2>
+          <p class="modal-copy">共 12 题。优先使用龙岗区优质资源，并补充 2 道 AI 变式题。</p>
+          <div class="generated-outline">
+            <div><span>01</span><b>正负数意义</b><small>3 题 · 基础</small><button>调整</button></div>
+            <div><span>02</span><b>符号判断</b><small>3 题 · 易错</small><button>调整</button></div>
+            <div><span>03</span><b>有理数运算</b><small>4 题 · 中等</small><button>调整</button></div>
+            <div><span>04</span><b>综合应用</b><small>2 题 · 提高</small><button>调整</button></div>
+          </div>
+          <div class="modal-actions">
+            <button id="regenerate" class="secondary-button">重新生成</button>
+            <button id="editGenerated" class="primary-button">进入题单编辑</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="preferenceMask" class="home-preference-mask" hidden>
+      <section class="home-preference-dialog" role="dialog" aria-modal="true" aria-labelledby="preferenceDialogTitle">
+        <header>
+          <div>
+            <span><i class="ri-equalizer-3-line"></i></span>
+            <div><h2 id="preferenceDialogTitle">我的选题偏好</h2><p>设置后将优先推荐更符合您习惯的优质资源。</p></div>
+          </div>
+          <button id="closePreference" type="button" aria-label="关闭选题偏好"><i class="ri-close-line"></i></button>
+        </header>
+        <div class="home-preference-groups">
+          <section><h3>关注范围</h3><div><button type="button" data-preference-group="regions" data-preference-value="龙岗区">龙岗区</button><button type="button" data-preference-group="regions" data-preference-value="深圳名校">深圳名校</button><button type="button" data-preference-group="regions" data-preference-value="强区">强区</button></div></section>
+          <section><h3>认可教辅</h3><div><button type="button" data-preference-group="sources" data-preference-value="多维导学案">多维导学案</button><button type="button" data-preference-group="sources" data-preference-value="全品学练考">全品学练考</button><button type="button" data-preference-group="sources" data-preference-value="本地真题">本地真题</button></div></section>
+          <section><h3>资源类型</h3><div><button type="button" data-preference-group="types" data-preference-value="同步练习">同步练习</button><button type="button" data-preference-group="types" data-preference-value="试卷">试卷</button><button type="button" data-preference-group="types" data-preference-value="真题整理">真题整理</button></div></section>
+          <section><h3>真题偏好</h3><div><button type="button" data-preference-group="truthTypes" data-preference-value="期中·期末">期中·期末</button><button type="button" data-preference-group="truthTypes" data-preference-value="区级真题">区级真题</button><button type="button" data-preference-group="truthTypes" data-preference-value="名校真题">名校真题</button></div></section>
+          <section><h3>常用难度</h3><div><button type="button" data-preference-group="difficulties" data-preference-value="基础">基础</button><button type="button" data-preference-group="difficulties" data-preference-value="中等">中等</button><button type="button" data-preference-group="difficulties" data-preference-value="提高">提高</button></div></section>
+        </div>
+        <footer><button id="resetPreference" type="button">恢复默认</button><button id="savePreference" type="button">保存偏好</button></footer>
+      </section>
+    </div>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="./main.js?v=20260818indexv64"></script>
+  </body>
+</html>
