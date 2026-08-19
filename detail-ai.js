@@ -441,19 +441,6 @@ function getPaperSelectionState(tab) {
   return "partial";
 }
 
-function getSectionQuestions(tab, section) {
-  return getSelectableQuestions(tab).filter(q => q.section === section);
-}
-
-function getSectionSelectionState(tab, section) {
-  const items = getSectionQuestions(tab, section);
-  if (!items.length) return "empty";
-  const selectedCount = items.filter(q => isQuestionGloballySelected(tab.topicId, q.id)).length;
-  if (selectedCount === 0) return "none";
-  if (selectedCount === items.length) return "all";
-  return "partial";
-}
-
 function getCanvasSourceLabel(item) {
   const meta = paperCatalog[item.topicId] || workbookCatalog[item.topicId];
   return meta?.shortTitle || item.sourceTitle || "未分组试卷";
@@ -1003,14 +990,6 @@ function questionCardHtml(q, tab) {
     </article>`;
 }
 
-function sectionSelectButtonHtml(tab, section, items) {
-  const state = getSectionSelectionState(tab, section);
-  const selectedCount = items.filter(q => !tab.removedQuestionIds.includes(q.id) && isQuestionGloballySelected(tab.topicId, q.id)).length;
-  const selectableCount = items.filter(q => !tab.removedQuestionIds.includes(q.id)).length;
-  const label = state === "all" ? "取消本大题" : state === "partial" ? `全选本大题 ${selectedCount}/${selectableCount}` : "全选本大题";
-  return `<button type="button" class="question-section-select ${state}" data-section-action="select-all" data-section="${escapeHtml(section)}">${label}</button>`;
-}
-
 function renderPaperSelectButton(tab) {
   const button = document.querySelector("#batchAddAllQuestions");
   if (!button || !tab) return;
@@ -1057,7 +1036,6 @@ function renderQuestionCards() {
             <h3>${escapeHtml(section)}</h3>
           </div>
           <div class="question-section-head-actions">
-            ${sectionSelectButtonHtml(tab, section, items)}
             <span>${selectable.length} 题</span>
           </div>
         </header>
@@ -1130,10 +1108,10 @@ function syncSelectedPanelChrome() {
   const answerBtn = document.querySelector("#toggleSelectedAnswers");
   const preview = document.querySelector("#aiSelectedPreview");
   if (enlargeBtn) {
-    enlargeBtn.textContent = "编辑";
+    enlargeBtn.textContent = "高级编辑";
     enlargeBtn.hidden = selectedPanelEnlarged;
     enlargeBtn.setAttribute("aria-pressed", selectedPanelEnlarged ? "true" : "false");
-    enlargeBtn.title = "编辑组题画布";
+    enlargeBtn.title = "高级编辑组题画布";
   }
   const compactCollapse = document.querySelector("#collapseSelectedPanel");
   const topbarCollapse = document.querySelector("#topbarCollapseCanvas");
@@ -2672,25 +2650,6 @@ function toggleSelectWholePaper() {
   showToast(added ? `已整卷选用 ${selectable.length} 题` : "当前试卷已全部在画布中");
 }
 
-function selectSectionQuestions(section) {
-  const tab = getActiveTab();
-  if (!tab || !section) return;
-  const items = getSectionQuestions(tab, section);
-  if (!items.length) return;
-  const state = getSectionSelectionState(tab, section);
-  if (state === "all") {
-    const keys = new Set(items.map(q => getQuestionSelectionKey(tab.topicId, q.id)));
-    workspace.globalSelectedQuestions = getGlobalSelectedQuestions().filter(item => !keys.has(item.selectionKey));
-    syncTabSelectedQuestionIds(tab);
-    saveWorkspace();
-    renderQuestionCards();
-    showToast(`已取消选用「${section}」`);
-    return;
-  }
-  const added = addQuestionsToSelected(items.map(q => q.id));
-  showToast(added ? `已选用「${section}」${items.length} 题` : "本大题已全部在画布中");
-}
-
 function batchAddAllQuestionsToSelected() {
   toggleSelectWholePaper();
 }
@@ -3170,14 +3129,6 @@ function bindQuestionCardEvents() {
     });
   });
 
-  document.querySelectorAll("#questionCardBoard [data-section-action='select-all']").forEach(button => {
-    button.addEventListener("click", event => {
-      event.stopPropagation();
-      event.preventDefault();
-      selectSectionQuestions(button.dataset.section);
-    });
-  });
-
   bindQuestionDragEvents();
 }
 
@@ -3239,20 +3190,6 @@ function bindEvents() {
   document.querySelectorAll("[data-action]").forEach(button => {
     button.addEventListener("click", () => {
       const action = button.dataset.action;
-      const tab = getActiveTab();
-      if (action === "edit") {
-        const tab = getActiveTab();
-        if (!tab) return;
-        const payload = buildEditorPayload(tab);
-        if (!payload.questions.length) {
-          showToast("当前题单没有可排版的题目");
-          return;
-        }
-        const payloadHash = saveEditorPayload(payload);
-        const ctx = payload.context;
-        const topic = payload.topicId;
-        location.href = `./editor.html?topic=${encodeURIComponent(topic)}&context=${encodeURIComponent(ctx)}&from=ai&tabId=${encodeURIComponent(tab.id)}#${payloadHash}`;
-      }
       if (action === "download") showToast("正在生成可打印文件…");
     });
   });

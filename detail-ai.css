@@ -3263,35 +3263,6 @@ body.is-question-dragging .question-item {
   flex: none;
 }
 
-.question-section-select {
-  min-height: 28px;
-  padding: 0 10px;
-  color: var(--green-800);
-  font-size: 12px;
-  font-weight: 700;
-  border: 1px solid #c5ddd2;
-  border-radius: 99px;
-  background: #f5fbf7;
-  cursor: pointer;
-}
-
-.question-section-select:hover {
-  color: var(--green-900);
-  border-color: #9ecfb5;
-  background: #edf5f0;
-}
-
-.question-section-select.is-all {
-  color: #fff;
-  border-color: transparent;
-  background: var(--green-800);
-}
-
-.question-section-select.is-partial {
-  background: #e8f4ed;
-  box-shadow: inset 0 0 0 1px rgba(45, 106, 79, .12);
-}
-
 .ai-canvas-group {
   margin-bottom: 10px;
   border: 1px solid #dce8e1;
